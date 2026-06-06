@@ -163,6 +163,9 @@ gem "kaminari"
 # ViewComponents
 gem "view_component"
 
+# Floating Labels pour les formulaires
+gem "floating_labels_rails", ">= 0.1.1"
+
 # Performance
 gem "bootsnap", require: false
 
@@ -189,6 +192,7 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   gem "shoulda-matchers"
+  gem "pundit-matchers"
   gem "database_cleaner-active_record"
 end
 ```

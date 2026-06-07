@@ -51,6 +51,9 @@ gem "pundit"
 # State Machine
 gem "aasm"
 
+# Service Layer : Organizers + Actions
+gem "light-service", "~> 0.18"
+
 # PDF
 gem "prawn"
 gem "prawn-table"

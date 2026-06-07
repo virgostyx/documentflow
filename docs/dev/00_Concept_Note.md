@@ -1842,13 +1842,13 @@ documentflow/
 - [ ] Spec policy `DocumentPolicy` (rôles entity) → implémenter
 
 ### Phase 3 — Service Layer en TDD (1 semaine)
-- [ ] Spec `Entities::CreateOrganizer` (entity + owner EntityUser) → implémenter
-- [ ] Spec `Entities::InviteMemberOrganizer` (invitation email) → implémenter
-- [ ] Spec `Documents::CreateOrganizer` (scoped entity) → implémenter
-- [ ] Spec `Documents::LaunchOrganizer` → implémenter
-- [ ] Spec `Workflow::ApproveStepOrganizer` → implémenter
-- [ ] Spec `Workflow::RejectStepOrganizer` → implémenter
-- [ ] Spec `Documents::FinalizeOrganizer` (PDF + frozen) → implémenter
+- [x] Spec `Entities::CreateOrganizer` (entity + owner EntityUser) → implémenter
+- [x] Spec `Entities::InviteMemberOrganizer` (invitation email) → implémenter
+- [x] Spec `Documents::CreateOrganizer` (scoped entity) → implémenter
+- [x] Spec `Documents::LaunchOrganizer` → implémenter
+- [x] Spec `Workflow::ApproveStepOrganizer` → implémenter
+- [x] Spec `Workflow::RejectStepOrganizer` → implémenter
+- [x] Spec `Documents::FinalizeOrganizer` (PDF + frozen) → implémenter
 
 ### Phase 4 — Contrôleurs & Vues (1 semaine)
 - [ ] Request specs contrôleurs → implémenter (`EntityScoped` concern)

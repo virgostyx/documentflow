@@ -26,5 +26,14 @@ FactoryBot.define do
     trait :cancelled do
       status { "cancelled" }
     end
+
+    trait :with_workflow do
+      after(:create) do |document|
+        create(:workflow_step, :red,  document: document, order: 1, actor: document.created_by)
+        create(:workflow_step, :visa, document: document, order: 2, actor: create(:user))
+        create(:workflow_step, :sign, document: document, order: 3, actor: create(:user))
+        create(:workflow_step, :exp,  document: document, order: 4, actor: create(:user))
+      end
+    end
   end
 end

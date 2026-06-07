@@ -14,6 +14,7 @@ require 'capybara/rspec'
 require 'factory_bot_rails'
 require 'shoulda/matchers'
 require 'database_cleaner/active_record'
+require 'pundit/matchers'
 
 Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
 

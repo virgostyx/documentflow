@@ -16,6 +16,9 @@
 @source inline("peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0");
 @source inline("peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-blue-600");
 
+/* Bouton "afficher/masquer" du floating_password_field (positionnement absolu à droite du champ) */
+@source inline("inset-y-0 right-0 flex items-center pr-3 pr-12 text-gray-600 hover:text-gray-800 focus:outline-none");
+
 @theme {
   --font-sans: "Inter var", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 

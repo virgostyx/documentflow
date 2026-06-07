@@ -1,0 +1,18 @@
+<%= form_with model: entity, builder: FloatingLabelsRails::FormBuilder, local: true do |f| %>
+  <% if entity.errors.any? %>
+    <div class="mb-4 rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+      <%= entity.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= f.floating_text_field :name,
+                            label: "Entity name",
+                            required: true,
+                            autofocus: true,
+                            placeholder: " " %>
+
+  <div class="mt-6 flex justify-end gap-3">
+    <%= render(Ui::ButtonComponent.new(href: entity.persisted? ? entity_path(entity) : entities_path, variant: :secondary)) { "Cancel" } %>
+    <%= render(Ui::ButtonComponent.new) { entity.persisted? ? "Save changes" : "Create entity" } %>
+  </div>
+<% end %>

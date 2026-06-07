@@ -1,14 +1,16 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <%= render Ui::PageHeaderComponent.new(
-    title: "Dashboard",
-    description: "Welcome, #{current_user.email}."
+    title: "My entities",
+    description: "Organizations you belong to",
+    back_path: dashboard_path,
+    back_text: "Dashboard"
   ) %>
 
-  <% if @entities.any? %>
-    <div class="flex justify-end mb-4">
-      <%= render(Ui::ButtonComponent.new(href: new_entity_path)) { "New entity" } %>
-    </div>
+  <div class="flex justify-end mb-4">
+    <%= render(Ui::ButtonComponent.new(href: new_entity_path)) { "New entity" } %>
+  </div>
 
+  <% if @entities.any? %>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <% @entities.each do |entity| %>
         <%= render Entities::EntityCardComponent.new(entity: entity, current_user: current_user) %>

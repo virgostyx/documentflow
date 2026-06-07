@@ -1,0 +1,52 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: "Contacts",
+    description: current_entity.name,
+    back_path: entity_path(current_entity),
+    back_text: current_entity.name
+  ) %>
+
+  <% if policy(current_entity.contacts.new).create? %>
+    <div class="flex justify-end mb-4">
+      <%= render(Ui::ButtonComponent.new(href: new_entity_contact_path(current_entity))) { "New contact" } %>
+    </div>
+  <% end %>
+
+  <% if @contacts.any? %>
+    <%= render Ui::CardComponent.new do |card| %>
+      <% card.with_header { "All contacts" } %>
+
+      <ul class="divide-y divide-gray-100">
+        <% @contacts.each do |contact| %>
+          <li class="flex items-center justify-between py-3">
+            <div>
+              <p class="font-medium text-gray-900"><%= contact.full_name %></p>
+              <p class="text-sm text-gray-600"><%= contact.email %></p>
+            </div>
+
+            <% if policy(contact).update? %>
+              <div class="flex items-center gap-3">
+                <%= render(Ui::ButtonComponent.new(href: edit_entity_contact_path(current_entity, contact), variant: :secondary)) { "Edit" } %>
+                <%= render(Ui::ButtonComponent.new(
+                  href: entity_contact_path(current_entity, contact), variant: :danger, method: :delete,
+                  data: { turbo_confirm: "Are you sure you want to delete this contact?" }
+                )) { "Delete" } %>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  <% else %>
+    <%= render Ui::EmptyStateComponent.new(
+      title: "No contacts yet",
+      description: "Add a contact to use as a sender or addressee on your documents."
+    ) do |empty_state| %>
+      <% if policy(current_entity.contacts.new).create? %>
+        <% empty_state.with_action do %>
+          <%= render(Ui::ButtonComponent.new(href: new_entity_contact_path(current_entity))) { "New contact" } %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

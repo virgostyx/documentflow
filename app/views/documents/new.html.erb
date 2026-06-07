@@ -1,0 +1,12 @@
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: "New document",
+    description: current_entity.name,
+    back_path: entity_documents_path(current_entity),
+    back_text: "Documents"
+  ) %>
+
+  <%= render Ui::CardComponent.new do %>
+    <%= render "form", document: @document %>
+  <% end %>
+</div>

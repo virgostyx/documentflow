@@ -1,0 +1,23 @@
+<li class="flex items-center justify-between gap-3 py-3">
+  <div class="flex items-center gap-3">
+    <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-600 font-medium">
+      <%= display_name.first.upcase %>
+    </span>
+    <div>
+      <p class="text-sm font-medium text-gray-900"><%= display_name %></p>
+      <% if entity_user.pending? %>
+        <%= render(Ui::BadgeComponent.new(color: :warning)) { "Pending" } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= render(Ui::BadgeComponent.new(color: role_color)) { role_label } %>
+
+    <% if manage_members? && entity_user.user != current_user %>
+      <%= link_to "Remove", entity_entity_user_path(entity, entity_user),
+            data: { turbo_method: :delete, turbo_confirm: "Remove this member from the entity?" },
+            class: "text-sm text-danger-600 hover:text-danger-700" %>
+    <% end %>
+  </div>
+</li>

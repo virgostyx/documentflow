@@ -1,0 +1,24 @@
+<div class="flex flex-wrap items-center gap-3">
+  <% if show_approve? %>
+    <%= button_to "Approve",
+                  approve_entity_document_workflow_step_path(document.entity, document, current_step),
+                  method: :post,
+                  class: "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-success-600 text-white hover:bg-success-700 focus:ring-success-500" %>
+  <% end %>
+
+  <% if show_reject? %>
+    <%= form_with url: reject_entity_document_workflow_step_path(document.entity, document, current_step),
+                  method: :post, local: true, class: "flex items-center gap-2" do |f| %>
+      <%= f.text_field :reason, placeholder: "Reason for rejection", required: true,
+                       class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-danger-500" %>
+      <%= render(Ui::ButtonComponent.new(variant: :danger)) { "Reject" } %>
+    <% end %>
+  <% end %>
+
+  <% if show_cancel? %>
+    <%= render(Ui::ButtonComponent.new(
+      href: cancel_entity_document_path(document.entity, document), variant: :danger, method: :post,
+      data: { turbo_confirm: "Are you sure you want to cancel this document?" }
+    )) { "Cancel document" } %>
+  <% end %>
+</div>

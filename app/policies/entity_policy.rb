@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 class EntityPolicy < ApplicationPolicy
+  def index?
+    true
+  end
+
+  def create?
+    true
+  end
+
   def show?
     entity_owner? || entity_admin? || entity_member? || entity_guest?
   end

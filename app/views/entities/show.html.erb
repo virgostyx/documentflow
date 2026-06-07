@@ -1,0 +1,31 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: @entity.name,
+    description: @entity.code,
+    back_path: entities_path,
+    back_text: "My entities"
+  ) %>
+
+  <div class="flex justify-end gap-3 mb-4">
+    <% if policy(@entity).update? %>
+      <%= render(Ui::ButtonComponent.new(href: edit_entity_path(@entity), variant: :secondary)) { "Edit entity" } %>
+    <% end %>
+    <% if policy(@entity).destroy? %>
+      <%= render(Ui::ButtonComponent.new(
+        href: entity_path(@entity), variant: :danger, method: :delete,
+        data: { turbo_confirm: "Are you sure you want to delete this entity? This cannot be undone." }
+      )) { "Delete entity" } %>
+    <% end %>
+  </div>
+
+  <%= render Ui::CardComponent.new do |card| %>
+    <% card.with_header { "Members" } %>
+
+    <div class="flex items-center justify-between">
+      <p class="text-gray-600">
+        <%= pluralize(@entity.entity_users.active.count, "active member") %>
+      </p>
+      <%= render(Ui::ButtonComponent.new(href: entity_entity_users_path(@entity), variant: :secondary)) { "Manage members" } %>
+    </div>
+  <% end %>
+</div>

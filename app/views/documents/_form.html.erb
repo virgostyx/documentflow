@@ -1,0 +1,28 @@
+<%= form_with model: [ current_entity, document ], builder: FloatingLabelsRails::FormBuilder, local: true do |f| %>
+  <% if document.errors.any? %>
+    <div class="mb-4 rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+      <%= document.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= f.floating_text_field :subject, label: "Subject", required: true, autofocus: true, placeholder: " " %>
+  <%= f.floating_date_field :document_date, label: "Document date", required: true, placeholder: " " %>
+
+  <%= f.floating_collection_select :sender_id, @contacts, :id, :full_name,
+                                   { label: "Sender", include_blank: "Select a sender..." },
+                                   { required: true } %>
+  <%= f.floating_collection_select :addressee_id, @contacts, :id, :full_name,
+                                   { label: "Addressee", include_blank: "Select an addressee..." },
+                                   { required: true } %>
+
+  <%= f.file_field :files, multiple: true,
+                   class: "mt-4 block w-full text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
+
+  <div class="mt-6 flex justify-end gap-3">
+    <%= render(Ui::ButtonComponent.new(
+      href: document.persisted? ? entity_document_path(current_entity, document) : entity_documents_path(current_entity),
+      variant: :secondary
+    )) { "Cancel" } %>
+    <%= render(Ui::ButtonComponent.new) { document.persisted? ? "Save changes" : "Create document" } %>
+  </div>
+<% end %>

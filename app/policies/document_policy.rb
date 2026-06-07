@@ -5,6 +5,10 @@ class DocumentPolicy < ApplicationPolicy
     entity_staff? || entity_guest?
   end
 
+  def show?
+    entity_staff? || entity_guest?
+  end
+
   def create?
     entity_staff?
   end
@@ -23,6 +27,10 @@ class DocumentPolicy < ApplicationPolicy
 
   def destroy?
     entity_owner? || entity_admin?
+  end
+
+  def launch?
+    record.draft? && (record.created_by == user || entity_admin? || entity_owner?)
   end
 
   def cancel?

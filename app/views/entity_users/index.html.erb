@@ -1,0 +1,42 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: "Members",
+    description: current_entity.name,
+    back_path: entity_path(current_entity),
+    back_text: current_entity.name
+  ) %>
+
+  <% if policy(current_entity).manage_members? %>
+    <%= render Ui::CardComponent.new do |card| %>
+      <% card.with_header { "Invite a member" } %>
+
+      <%= form_with url: entity_entity_users_path(current_entity), method: :post, local: true do |f| %>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <%= f.email_field :"entity_user[invited_email]",
+                            placeholder: "Email address",
+                            required: true,
+                            class: "flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+          <%= f.select :"entity_user[role]", EntityUser::ROLES.map { |role| [ role.titleize, role ] }, { selected: "member" },
+                       class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+          <%= render(Ui::ButtonComponent.new) { "Invite" } %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <div class="mt-6"></div>
+  <% end %>
+
+  <%= render Ui::CardComponent.new do |card| %>
+    <% card.with_header { "All members" } %>
+
+    <% if @entity_users.any? %>
+      <ul class="divide-y divide-gray-100">
+        <% @entity_users.each do |entity_user| %>
+          <%= render Entities::MemberRowComponent.new(entity_user: entity_user, current_user: current_user, entity: current_entity) %>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-gray-600">No members yet.</p>
+    <% end %>
+  <% end %>
+</div>

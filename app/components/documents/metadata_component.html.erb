@@ -1,0 +1,5 @@
+<div class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600">
+  <p><span class="font-medium text-gray-900">From:</span> <%= document.sender&.full_name %></p>
+  <p><span class="font-medium text-gray-900">To:</span> <%= document.addressee&.full_name %></p>
+  <p><span class="font-medium text-gray-900">Date:</span> <%= l(document.document_date) %></p>
+</div>

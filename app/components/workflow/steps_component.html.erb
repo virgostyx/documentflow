@@ -1,0 +1,13 @@
+<%= render Ui::CardComponent.new do |card| %>
+  <% card.with_header { "Validation circuit" } %>
+
+  <% if steps.any? %>
+    <div class="divide-y divide-gray-100">
+      <% steps.each do |step| %>
+        <%= render Workflow::StepComponent.new(step: step) %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-gray-500">No validation circuit defined for this document yet.</p>
+  <% end %>
+<% end %>

@@ -1,0 +1,16 @@
+<div class="flex items-start gap-4 py-3" data-role="<%= step.role %>">
+  <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">
+    <%= step.order %>
+  </span>
+
+  <div class="flex-1">
+    <div class="flex items-center gap-2">
+      <p class="font-medium text-gray-900"><%= step.role %></p>
+      <%= render(Ui::BadgeComponent.new(color: status_color)) { step.status.titleize } %>
+    </div>
+    <p class="text-sm text-gray-600"><%= step.actor&.email || "Unassigned" %></p>
+    <% if step.comment.present? %>
+      <p class="mt-1 text-sm text-gray-500 italic">&ldquo;<%= step.comment %>&rdquo;</p>
+    <% end %>
+  </div>
+</div>

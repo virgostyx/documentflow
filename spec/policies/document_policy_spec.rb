@@ -21,6 +21,14 @@ RSpec.describe DocumentPolicy, type: :policy do
     context "as outsider" do let(:user) { outsider }; it { is_expected.not_to permit_action(:index) } end
   end
 
+  describe "#show?" do
+    let(:document) { create(:document, entity: entity) }
+
+    context "as member" do let(:user) { member }; it { is_expected.to permit_action(:show) } end
+    context "as guest"  do let(:user) { guest };  it { is_expected.to permit_action(:show) } end
+    context "as outsider" do let(:user) { outsider }; it { is_expected.not_to permit_action(:show) } end
+  end
+
   describe "#create?" do
     let(:document) { entity }
 
@@ -62,6 +70,23 @@ RSpec.describe DocumentPolicy, type: :policy do
     context "as entity owner"  do let(:user) { owner };  it { is_expected.to permit_action(:destroy) } end
     context "as entity admin"  do let(:user) { admin };  it { is_expected.to permit_action(:destroy) } end
     context "as entity member" do let(:user) { member }; it { is_expected.not_to permit_action(:destroy) } end
+  end
+
+  describe "#launch?" do
+    context "when the document is a draft" do
+      let(:document) { create(:document, entity: entity, created_by: member) }
+
+      context "as its author"   do let(:user) { member }; it { is_expected.to permit_action(:launch) } end
+      context "as entity owner" do let(:user) { owner };  it { is_expected.to permit_action(:launch) } end
+      context "as entity admin" do let(:user) { admin };  it { is_expected.to permit_action(:launch) } end
+      context "as another member" do let(:user) { create(:user).tap { |u| create(:entity_user, user: u, entity: entity, role: "member", status: "active") } }; it { is_expected.not_to permit_action(:launch) } end
+    end
+
+    context "when the document is not a draft" do
+      let(:document) { create(:document, :in_progress, entity: entity, created_by: owner) }
+
+      context "as entity owner" do let(:user) { owner }; it { is_expected.not_to permit_action(:launch) } end
+    end
   end
 
   describe "#cancel?" do

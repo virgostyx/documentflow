@@ -1,0 +1,12 @@
+<% if document.files.attached? %>
+  <ul class="divide-y divide-gray-100">
+    <% document.files.each do |file| %>
+      <li class="flex items-center justify-between py-2 text-sm">
+        <span class="text-gray-900"><%= file.filename %></span>
+        <%= link_to "Download", rails_blob_path(file, disposition: "attachment"), class: "text-primary-600 hover:text-primary-700 font-medium" %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="text-sm text-gray-500">No files attached.</p>
+<% end %>

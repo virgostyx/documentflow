@@ -1,0 +1,98 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: @document.reference_number,
+    description: @document.subject,
+    back_path: entity_documents_path(current_entity),
+    back_text: "Documents"
+  ) %>
+
+  <div class="flex justify-end gap-3 mb-4">
+    <% if policy(@document).launch? %>
+      <%= render(Ui::ButtonComponent.new(
+        href: launch_entity_document_path(current_entity, @document), method: :post,
+        data: { turbo_confirm: "Launch this document into its validation circuit?" }
+      )) { "Launch" } %>
+    <% end %>
+    <% if policy(@document).update? %>
+      <%= render(Ui::ButtonComponent.new(href: edit_entity_document_path(current_entity, @document), variant: :secondary)) { "Edit" } %>
+    <% end %>
+    <% if policy(@document).cancel? %>
+      <%= render(Ui::ButtonComponent.new(
+        href: cancel_entity_document_path(current_entity, @document), variant: :danger, method: :post,
+        data: { turbo_confirm: "Are you sure you want to cancel this document?" }
+      )) { "Cancel document" } %>
+    <% end %>
+    <% if policy(@document).destroy? %>
+      <%= render(Ui::ButtonComponent.new(
+        href: entity_document_path(current_entity, @document), variant: :danger, method: :delete,
+        data: { turbo_confirm: "Are you sure you want to delete this document? This cannot be undone." }
+      )) { "Delete" } %>
+    <% end %>
+  </div>
+
+  <%= render Ui::CardComponent.new do |card| %>
+    <% card.with_header { render(Documents::DocumentStatusBadgeComponent.new(status: @document.status)) } %>
+
+    <%= render Documents::MetadataComponent.new(document: @document) %>
+
+    <div class="mt-6">
+      <%= render Ui::DefinitionListComponent.new do |dl| %>
+        <% dl.with_item(term: "Reference number") { @document.reference_number } %>
+        <% dl.with_item(term: "Document date") { l(@document.document_date) } %>
+        <% dl.with_item(term: "Created by") { @document.created_by.email } %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="mt-6">
+    <%= render Ui::CardComponent.new do |card| %>
+      <% card.with_header { "Attached files" } %>
+      <%= render Documents::FileListComponent.new(document: @document) %>
+    <% end %>
+  </div>
+
+  <% if policy(@document.shared_links.new).create? || @document.shared_links.active.any? %>
+    <div class="mt-6">
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header { "Public sharing" } %>
+
+        <% if @document.shared_links.active.any? %>
+          <ul class="divide-y divide-gray-100">
+            <% @document.shared_links.active.each do |shared_link| %>
+              <li class="py-3 flex items-center justify-between gap-4">
+                <div class="min-w-0">
+                  <p class="text-sm text-gray-900 truncate"><%= shared_document_url(token: shared_link.token) %></p>
+                  <p class="text-sm text-gray-500">Expires on <%= l(shared_link.expires_at.to_date) %></p>
+                </div>
+                <% if policy(shared_link).destroy? %>
+                  <%= render(Ui::ButtonComponent.new(
+                    href: entity_document_shared_link_path(current_entity, @document, shared_link), variant: :danger, method: :delete,
+                    data: { turbo_confirm: "Revoke this share link? Anyone using it will lose access to the document." }
+                  )) { "Revoke" } %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-sm text-gray-500">This document has not been shared yet.</p>
+        <% end %>
+
+        <% if policy(@document.shared_links.new).create? %>
+          <div class="mt-4">
+            <%= render(Ui::ButtonComponent.new(
+              href: entity_document_shared_links_path(current_entity, @document), variant: :secondary, method: :post
+            )) { "Generate share link" } %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="mt-6">
+    <%= render Workflow::StepsComponent.new(document: @document, current_user: current_user) %>
+  </div>
+
+  <div class="mt-6">
+    <%= render Workflow::ActionButtonsComponent.new(document: @document, current_user: current_user) %>
+  </div>
+</div>

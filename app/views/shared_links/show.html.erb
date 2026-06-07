@@ -1,0 +1,33 @@
+<% content_for :title, "#{@document.reference_number} - DocumentFlow" %>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="flex items-center gap-2 mb-8">
+    <svg class="w-8 h-8 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+    </svg>
+    <span class="text-xl font-bold text-gray-900">DocumentFlow</span>
+  </div>
+
+  <p class="text-sm text-gray-600 mb-2">A document was shared with you</p>
+  <h1 class="text-2xl font-bold text-gray-900 mb-6"><%= @document.subject %></h1>
+
+  <%= render Ui::CardComponent.new do |card| %>
+    <% card.with_header { render(Documents::DocumentStatusBadgeComponent.new(status: @document.status)) } %>
+
+    <%= render Documents::MetadataComponent.new(document: @document) %>
+
+    <div class="mt-6">
+      <%= render Ui::DefinitionListComponent.new do |dl| %>
+        <% dl.with_item(term: "Reference number") { @document.reference_number } %>
+        <% dl.with_item(term: "Document date") { l(@document.document_date) } %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="mt-6">
+    <%= render Ui::CardComponent.new do |card| %>
+      <% card.with_header { "Attached files" } %>
+      <%= render Documents::FileListComponent.new(document: @document) %>
+    <% end %>
+  </div>
+</div>

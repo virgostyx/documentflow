@@ -6,6 +6,16 @@
 @source "../../helpers/**/*.rb";
 @source "../../javascript/**/*.js";
 
+/*
+ * FloatingLabelsRails::FormBuilder construit ses classes Tailwind dans le code
+ * Ruby de la gem (hors des chemins scannés ci-dessus). On les déclare donc
+ * explicitement pour que Tailwind génère le CSS correspondant.
+ */
+@source inline("peer relative absolute origin-[0] transform duration-300");
+@source inline("top-4 left-3 scale-75 -translate-y-3");
+@source inline("peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0");
+@source inline("peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-blue-600");
+
 @theme {
   --font-sans: "Inter var", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 

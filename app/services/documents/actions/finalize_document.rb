@@ -9,7 +9,7 @@ module Documents
         document = ctx.document
 
         unless document.may_finalize?
-          next fail_with!(ctx, "Ce document doit être signé avant d'être finalisé", :validation_error)
+          next fail_with!(ctx, "This document must be signed before it can be finalized", :validation_error)
         end
 
         document.finalize!

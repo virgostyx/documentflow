@@ -78,12 +78,12 @@ class Document < ApplicationRecord
   def sender_belongs_to_entity
     return if sender.nil? || entity.nil? || sender.entity_id == entity_id
 
-    errors.add(:sender, "doit appartenir à la même entité")
+    errors.add(:sender, "must belong to the same entity")
   end
 
   def addressee_belongs_to_entity
     return if addressee.nil? || entity.nil? || addressee.entity_id == entity_id
 
-    errors.add(:addressee, "doit appartenir à la même entité")
+    errors.add(:addressee, "must belong to the same entity")
   end
 end

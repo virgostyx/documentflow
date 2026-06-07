@@ -7,7 +7,7 @@ module Entities
 
       executed do |ctx|
         if ctx.entity.entity_users.exists?(invited_email: ctx.invited_email)
-          fail_with!(ctx, "Cette adresse email est déjà membre ou invitée dans cette entité", :validation_error)
+          fail_with!(ctx, "This email address is already a member or has already been invited to this entity", :validation_error)
         end
       end
     end

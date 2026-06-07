@@ -7,10 +7,10 @@ class InvitationMailer < ApplicationMailer
 
     mail(
       to: entity_user.invited_email,
-      subject: "Vous êtes invité(e) à rejoindre #{entity.name} sur DocumentFlow",
-      body: "Bonjour,\n\n" \
-            "#{inviter&.email} vous invite à rejoindre l'entité #{entity.name} sur DocumentFlow " \
-            "avec le rôle #{entity_user.role}.",
+      subject: "You're invited to join #{entity.name} on DocumentFlow",
+      body: "Hello,\n\n" \
+            "#{inviter&.email} invites you to join the entity #{entity.name} on DocumentFlow " \
+            "with the role #{entity_user.role}.",
       content_type: "text/plain"
     )
   end

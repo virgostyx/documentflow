@@ -3,11 +3,11 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Landing publique
+  # Public landing page
   root "pages#home"
 
   devise_for :users
 
-  # Dashboard global (liste des entités de l'utilisateur)
+  # Global dashboard (list of the user's entities)
   get "dashboard", to: "dashboard#index"
 end

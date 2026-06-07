@@ -1,10 +1,10 @@
 <%= render Auth::AuthLayoutComponent.new(
-  title: "Créer un compte",
-  subtitle: "Démarrez gratuitement, sans carte bancaire"
+  title: "Create an account",
+  subtitle: "Get started for free, no credit card required"
 ) do %>
   <div class="mb-6">
     <%= link_to root_path, class: "inline-flex items-center text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors" do %>
-      ← Retour à l'accueil
+      ← Back to home
     <% end %>
   </div>
 
@@ -15,50 +15,50 @@
 
     <%# Email %>
     <%= f.floating_email_field :email,
-                               label: "Adresse e-mail",
+                               label: "Email address",
                                required: true,
                                autocomplete: "email",
                                autofocus: true,
                                placeholder: " " %>
 
-    <%# Mot de passe %>
+    <%# Password %>
     <%= f.floating_password_field :password,
-                                  label: "Mot de passe",
+                                  label: "Password",
                                   required: true,
                                   autocomplete: "new-password",
                                   placeholder: " " %>
 
     <% if @minimum_password_length %>
       <p class="text-xs text-gray-500 -mt-2 mb-4">
-        Minimum <%= @minimum_password_length %> caractères
+        Minimum <%= @minimum_password_length %> characters
       </p>
     <% end %>
 
     <%# Confirmation %>
     <%= f.floating_password_field :password_confirmation,
-                                  label: "Confirmer le mot de passe",
+                                  label: "Confirm password",
                                   required: true,
                                   autocomplete: "new-password",
                                   placeholder: " " %>
 
-    <%# Bouton %>
-    <%= f.submit "Créer mon compte",
+    <%# Button %>
+    <%= f.submit "Create my account",
                  class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors" %>
 
-    <%# Liens %>
+    <%# Links %>
     <div class="mt-6 text-center text-sm">
       <p class="text-gray-600">
-        Déjà un compte ?
-        <%= link_to "Se connecter", new_user_session_path, class: "font-medium text-primary-600 hover:text-primary-500" %>
+        Already have an account?
+        <%= link_to "Sign in", new_user_session_path, class: "font-medium text-primary-600 hover:text-primary-500" %>
       </p>
     </div>
 
-    <%# Argumentaire %>
+    <%# Selling points %>
     <div class="mt-8 pt-6 border-t border-gray-200">
       <div class="text-center text-xs text-gray-500">
-        <p class="mb-2">✓ Premier circuit de validation gratuit</p>
-        <p class="mb-2">✓ Aucune carte bancaire requise</p>
-        <p>✓ Configuration en moins de 5 minutes</p>
+        <p class="mb-2">✓ First validation circuit free</p>
+        <p class="mb-2">✓ No credit card required</p>
+        <p>✓ Set up in under 5 minutes</p>
       </div>
     </div>
   <% end %>

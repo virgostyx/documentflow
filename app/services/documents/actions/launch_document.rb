@@ -9,7 +9,7 @@ module Documents
         document = ctx.document
 
         unless document.may_launch?
-          next fail_with!(ctx, "Ce document ne peut pas être lancé dans son état actuel", :validation_error)
+          next fail_with!(ctx, "This document cannot be launched in its current state", :validation_error)
         end
 
         document.launch!

@@ -10,7 +10,7 @@ module Workflow
         previous_step = ctx.document.workflow_steps.where("\"order\" < ?", ctx.step.order).ordered.last
 
         unless previous_step
-          next fail_with!(ctx, "Aucune étape précédente vers laquelle revenir", :business_logic_error)
+          next fail_with!(ctx, "No previous step to return to", :business_logic_error)
         end
 
         previous_step.update!(status: "pending")

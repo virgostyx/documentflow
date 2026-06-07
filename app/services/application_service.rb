@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base class for all service organizers
-# Uses LightService to orchestrer des workflows métier composés d'Actions atomiques
+# Uses LightService to orchestrate business workflows composed of atomic Actions
 class ApplicationService
   extend LightService::Organizer
 
@@ -9,7 +9,7 @@ class ApplicationService
   class PermissionError < StandardError; end
   class BusinessLogicError < StandardError; end
 
-  # Point d'entrée de tous les organizers
+  # Entry point for all organizers
   # Usage: MyOrganizer.call(param1: value1, param2: value2)
   def self.call(**args)
     result = nil
@@ -20,7 +20,7 @@ class ApplicationService
     result
   end
 
-  # Ajoute l'étape d'audit logging à la fin d'une liste d'actions
+  # Appends the audit logging step to the end of a list of actions
   # Usage:
   #   def self.steps
   #     with_audit_logging([MyAction1, MyAction2])
@@ -29,7 +29,7 @@ class ApplicationService
     steps_array + [ Shared::Actions::LogAuditEvent ]
   end
 
-  # DSL déclaratif : `workflow_steps Action1, Action2, audit_log: false`
+  # Declarative DSL: `workflow_steps Action1, Action2, audit_log: false`
   def self.workflow_steps(*actions, audit_log: true)
     step_list = actions.flatten
     define_singleton_method(:steps) do

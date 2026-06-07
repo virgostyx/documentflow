@@ -1,10 +1,10 @@
 <%= render Auth::AuthLayoutComponent.new(
-  title: "Modifier mon profil",
-  subtitle: "Mettez à jour les informations de votre compte"
+  title: "Edit my profile",
+  subtitle: "Update your account information"
 ) do %>
   <div class="mb-6">
     <%= link_to dashboard_path, class: "inline-flex items-center text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors" do %>
-      ← Retour au tableau de bord
+      ← Back to dashboard
     <% end %>
   </div>
 
@@ -16,59 +16,59 @@
 
     <%# Email %>
     <div class="mb-6">
-      <h3 class="text-sm font-semibold text-gray-900 mb-4">Informations du compte</h3>
+      <h3 class="text-sm font-semibold text-gray-900 mb-4">Account information</h3>
 
       <%= f.floating_email_field :email,
-                                 label: "Adresse e-mail",
+                                 label: "Email address",
                                  required: true,
                                  autocomplete: "email",
                                  placeholder: " " %>
     </div>
 
-    <%# Mot de passe %>
+    <%# Password %>
     <div class="mb-6 pt-6 border-t border-gray-200">
-      <h3 class="text-sm font-semibold text-gray-900 mb-2">Changer de mot de passe</h3>
-      <p class="text-xs text-gray-500 mb-4">Laissez vide si vous ne souhaitez pas le modifier</p>
+      <h3 class="text-sm font-semibold text-gray-900 mb-2">Change password</h3>
+      <p class="text-xs text-gray-500 mb-4">Leave blank if you don't want to change it</p>
 
       <%= f.floating_password_field :password,
-                                    label: "Nouveau mot de passe (optionnel)",
+                                    label: "New password (optional)",
                                     autocomplete: "new-password",
                                     placeholder: " " %>
 
       <% if @minimum_password_length %>
         <p class="text-xs text-gray-500 -mt-2 mb-4">
-          Minimum <%= @minimum_password_length %> caractères
+          Minimum <%= @minimum_password_length %> characters
         </p>
       <% end %>
 
       <%= f.floating_password_field :password_confirmation,
-                                    label: "Confirmer le nouveau mot de passe",
+                                    label: "Confirm new password",
                                     autocomplete: "new-password",
                                     placeholder: " " %>
     </div>
 
-    <%# Mot de passe actuel %>
+    <%# Current password %>
     <div class="mb-6 pt-6 border-t border-gray-200">
-      <h3 class="text-sm font-semibold text-gray-900 mb-2">Confirmer les changements</h3>
-      <p class="text-xs text-gray-500 mb-4">Saisissez votre mot de passe actuel pour enregistrer les changements</p>
+      <h3 class="text-sm font-semibold text-gray-900 mb-2">Confirm changes</h3>
+      <p class="text-xs text-gray-500 mb-4">Enter your current password to save the changes</p>
 
       <%= f.floating_password_field :current_password,
-                                    label: "Mot de passe actuel",
+                                    label: "Current password",
                                     required: true,
                                     autocomplete: "current-password",
                                     placeholder: " " %>
     </div>
 
-    <%# Bouton %>
-    <%= f.submit "Mettre à jour le profil",
+    <%# Button %>
+    <%= f.submit "Update profile",
                  class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors" %>
 
-    <%# Suppression de compte %>
+    <%# Account deletion %>
     <div class="mt-8 pt-6 border-t border-gray-200">
-      <h3 class="text-sm font-semibold text-gray-900 mb-4">Gestion du compte</h3>
-      <%= link_to "Supprimer mon compte",
+      <h3 class="text-sm font-semibold text-gray-900 mb-4">Account management</h3>
+      <%= link_to "Delete my account",
                   registration_path(resource_name),
-                  data: { turbo_method: :delete, turbo_confirm: "Êtes-vous sûr ? Cette action est irréversible." },
+                  data: { turbo_method: :delete, turbo_confirm: "Are you sure? This action cannot be undone." },
                   class: "block text-sm text-red-600 hover:text-red-500" %>
     </div>
   <% end %>

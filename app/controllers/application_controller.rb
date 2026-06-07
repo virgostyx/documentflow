@@ -15,13 +15,13 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # Les pages Devise (connexion, inscription, mot de passe...) sont publiques
-  # et utilisent le layout "pages" qui ne suppose pas d'utilisateur connecté.
+  # Devise pages (sign in, sign up, password...) are public
+  # and use the "pages" layout which doesn't assume a signed-in user.
   def resolve_layout
     devise_controller? ? "pages" : "application"
   end
 
   def user_not_authorized
-    redirect_back fallback_location: root_path, alert: "Vous n'êtes pas autorisé à effectuer cette action."
+    redirect_back fallback_location: root_path, alert: "You are not authorized to perform this action."
   end
 end

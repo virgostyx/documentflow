@@ -49,7 +49,7 @@ RSpec.describe Documents::LaunchOrganizer do
         result = described_class.call(document: document, current_user: user)
 
         expect(result).not_to be_success
-        expect(result.message).to include("circuit de validation")
+        expect(result.message).to include("validation circuit")
         expect(document.reload.status).to eq("draft")
       end
     end

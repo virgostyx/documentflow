@@ -59,7 +59,7 @@ RSpec.describe Entities::InviteMemberOrganizer do
         result = described_class.call(**params)
 
         expect(result).not_to be_success
-        expect(result.message).to include("déjà")
+        expect(result.message).to include("already")
       end
     end
   end

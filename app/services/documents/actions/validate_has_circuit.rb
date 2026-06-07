@@ -7,7 +7,7 @@ module Documents
 
       executed do |ctx|
         if ctx.document.workflow_steps.none?
-          fail_with!(ctx, "Ce document n'a pas de circuit de validation défini", :validation_error)
+          fail_with!(ctx, "This document has no validation circuit defined", :validation_error)
         end
       end
     end

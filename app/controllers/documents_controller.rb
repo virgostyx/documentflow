@@ -5,6 +5,7 @@ class DocumentsController < ApplicationController
 
   before_action :set_document, only: %i[show edit update destroy launch cancel]
   before_action :set_contacts, only: %i[new create edit update]
+  before_action :set_entity_members, only: %i[new create edit update]
 
   def index
     @documents = load_documents
@@ -95,6 +96,10 @@ class DocumentsController < ApplicationController
     @contacts = current_entity.contacts.order(:last_name, :first_name)
   end
 
+  def set_entity_members
+    @entity_members = current_entity.users.merge(EntityUser.active).order(:email)
+  end
+
   def load_documents
     documents = policy_scope(Document)
                   .where(entity: current_entity)
@@ -105,6 +110,10 @@ class DocumentsController < ApplicationController
   end
 
   def document_params
-    params.require(:document).permit(:subject, :document_date, :sender_id, :addressee_id, files: [])
+    params.require(:document).permit(
+      :subject, :document_date, :sender_id, :addressee_id,
+      files: [],
+      workflow_steps_attributes: %i[id role order actor_id is_parallel parallel_group _destroy]
+    )
   end
 end

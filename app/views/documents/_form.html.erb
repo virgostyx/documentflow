@@ -18,6 +18,32 @@
   <%= f.file_field :files, multiple: true,
                    class: "mt-4 block w-full text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
 
+  <% if document.draft? %>
+    <div class="mt-6 border-t border-gray-200 pt-6" data-controller="workflow-builder">
+      <h3 class="text-sm font-medium text-gray-900">Validation circuit</h3>
+      <p class="mt-1 text-sm text-gray-500">
+        Define the sequence of approval steps this document must go through before it can be launched. Drag steps to reorder them.
+      </p>
+
+      <div data-workflow-builder-target="steps" class="mt-4 space-y-3">
+        <%= f.fields_for :workflow_steps do |step_form| %>
+          <%= render "workflow_step_fields", f: step_form %>
+        <% end %>
+      </div>
+
+      <template data-workflow-builder-target="template">
+        <%= f.fields_for :workflow_steps, WorkflowStep.new, child_index: "NEW_RECORD" do |step_form| %>
+          <%= render "workflow_step_fields", f: step_form %>
+        <% end %>
+      </template>
+
+      <button type="button" data-action="workflow-builder#addStep"
+              class="mt-3 text-sm font-medium text-primary-600 hover:text-primary-700">
+        + Add step
+      </button>
+    </div>
+  <% end %>
+
   <div class="mt-6 flex justify-end gap-3">
     <%= render(Ui::ButtonComponent.new(
       href: document.persisted? ? entity_document_path(current_entity, document) : entity_documents_path(current_entity),

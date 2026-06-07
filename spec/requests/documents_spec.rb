@@ -132,6 +132,37 @@ RSpec.describe "Documents", type: :request do
         end
       end
 
+      context "with a validation circuit" do
+        let(:red_actor) { user }
+        let(:visa_actor) { create(:user) }
+        let(:document_params) do
+          {
+            document: {
+              subject: "New supplier agreement",
+              document_date: Date.current,
+              sender_id: sender.id,
+              addressee_id: addressee.id,
+              workflow_steps_attributes: {
+                "0" => { role: "RED", order: 1, actor_id: red_actor.id },
+                "1" => { role: "VISA", order: 2, actor_id: visa_actor.id }
+              }
+            }
+          }
+        end
+
+        before do
+          create(:entity_user, entity: entity, user: visa_actor)
+        end
+
+        it "creates the document with its validation circuit" do
+          post entity_documents_path(entity), params: document_params
+
+          document = entity.documents.find_by(subject: "New supplier agreement")
+          expect(document.workflow_steps.ordered.pluck(:role)).to eq(%w[RED VISA])
+          expect(document.workflow_steps.find_by(role: "VISA").actor).to eq(visa_actor)
+        end
+      end
+
       context "with invalid params" do
         let(:document_params) do
           { document: { subject: "", document_date: nil, sender_id: sender.id, addressee_id: addressee.id } }
@@ -323,6 +354,41 @@ RSpec.describe "Documents", type: :request do
 
         expect(document.reload.subject).to eq("New subject")
         expect(response).to redirect_to(entity_document_path(entity, document))
+      end
+
+      context "with validation circuit changes" do
+        let!(:red_step) { create(:workflow_step, :red, document: document, order: 1, actor: user) }
+        let(:visa_actor) { create(:user) }
+
+        before { create(:entity_user, entity: entity, user: visa_actor) }
+
+        it "adds new steps to the circuit" do
+          patch entity_document_path(entity, document), params: {
+            document: {
+              workflow_steps_attributes: {
+                "0" => { id: red_step.id, role: "RED", order: 1, actor_id: user.id },
+                "1" => { role: "VISA", order: 2, actor_id: visa_actor.id }
+              }
+            }
+          }
+
+          expect(document.reload.workflow_steps.ordered.pluck(:role)).to eq(%w[RED VISA])
+        end
+
+        it "removes steps marked for destruction" do
+          visa_step = create(:workflow_step, :visa, document: document, order: 2, actor: visa_actor)
+
+          patch entity_document_path(entity, document), params: {
+            document: {
+              workflow_steps_attributes: {
+                "0" => { id: red_step.id, role: "RED", order: 1, actor_id: user.id },
+                "1" => { id: visa_step.id, _destroy: "1" }
+              }
+            }
+          }
+
+          expect(document.reload.workflow_steps.pluck(:role)).to eq(%w[RED])
+        end
       end
     end
   end

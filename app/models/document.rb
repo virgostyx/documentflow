@@ -15,6 +15,8 @@ class Document < ApplicationRecord
   has_many :audit_logs, as: :auditable, dependent: :destroy
   has_many_attached :files
 
+  accepts_nested_attributes_for :workflow_steps, allow_destroy: true, reject_if: :all_blank
+
   # Validations
   validates :subject, presence: true, length: { maximum: 255 }
   validates :document_date, presence: true

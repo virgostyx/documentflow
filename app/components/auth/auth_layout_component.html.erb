@@ -1,0 +1,90 @@
+<div class="min-h-screen flex">
+  <%# Panneau de marque %>
+  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 via-primary-700 to-sky-900 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+      <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+      </svg>
+    </div>
+
+    <div class="relative z-10 flex flex-col justify-center px-12 text-white">
+      <div class="mb-8">
+        <svg class="w-12 h-12 mb-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+        </svg>
+        <h1 class="text-4xl font-bold mb-4">DocumentFlow</h1>
+        <p class="text-xl text-primary-100">
+          Structurez et tracez vos flux documentaires avec rigueur
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex items-start">
+          <svg class="w-6 h-6 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <div>
+            <p class="font-semibold">Circuit RED → VISA → SIGN → EXP</p>
+            <p class="text-sm text-primary-200">Un workflow de validation entièrement structuré</p>
+          </div>
+        </div>
+
+        <div class="flex items-start">
+          <svg class="w-6 h-6 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <div>
+            <p class="font-semibold">Validation multi-acteurs</p>
+            <p class="text-sm text-primary-200">Chaque étape est confiée à un acteur identifié</p>
+          </div>
+        </div>
+
+        <div class="flex items-start">
+          <svg class="w-6 h-6 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <div>
+            <p class="font-semibold">Audit trail complet</p>
+            <p class="text-sm text-primary-200">Traçabilité totale de chaque action</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-12 text-sm text-primary-200">
+        <p>Adopté par des organisations exigeantes en traçabilité documentaire</p>
+      </div>
+    </div>
+  </div>
+
+  <%# Formulaire %>
+  <div class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <div class="w-full max-w-md space-y-8">
+      <div class="lg:hidden text-center">
+        <svg class="w-12 h-12 mx-auto text-primary-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+        </svg>
+        <h2 class="mt-4 text-2xl font-bold text-gray-900">DocumentFlow</h2>
+      </div>
+
+      <div>
+        <h2 class="text-center text-3xl font-extrabold text-gray-900">
+          <%= title %>
+        </h2>
+        <% if subtitle %>
+          <p class="mt-2 text-center text-sm text-gray-600">
+            <%= subtitle %>
+          </p>
+        <% end %>
+      </div>
+
+      <div class="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10">
+        <%= content %>
+      </div>
+    </div>
+  </div>
+</div>

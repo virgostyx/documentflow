@@ -16,7 +16,13 @@ module Documentflow
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
-    # Configuration for the application, engines, and railties goes here.
+    # Floating labels pour tous les formulaires (cf. note de concept)
+    config.action_view.default_form_builder = "FloatingLabelsRails::FormBuilder"
+
+    # Previews ViewComponent sur /rails/view_components
+    config.view_component.previews.paths << Rails.root.join("spec/components/previews").to_s
+
+    # Configuration pour l'application, les engines, etc.
     #
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.

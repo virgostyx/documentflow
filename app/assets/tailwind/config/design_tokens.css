@@ -1,0 +1,68 @@
+/* ============================================
+   DOCUMENTFLOW DESIGN TOKENS
+   Architecture identique à BudgetFlow — seule la teinte primaire change
+   (Sky blue ici, Indigo chez BudgetFlow)
+   ============================================ */
+
+:root {
+  /* Primary (Sky Blue) */
+  --df-primary-50:  #f0f9ff;
+  --df-primary-100: #e0f2fe;
+  --df-primary-200: #bae6fd;
+  --df-primary-300: #7dd3fc;
+  --df-primary-400: #38bdf8;
+  --df-primary-500: #0ea5e9;
+  --df-primary-600: #0284c7;
+  --df-primary-700: #0369a1;
+  --df-primary-800: #075985;
+  --df-primary-900: #0c4a6e;
+
+  /* Gray (Neutral) */
+  --df-gray-50:  #f9fafb;
+  --df-gray-100: #f3f4f6;
+  --df-gray-200: #e5e7eb;
+  --df-gray-300: #d1d5db;
+  --df-gray-400: #9ca3af;
+  --df-gray-500: #6b7280;
+  --df-gray-600: #4b5563;
+  --df-gray-700: #374151;
+  --df-gray-800: #1f2937;
+  --df-gray-900: #111827;
+
+  /* Success (Green) */
+  --df-success-50:  #f0fdf4;
+  --df-success-100: #dcfce7;
+  --df-success-500: #22c55e;
+  --df-success-600: #16a34a;
+  --df-success-700: #15803d;
+
+  /* Warning (Yellow) */
+  --df-warning-50:  #fffbeb;
+  --df-warning-100: #fef3c7;
+  --df-warning-500: #eab308;
+  --df-warning-600: #ca8a04;
+  --df-warning-700: #a16207;
+
+  /* Danger (Red) */
+  --df-danger-50:  #fef2f2;
+  --df-danger-100: #fee2e2;
+  --df-danger-500: #ef4444;
+  --df-danger-600: #dc2626;
+  --df-danger-700: #b91c1c;
+
+  /* Info (Blue) */
+  --df-info-50:  #eff6ff;
+  --df-info-100: #dbeafe;
+  --df-info-500: #3b82f6;
+  --df-info-600: #2563eb;
+  --df-info-700: #1d4ed8;
+
+  /* Spacing */
+  --df-spacing-xs: 0.25rem;
+  --df-spacing-sm: 0.5rem;
+  --df-spacing-md: 1rem;
+  --df-spacing-lg: 1.5rem;
+  --df-spacing-xl: 2rem;
+  --df-spacing-2xl: 3rem;
+  --df-spacing-3xl: 4rem;
+}

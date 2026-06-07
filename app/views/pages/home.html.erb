@@ -1,0 +1,226 @@
+<%# Navigation %>
+<nav class="fixed w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50 h-16" data-controller="navbar">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 flex items-center">
+          <svg class="w-8 h-8 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+          </svg>
+          <span class="ml-2 text-xl font-bold text-gray-900">DocumentFlow</span>
+        </div>
+      </div>
+
+      <%# Navigation desktop %>
+      <div class="hidden sm:flex sm:items-center sm:space-x-8">
+        <a href="#features" class="text-gray-700 hover:text-primary-600 transition-colors">Fonctionnalités</a>
+        <a href="#how-it-works" class="text-gray-700 hover:text-primary-600 transition-colors">Workflow</a>
+        <%= link_to "Se connecter", new_user_session_path,
+              class: "text-gray-700 hover:text-primary-600 transition-colors" %>
+        <%= link_to "S'inscrire", new_user_registration_path,
+              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 transition-colors" %>
+      </div>
+
+      <%# Menu mobile %>
+      <div class="flex items-center sm:hidden">
+        <button type="button" data-action="click->navbar#toggle" class="text-gray-700 hover:text-primary-600">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div data-navbar-target="menu" class="hidden sm:hidden border-t border-gray-200 bg-white">
+    <div class="px-2 pt-2 pb-3 space-y-1">
+      <a href="#features" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md" data-action="click->navbar#close">Fonctionnalités</a>
+      <a href="#how-it-works" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md" data-action="click->navbar#close">Workflow</a>
+      <%= link_to "Se connecter", new_user_session_path,
+            class: "block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md" %>
+      <%= link_to "S'inscrire", new_user_registration_path,
+            class: "block px-3 py-2 text-center text-white bg-primary-600 hover:bg-primary-700 rounded-md" %>
+    </div>
+  </div>
+</nav>
+
+<%# Hero %>
+<section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto text-center">
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight">
+      Gérez vos flux documentaires
+      <span class="mt-3 pt-2 block text-primary-600">avec rigueur et traçabilité</span>
+    </h1>
+    <p class="mt-6 mx-auto max-w-2xl text-xl text-gray-600">
+      DocumentFlow structure l'enregistrement, la validation multi-acteurs et l'archivage
+      de vos documents grâce à un circuit RED → VISA → SIGN → EXP entièrement traçable.
+    </p>
+    <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+      <%= link_to new_user_registration_path,
+            class: "inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" do %>
+        <span>Démarrer</span>
+        <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+        </svg>
+      <% end %>
+      <a href="#how-it-works" class="inline-flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+        <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Voir une démo
+      </a>
+    </div>
+
+    <%# Trust badges %>
+    <div class="mt-12 text-sm text-gray-500">
+      <p class="mb-4">Adopté par des organisations exigeantes en traçabilité documentaire</p>
+      <div class="flex flex-wrap justify-center gap-8 items-center opacity-60">
+        <div class="px-4 py-2 border border-gray-200 rounded-lg"><span class="font-semibold">Administration publique</span></div>
+        <div class="px-4 py-2 border border-gray-200 rounded-lg"><span class="font-semibold">Cabinet juridique</span></div>
+        <div class="px-4 py-2 border border-gray-200 rounded-lg"><span class="font-semibold">Direction générale</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# Fonctionnalités %>
+<section id="features" class="py-20 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900">Des fonctionnalités pensées pour la rigueur</h2>
+      <p class="mt-4 text-xl text-gray-600">Tout ce qu'il faut pour structurer et tracer vos flux documentaires</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <%= render Auth::FeatureCardComponent.new(
+        icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
+        title: "Workflow structuré",
+        description: "Un circuit de validation en quatre étapes : Rédaction, Visa, Signature et Expédition"
+      ) %>
+
+      <%= render Auth::FeatureCardComponent.new(
+        icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-4-4"/>',
+        title: "Validation multi-acteurs",
+        description: "Chaque étape est confiée à un acteur identifié, avec visas parallèles possibles"
+      ) %>
+
+      <%= render Auth::FeatureCardComponent.new(
+        icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
+        title: "Audit trail complet",
+        description: "Chaque action est consignée et horodatée pour une traçabilité totale"
+      ) %>
+
+      <%= render Auth::FeatureCardComponent.new(
+        icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>',
+        title: "Conversion PDF automatique",
+        description: "Vos documents sont convertis et archivés en PDF dès la finalisation"
+      ) %>
+
+      <%= render Auth::FeatureCardComponent.new(
+        icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>',
+        title: "Partage temporisé",
+        description: "Générez des liens d'accès publics à expiration automatique pour vos documents finalisés"
+      ) %>
+
+      <%= render Auth::FeatureCardComponent.new(
+        icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>',
+        title: "Recherche full-text",
+        description: "Retrouvez instantanément vos documents par référence, objet, expéditeur ou destinataire"
+      ) %>
+    </div>
+  </div>
+</section>
+
+<%# Comment ça marche %>
+<section id="how-it-works" class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900">Comment ça marche</h2>
+      <p class="mt-4 text-xl text-gray-600">Du dépôt à l'archivage, en quatre étapes</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <% [
+        ["Créer un document", "Renseignez l'objet, la date et les pièces jointes"],
+        ["Définir le circuit de validation", "Choisissez les acteurs RED, VISA, SIGN et EXP"],
+        ["Les acteurs approuvent ou rejettent", "Chaque étape avance ou revient selon la décision prise"],
+        ["Finalisation et archivage PDF", "Le document est converti, figé et archivé automatiquement"]
+      ].each_with_index do |(title, description), index| %>
+        <div class="flex flex-col items-center text-center">
+          <div class="w-16 h-16 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center text-2xl font-bold mb-4">
+            <%= index + 1 %>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2"><%= title %></h3>
+          <p class="text-gray-600"><%= description %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<%# CTA %>
+<section class="py-20 bg-primary-600">
+  <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+      Prêt à digitaliser vos flux documentaires ?
+    </h2>
+    <p class="text-xl text-primary-100 mb-8">
+      Rejoignez les organisations qui font confiance à DocumentFlow pour leur traçabilité documentaire
+    </p>
+    <%= link_to new_user_registration_path,
+          class: "inline-flex items-center justify-center px-8 py-3 border-2 border-white text-base font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50 transition-colors shadow-lg" do %>
+      <span>Démarrer gratuitement</span>
+      <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+      </svg>
+    <% end %>
+    <p class="mt-4 text-sm text-primary-200">Aucune carte bancaire requise</p>
+  </div>
+</section>
+
+<%# Footer %>
+<footer class="bg-gray-900 text-gray-300 py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div>
+        <div class="flex items-center mb-4">
+          <svg class="w-8 h-8 text-primary-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+          </svg>
+          <span class="ml-2 text-xl font-bold text-white">DocumentFlow</span>
+        </div>
+        <p class="text-sm">Gestion de flux documentaire avec validation multi-acteurs et traçabilité complète.</p>
+      </div>
+
+      <div>
+        <h3 class="text-white font-semibold mb-4">Produit</h3>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#features" class="hover:text-white transition-colors">Fonctionnalités</a></li>
+          <li><a href="#how-it-works" class="hover:text-white transition-colors">Workflow</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-white font-semibold mb-4">Ressources</h3>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-white transition-colors">Documentation</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Support</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-white font-semibold mb-4">Société</h3>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-white transition-colors">À propos</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
+      <p>&copy; <%= Time.current.year %> DocumentFlow. Tous droits réservés.</p>
+    </div>
+  </div>
+</footer>

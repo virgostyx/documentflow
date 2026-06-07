@@ -1,0 +1,31 @@
+<header class="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+    <%= link_to dashboard_path, class: "flex items-center" do %>
+      <svg class="w-8 h-8 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+      </svg>
+      <span class="ml-2 text-xl font-bold text-gray-900">DocumentFlow</span>
+    <% end %>
+
+    <div class="flex items-center gap-4" data-controller="dropdown">
+      <button type="button"
+              data-action="click->dropdown#toggle"
+              class="flex items-center gap-2 text-sm text-gray-700 hover:text-primary-600 transition-colors">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 text-primary-700 font-medium">
+          <%= current_user.email.first.upcase %>
+        </span>
+        <span><%= current_user.email %></span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+
+      <div data-dropdown-target="menu"
+           class="hidden absolute right-4 top-14 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1">
+        <%= link_to "Déconnexion", destroy_user_session_path,
+              data: { turbo_method: :delete },
+              class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
+      </div>
+    </div>
+  </div>
+</header>

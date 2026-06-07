@@ -1,0 +1,5 @@
+<div id="flash-messages" class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4 space-y-2">
+  <% flash.each do |type, message| %>
+    <%= render FlashMessageComponent.new(type: type, message: message) %>
+  <% end %>
+</div>

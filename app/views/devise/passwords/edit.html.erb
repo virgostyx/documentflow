@@ -1,0 +1,57 @@
+<%= render Auth::AuthLayoutComponent.new(
+  title: "Réinitialiser le mot de passe",
+  subtitle: "Saisissez votre nouveau mot de passe ci-dessous"
+) do %>
+  <div class="mb-6">
+    <%= link_to root_path, class: "inline-flex items-center text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors" do %>
+      ← Retour à l'accueil
+    <% end %>
+  </div>
+
+  <%= form_for(resource, as: resource_name, url: password_path(resource_name),
+               html: { method: :put },
+               builder: FloatingLabelsRails::FormBuilder) do |f| %>
+
+    <%= render "devise/shared/error_messages", resource: resource %>
+    <%= f.hidden_field :reset_password_token %>
+
+    <%# Nouveau mot de passe %>
+    <%= f.floating_password_field :password,
+                                  label: "Nouveau mot de passe",
+                                  required: true,
+                                  autofocus: true,
+                                  autocomplete: "new-password",
+                                  placeholder: " " %>
+
+    <% if @minimum_password_length %>
+      <p class="text-xs text-gray-500 -mt-4 mb-4">
+        Minimum <%= @minimum_password_length %> caractères
+      </p>
+    <% end %>
+
+    <%# Confirmation %>
+    <%= f.floating_password_field :password_confirmation,
+                                  label: "Confirmer le nouveau mot de passe",
+                                  required: true,
+                                  autocomplete: "new-password",
+                                  placeholder: " " %>
+
+    <%# Bouton %>
+    <%= f.submit "Changer mon mot de passe",
+                 class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors" %>
+
+    <%# Liens %>
+    <div class="mt-6 text-center text-sm">
+      <p class="text-gray-600">
+        Vous vous souvenez de votre mot de passe ?
+        <%= link_to "Se connecter", new_user_session_path, class: "font-medium text-primary-600 hover:text-primary-500" %>
+      </p>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-gray-200">
+      <div class="text-center text-xs text-gray-500">
+        <p>🔒 Votre mot de passe est chiffré et sécurisé</p>
+      </div>
+    </div>
+  <% end %>
+<% end %>

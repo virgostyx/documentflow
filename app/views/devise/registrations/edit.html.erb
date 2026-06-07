@@ -1,0 +1,75 @@
+<%= render Auth::AuthLayoutComponent.new(
+  title: "Modifier mon profil",
+  subtitle: "Mettez à jour les informations de votre compte"
+) do %>
+  <div class="mb-6">
+    <%= link_to dashboard_path, class: "inline-flex items-center text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors" do %>
+      ← Retour au tableau de bord
+    <% end %>
+  </div>
+
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name),
+               html: { method: :put },
+               builder: FloatingLabelsRails::FormBuilder) do |f| %>
+
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <%# Email %>
+    <div class="mb-6">
+      <h3 class="text-sm font-semibold text-gray-900 mb-4">Informations du compte</h3>
+
+      <%= f.floating_email_field :email,
+                                 label: "Adresse e-mail",
+                                 required: true,
+                                 autocomplete: "email",
+                                 placeholder: " " %>
+    </div>
+
+    <%# Mot de passe %>
+    <div class="mb-6 pt-6 border-t border-gray-200">
+      <h3 class="text-sm font-semibold text-gray-900 mb-2">Changer de mot de passe</h3>
+      <p class="text-xs text-gray-500 mb-4">Laissez vide si vous ne souhaitez pas le modifier</p>
+
+      <%= f.floating_password_field :password,
+                                    label: "Nouveau mot de passe (optionnel)",
+                                    autocomplete: "new-password",
+                                    placeholder: " " %>
+
+      <% if @minimum_password_length %>
+        <p class="text-xs text-gray-500 -mt-2 mb-4">
+          Minimum <%= @minimum_password_length %> caractères
+        </p>
+      <% end %>
+
+      <%= f.floating_password_field :password_confirmation,
+                                    label: "Confirmer le nouveau mot de passe",
+                                    autocomplete: "new-password",
+                                    placeholder: " " %>
+    </div>
+
+    <%# Mot de passe actuel %>
+    <div class="mb-6 pt-6 border-t border-gray-200">
+      <h3 class="text-sm font-semibold text-gray-900 mb-2">Confirmer les changements</h3>
+      <p class="text-xs text-gray-500 mb-4">Saisissez votre mot de passe actuel pour enregistrer les changements</p>
+
+      <%= f.floating_password_field :current_password,
+                                    label: "Mot de passe actuel",
+                                    required: true,
+                                    autocomplete: "current-password",
+                                    placeholder: " " %>
+    </div>
+
+    <%# Bouton %>
+    <%= f.submit "Mettre à jour le profil",
+                 class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors" %>
+
+    <%# Suppression de compte %>
+    <div class="mt-8 pt-6 border-t border-gray-200">
+      <h3 class="text-sm font-semibold text-gray-900 mb-4">Gestion du compte</h3>
+      <%= link_to "Supprimer mon compte",
+                  registration_path(resource_name),
+                  data: { turbo_method: :delete, turbo_confirm: "Êtes-vous sûr ? Cette action est irréversible." },
+                  class: "block text-sm text-red-600 hover:text-red-500" %>
+    </div>
+  <% end %>
+<% end %>

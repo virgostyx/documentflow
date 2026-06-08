@@ -1868,9 +1868,9 @@ documentflow/
 - [x] Jobs récurrents (reminders, cleanup SharedLinks)
 
 ### Phase 6 — Tests système & Finalisation (3 jours)
-- [ ] Tests système Capybara (golden path + edge cases)
-- [ ] Coverage >80% (SimpleCov)
-- [ ] RuboCop propre
+- [x] Tests système Capybara (golden path + edge cases)
+- [x] Coverage >80% (SimpleCov)
+- [x] RuboCop propre
 
 ### Phase 7 — Déploiement (1 jour)
 - [ ] Configuration Kamal + Dockerfile

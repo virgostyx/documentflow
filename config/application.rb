@@ -16,13 +16,17 @@ module Documentflow
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
-    # Floating labels pour tous les formulaires (cf. note de concept)
+    # Floating labels for all forms (see concept note)
     config.action_view.default_form_builder = "FloatingLabelsRails::FormBuilder"
 
-    # Previews ViewComponent sur /rails/view_components
+    # ViewComponent previews available at /rails/view_components
     config.view_component.previews.paths << Rails.root.join("spec/components/previews").to_s
 
-    # Configuration pour l'application, les engines, etc.
+    # Render previews in a minimal layout (no authenticated header) since previews
+    # are rendered outside of a signed-in session and `current_user` is unavailable.
+    config.view_component.previews.default_layout = "component_preview"
+
+    # Application, engine, etc. configuration.
     #
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.

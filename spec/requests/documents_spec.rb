@@ -32,6 +32,13 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).to include(document.subject)
       end
 
+      it "wraps the results in a turbo frame targeted by the search form" do
+        get entity_documents_path(entity)
+
+        expect(response.body).to include('<turbo-frame id="documents_list"')
+        expect(response.body).to include('data-turbo-frame="documents_list"')
+      end
+
       it "filters by the search query" do
         other = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Annual report")
 
@@ -67,6 +74,12 @@ RSpec.describe "Documents", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(document.subject)
+    end
+
+    it "wraps the results in the documents_list turbo frame so Turbo can swap it in place" do
+      get search_entity_documents_path(entity), params: { q: "Supplier" }
+
+      expect(response.body).to include('<turbo-frame id="documents_list"')
     end
   end
 
@@ -261,6 +274,13 @@ RSpec.describe "Documents", type: :request do
             expect(response.body).to include("Generate share link")
             expect(response.body).to include(shared_document_url(token: shared_link.token))
             expect(response.body).to include("Revoke")
+          end
+
+          it "wraps the sharing actions in a turbo frame so they can be updated in place" do
+            get entity_document_path(entity, document)
+
+            expect(response.body).to match(%r{<turbo-frame id="shared_links".*Generate share link.*</turbo-frame>}m)
+            expect(response.body).to match(%r{<turbo-frame id="shared_links".*Revoke.*</turbo-frame>}m)
           end
         end
 

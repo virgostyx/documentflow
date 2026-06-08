@@ -7,7 +7,8 @@
   ) %>
 
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-    <%= form_with url: search_entity_documents_path(current_entity), method: :get, local: true, class: "flex-1 max-w-md" do %>
+    <%= form_with url: search_entity_documents_path(current_entity), method: :get, local: true,
+                  data: { turbo_frame: "documents_list" }, class: "flex-1 max-w-md" do %>
       <input type="search" name="q" value="<%= params[:q] %>" placeholder="Search documents..."
              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
     <% end %>
@@ -17,20 +18,22 @@
     <% end %>
   </div>
 
-  <% if @documents.any? %>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <% @documents.each do |document| %>
-        <%= render Documents::DocumentCardComponent.new(document: document, current_user: current_user) %>
-      <% end %>
-    </div>
-  <% else %>
-    <%= render Ui::EmptyStateComponent.new(
-      title: "No documents found",
-      description: "Create a document to start a validation workflow."
-    ) do |empty_state| %>
-      <% if policy(current_entity.documents.new).create? %>
-        <% empty_state.with_action do %>
-          <%= render(Ui::ButtonComponent.new(href: new_entity_document_path(current_entity))) { "New document" } %>
+  <%= turbo_frame_tag "documents_list" do %>
+    <% if @documents.any? %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% @documents.each do |document| %>
+          <%= render Documents::DocumentCardComponent.new(document: document, current_user: current_user) %>
+        <% end %>
+      </div>
+    <% else %>
+      <%= render Ui::EmptyStateComponent.new(
+        title: "No documents found",
+        description: "Create a document to start a validation workflow."
+      ) do |empty_state| %>
+        <% if policy(current_entity.documents.new).create? %>
+          <% empty_state.with_action do %>
+            <%= render(Ui::ButtonComponent.new(href: new_entity_document_path(current_entity))) { "New document" } %>
+          <% end %>
         <% end %>
       <% end %>
     <% end %>

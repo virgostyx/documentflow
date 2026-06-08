@@ -56,33 +56,35 @@
       <%= render Ui::CardComponent.new do |card| %>
         <% card.with_header { "Public sharing" } %>
 
-        <% if @document.shared_links.active.any? %>
-          <ul class="divide-y divide-gray-100">
-            <% @document.shared_links.active.each do |shared_link| %>
-              <li class="py-3 flex items-center justify-between gap-4">
-                <div class="min-w-0">
-                  <p class="text-sm text-gray-900 truncate"><%= shared_document_url(token: shared_link.token) %></p>
-                  <p class="text-sm text-gray-500">Expires on <%= l(shared_link.expires_at.to_date) %></p>
-                </div>
-                <% if policy(shared_link).destroy? %>
-                  <%= render(Ui::ButtonComponent.new(
-                    href: entity_document_shared_link_path(current_entity, @document, shared_link), variant: :danger, method: :delete,
-                    data: { turbo_confirm: "Revoke this share link? Anyone using it will lose access to the document." }
-                  )) { "Revoke" } %>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <p class="text-sm text-gray-500">This document has not been shared yet.</p>
-        <% end %>
+        <%= turbo_frame_tag "shared_links" do %>
+          <% if @document.shared_links.active.any? %>
+            <ul class="divide-y divide-gray-100">
+              <% @document.shared_links.active.each do |shared_link| %>
+                <li class="py-3 flex items-center justify-between gap-4">
+                  <div class="min-w-0">
+                    <p class="text-sm text-gray-900 truncate"><%= shared_document_url(token: shared_link.token) %></p>
+                    <p class="text-sm text-gray-500">Expires on <%= l(shared_link.expires_at.to_date) %></p>
+                  </div>
+                  <% if policy(shared_link).destroy? %>
+                    <%= render(Ui::ButtonComponent.new(
+                      href: entity_document_shared_link_path(current_entity, @document, shared_link), variant: :danger, method: :delete,
+                      data: { turbo_confirm: "Revoke this share link? Anyone using it will lose access to the document." }
+                    )) { "Revoke" } %>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-sm text-gray-500">This document has not been shared yet.</p>
+          <% end %>
 
-        <% if policy(@document.shared_links.new).create? %>
-          <div class="mt-4">
-            <%= render(Ui::ButtonComponent.new(
-              href: entity_document_shared_links_path(current_entity, @document), variant: :secondary, method: :post
-            )) { "Generate share link" } %>
-          </div>
+          <% if policy(@document.shared_links.new).create? %>
+            <div class="mt-4">
+              <%= render(Ui::ButtonComponent.new(
+                href: entity_document_shared_links_path(current_entity, @document), variant: :secondary, method: :post
+              )) { "Generate share link" } %>
+            </div>
+          <% end %>
         <% end %>
       <% end %>
     </div>

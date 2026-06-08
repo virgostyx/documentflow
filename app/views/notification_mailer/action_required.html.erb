@@ -1,0 +1,5 @@
+<p>Hello <%= @user.email %>,</p>
+
+<p>Action is required on document <strong><%= @document.reference_number %></strong> (<%= @document.subject %>).</p>
+
+<p><%= link_to "View the document", @document_url %></p>

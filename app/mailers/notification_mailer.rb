@@ -2,23 +2,19 @@
 
 class NotificationMailer < ApplicationMailer
   def action_required(user, document)
-    mail(
-      to: user.email,
-      subject: "Action required: #{document.reference_number}",
-      body: "Hello #{user.email},\n\n" \
-            "Action is required on document #{document.reference_number} (#{document.subject}).",
-      content_type: "text/plain"
-    )
+    @user = user
+    @document = document
+    @document_url = entity_document_url(document.entity, document)
+
+    mail(to: user.email, subject: "Action required: #{document.reference_number}")
   end
 
   def rejection_alert(user, document, reason)
-    mail(
-      to: user.email,
-      subject: "Document rejected: #{document.reference_number}",
-      body: "Hello #{user.email},\n\n" \
-            "Document #{document.reference_number} (#{document.subject}) has been rejected.\n\n" \
-            "Reason: #{reason}",
-      content_type: "text/plain"
-    )
+    @user = user
+    @document = document
+    @reason = reason
+    @document_url = entity_document_url(document.entity, document)
+
+    mail(to: user.email, subject: "Document rejected: #{document.reference_number}")
   end
 end

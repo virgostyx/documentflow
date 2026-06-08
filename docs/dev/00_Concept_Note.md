@@ -1851,21 +1851,21 @@ documentflow/
 - [x] Spec `Documents::FinalizeOrganizer` (PDF + frozen) → implémenter
 
 ### Phase 4 — Contrôleurs & Vues (1 semaine)
-- [ ] Request specs contrôleurs → implémenter (`EntityScoped` concern)
-- [ ] Spec + implémentation composants `Ui::` (card, badge, button, empty_state, definition_list...)
-- [ ] Spec + implémentation composants `Entities::` (entity_card, member_row)
-- [ ] Spec + implémentation composants `Documents::` (card, metadata, file_list...)
-- [ ] Spec + implémentation composants `Workflow::` (steps, action_buttons)
-- [ ] Vues ERB = assemblage de composants (pas de HTML brut dans les vues)
-- [ ] Dashboard global (liste des entités de l'utilisateur)
-- [ ] Turbo Frames pour navigation partielle
-- [ ] Previews ViewComponent sur `/rails/view_components`
-- [ ] Workflow builder Stimulus (drag-and-drop)
+- [x] Request specs contrôleurs → implémenter (`EntityScoped` concern)
+- [x] Spec + implémentation composants `Ui::` (card, badge, button, empty_state, definition_list...)
+- [x] Spec + implémentation composants `Entities::` (entity_card, member_row)
+- [x] Spec + implémentation composants `Documents::` (card, metadata, file_list...)
+- [x] Spec + implémentation composants `Workflow::` (steps, action_buttons)
+- [x] Vues ERB = assemblage de composants (pas de HTML brut dans les vues)
+- [x] Dashboard global (liste des entités de l'utilisateur)
+- [x] Turbo Frames pour navigation partielle
+- [x] Previews ViewComponent sur `/rails/view_components`
+- [x] Workflow builder Stimulus (drag-and-drop)
 
 ### Phase 5 — Jobs & Notifications (3 jours)
-- [ ] `NotificationJob` + `NotificationMailer`
-- [ ] `PdfConversionJob` (avec fix sécurité LibreOffice)
-- [ ] Jobs récurrents (reminders, cleanup SharedLinks)
+- [x] `NotificationJob` + `NotificationMailer`
+- [x] `PdfConversionJob` (avec fix sécurité LibreOffice)
+- [x] Jobs récurrents (reminders, cleanup SharedLinks)
 
 ### Phase 6 — Tests système & Finalisation (3 jours)
 - [ ] Tests système Capybara (golden path + edge cases)

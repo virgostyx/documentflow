@@ -29,13 +29,7 @@
       <%= render Ui::EmptyStateComponent.new(
         title: "No documents found",
         description: "Create a document to start a validation workflow."
-      ) do |empty_state| %>
-        <% if policy(current_entity.documents.new).create? %>
-          <% empty_state.with_action do %>
-            <%= render(Ui::ButtonComponent.new(href: new_entity_document_path(current_entity))) { "New document" } %>
-          <% end %>
-        <% end %>
-      <% end %>
+      ) %>
     <% end %>
   <% end %>
 </div>

@@ -2,6 +2,8 @@
 
 module Ui
   class PageHeaderComponent < ViewComponent::Base
+    renders_one :actions
+
     attr_reader :title, :description, :back_path, :back_text
 
     def initialize(title:, description: nil, back_path: nil, back_text: "Back")

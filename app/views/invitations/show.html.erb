@@ -1,0 +1,60 @@
+<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+  <div class="w-full max-w-md">
+    <%= render Ui::CardComponent.new do %>
+      <div class="p-8 text-center">
+        <div class="mx-auto h-16 w-16 rounded-full bg-primary-100 flex items-center justify-center mb-6">
+          <svg class="h-8 w-8 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">You've been invited</h1>
+
+        <p class="text-gray-600 mb-1">
+          Join <strong><%= @entity_user.entity.name %></strong> as a
+          <strong><%= @entity_user.role %></strong>.
+        </p>
+
+        <% if @entity_user.invited_by.present? %>
+          <p class="text-sm text-gray-500 mb-6">Invited by <%= @entity_user.invited_by.email %></p>
+        <% else %>
+          <div class="mb-6"></div>
+        <% end %>
+
+        <% if user_signed_in? %>
+          <p class="text-sm text-gray-500 mb-4">
+            You are signed in as <strong><%= current_user.email %></strong>.
+            This invitation was sent to <strong><%= @entity_user.invited_email %></strong>.
+          </p>
+
+          <%= render Ui::ButtonComponent.new(
+            href: destroy_user_session_path,
+            variant: :primary,
+            method: :delete
+          ) do %>
+            Sign out
+          <% end %>
+        <% else %>
+          <p class="text-sm text-gray-500 mb-6">
+            This invitation was sent to <strong><%= @entity_user.invited_email %></strong>.
+            Create an account or sign in to accept.
+          </p>
+
+          <div class="space-y-3">
+            <%= render Ui::ButtonComponent.new(
+              href: invitation_register_path(@entity_user.invitation_token),
+              variant: :primary
+            ) do %>
+              Set up my account
+            <% end %>
+
+            <p class="text-sm text-gray-500">
+              Already have an account?
+              <%= link_to "Sign in", new_user_session_path, class: "text-primary-600 hover:text-primary-500 font-medium" %>
+            </p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

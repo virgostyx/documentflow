@@ -22,5 +22,9 @@ RSpec.describe InvitationMailer do
       expect(mail.body.encoded).to include(entity.name)
       expect(mail.body.encoded).to include(entity_user.role)
     end
+
+    it "includes a link to accept the invitation" do
+      expect(mail.body.encoded).to include(entity_user.invitation_token)
+    end
   end
 end

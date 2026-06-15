@@ -1,0 +1,26 @@
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Reference", "reference_number") %></th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Subject", "subject") %></th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sender &rarr; Addressee</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Date", "document_date") %></th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Status", "status") %></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% documents.each do |document| %>
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="px-4 py-3">
+            <%= link_to document.reference_number, entity_document_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800" %>
+          </td>
+          <td class="px-4 py-3 text-gray-900"><%= document.subject %></td>
+          <td class="px-4 py-3 text-gray-500"><%= document.sender&.full_name %> &rarr; <%= document.addressee&.full_name %></td>
+          <td class="px-4 py-3 text-gray-500"><%= l(document.document_date) %></td>
+          <td class="px-4 py-3"><%= render Documents::DocumentStatusBadgeComponent.new(status: document.status) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

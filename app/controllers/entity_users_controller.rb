@@ -6,7 +6,7 @@ class EntityUsersController < ApplicationController
   before_action :set_entity_user, only: %i[update destroy]
 
   def index
-    @entity_users = current_entity.entity_users.includes(:user).order(:role)
+    redirect_to entity_settings_path(current_entity)
   end
 
   def create
@@ -20,9 +20,9 @@ class EntityUsersController < ApplicationController
     )
 
     if result.success?
-      redirect_to entity_entity_users_path(current_entity), notice: "Invitation sent successfully."
+      redirect_to entity_settings_path(current_entity), notice: "Invitation sent successfully."
     else
-      redirect_to entity_entity_users_path(current_entity), alert: result.message
+      redirect_to entity_settings_path(current_entity), alert: result.message
     end
   end
 
@@ -30,9 +30,9 @@ class EntityUsersController < ApplicationController
     authorize current_entity, :manage_members?
 
     if @entity_user.update(role: entity_user_params[:role])
-      redirect_to entity_entity_users_path(current_entity), notice: "Member role updated successfully."
+      redirect_to entity_settings_path(current_entity), notice: "Member role updated successfully."
     else
-      redirect_to entity_entity_users_path(current_entity), alert: @entity_user.errors.full_messages.to_sentence
+      redirect_to entity_settings_path(current_entity), alert: @entity_user.errors.full_messages.to_sentence
     end
   end
 
@@ -40,7 +40,7 @@ class EntityUsersController < ApplicationController
     authorize current_entity, :manage_members?
 
     @entity_user.destroy
-    redirect_to entity_entity_users_path(current_entity), notice: "Member removed successfully."
+    redirect_to entity_settings_path(current_entity), notice: "Member removed successfully."
   end
 
   private

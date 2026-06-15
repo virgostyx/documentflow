@@ -28,8 +28,12 @@ Rails.application.routes.draw do
       end
       collection do
         get :search
+        get :mine
+        get :received
       end
     end
+
+    resource :settings, only: %i[show], controller: "entities/settings"
   end
 
   # Public access to a shared document (no authentication)

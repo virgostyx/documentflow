@@ -47,6 +47,52 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).to include(document.subject)
         expect(response.body).not_to include(other.subject)
       end
+
+      it "renders documents in a table with sortable column headers" do
+        get entity_documents_path(entity)
+
+        expect(response.body).to include("<table")
+        expect(response.body).to include("sort=reference_number")
+        expect(response.body).to include("sort=subject")
+        expect(response.body).to include("sort=document_date")
+        expect(response.body).to include("sort=status")
+      end
+
+      it "sorts documents by document date, most recent first, by default" do
+        older = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Older contract", document_date: 5.days.ago.to_date)
+        newer = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Newer contract", document_date: Date.current)
+
+        get entity_documents_path(entity)
+
+        expect(response.body.index(newer.subject)).to be < response.body.index(older.subject)
+      end
+
+      it "sorts by an explicit column and direction" do
+        alpha = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Alpha contract")
+        beta = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Beta contract")
+
+        get entity_documents_path(entity), params: { sort: "subject", direction: "asc" }
+
+        expect(response.body.index(alpha.subject)).to be < response.body.index(beta.subject)
+      end
+
+      it "filters by status" do
+        in_progress = create(:document, :in_progress, entity: entity, sender: sender, addressee: addressee, subject: "In progress contract")
+
+        get entity_documents_path(entity), params: { status: "in_progress" }
+
+        expect(response.body).to include(in_progress.subject)
+        expect(response.body).not_to include(document.subject)
+      end
+
+      it "paginates the results" do
+        allow(Kaminari.config).to receive(:default_per_page).and_return(1)
+        create_list(:document, 2, entity: entity, sender: sender, addressee: addressee)
+
+        get entity_documents_path(entity)
+
+        expect(response.body).to include("page=2")
+      end
     end
 
     context "when the user is not a member of the entity" do
@@ -58,6 +104,44 @@ RSpec.describe "Documents", type: :request do
         expect(response).to redirect_to(dashboard_path)
         expect(flash[:alert]).to be_present
       end
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/mine" do
+    let!(:mine) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "My contract", created_by: user) }
+    let!(:others_document) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Colleague's contract") }
+
+    before do
+      create(:entity_user, entity: entity, user: user)
+      sign_in user
+    end
+
+    it "lists only documents created by the current user" do
+      get mine_entity_documents_path(entity)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(mine.subject)
+      expect(response.body).not_to include(others_document.subject)
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/received" do
+    let!(:received) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Routed to me") }
+    let!(:not_received) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Not routed to me") }
+
+    before do
+      create(:entity_user, entity: entity, user: user)
+      create(:workflow_step, document: received, actor: user, status: "approved")
+      create(:workflow_step, document: not_received, actor: create(:user))
+      sign_in user
+    end
+
+    it "lists only documents where the current user is an actor on a workflow step, regardless of status" do
+      get received_entity_documents_path(entity)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(received.subject)
+      expect(response.body).not_to include(not_received.subject)
     end
   end
 
@@ -80,6 +164,27 @@ RSpec.describe "Documents", type: :request do
       get search_entity_documents_path(entity), params: { q: "Supplier" }
 
       expect(response.body).to include('<turbo-frame id="documents_list"')
+    end
+
+    it "re-applies the 'mine' scope when searching" do
+      mine = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Mine supplier deal", created_by: user)
+      other = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Other supplier deal")
+
+      get search_entity_documents_path(entity), params: { q: "supplier", scope: "mine" }
+
+      expect(response.body).to include(mine.subject)
+      expect(response.body).not_to include(other.subject)
+    end
+
+    it "re-applies the 'received' scope when searching" do
+      received = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Received supplier deal")
+      other = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Other supplier deal")
+      create(:workflow_step, document: received, actor: user)
+
+      get search_entity_documents_path(entity), params: { q: "supplier", scope: "received" }
+
+      expect(response.body).to include(received.subject)
+      expect(response.body).not_to include(other.subject)
     end
   end
 

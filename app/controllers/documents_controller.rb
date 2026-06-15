@@ -8,11 +8,25 @@ class DocumentsController < ApplicationController
   before_action :set_entity_members, only: %i[new create edit update]
 
   def index
-    @documents = load_documents
+    @list_scope = "all"
+    @documents = load_documents(base_scope)
+  end
+
+  def mine
+    @list_scope = "mine"
+    @documents = load_documents(base_scope.authored_by(current_user))
+    render :index
+  end
+
+  def received
+    @list_scope = "received"
+    @documents = load_documents(base_scope.received_by(current_user))
+    render :index
   end
 
   def search
-    @documents = load_documents
+    @list_scope = params[:scope].presence || "all"
+    @documents = load_documents(scoped_base_for(@list_scope))
     render :index
   end
 
@@ -100,13 +114,23 @@ class DocumentsController < ApplicationController
     @entity_members = current_entity.users.merge(EntityUser.active).order(:email)
   end
 
-  def load_documents
-    documents = policy_scope(Document)
-                  .where(entity: current_entity)
-                  .includes(:sender, :addressee, :created_by)
-                  .order(created_at: :desc)
+  def base_scope
+    policy_scope(Document).where(entity: current_entity)
+  end
+
+  def scoped_base_for(list_scope)
+    case list_scope
+    when "mine" then base_scope.authored_by(current_user)
+    when "received" then base_scope.received_by(current_user)
+    else base_scope
+    end
+  end
+
+  def load_documents(scope)
+    documents = scope.includes(:sender, :addressee, :created_by)
+    documents = documents.with_status(params[:status])
     documents = documents.where("subject ILIKE :q OR reference_number ILIKE :q", q: "%#{params[:q]}%") if params[:q].present?
-    documents
+    documents.sorted(params[:sort], params[:direction]).page(params[:page])
   end
 
   def document_params

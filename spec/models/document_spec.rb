@@ -161,4 +161,80 @@ RSpec.describe Document, type: :model do
       expect(document.frozen?).to be false
     end
   end
+
+  # ── Scopes ────────────────────────────────────────────────────────────────
+
+  describe ".authored_by" do
+    it "returns documents created by the given user" do
+      author = create(:user)
+      other = create(:user)
+      mine = create(:document, entity: entity, created_by: author)
+      create(:document, entity: entity, created_by: other)
+
+      expect(Document.authored_by(author)).to contain_exactly(mine)
+    end
+  end
+
+  describe ".received_by" do
+    it "returns documents where the user is an actor on any workflow step, regardless of status" do
+      user = create(:user)
+      received = create(:document, entity: entity)
+      create(:workflow_step, document: received, actor: user, status: "approved")
+
+      not_received = create(:document, entity: entity)
+      create(:workflow_step, document: not_received, actor: create(:user))
+
+      expect(Document.received_by(user)).to contain_exactly(received)
+    end
+
+    it "does not return duplicate rows for a document with multiple steps assigned to the same user" do
+      user = create(:user)
+      document = create(:document, entity: entity)
+      create(:workflow_step, document: document, actor: user, role: "RED", order: 1)
+      create(:workflow_step, document: document, actor: user, role: "VISA", order: 2)
+
+      expect(Document.received_by(user)).to contain_exactly(document)
+    end
+  end
+
+  describe ".with_status" do
+    it "filters by status when present" do
+      draft = create(:document, entity: entity, status: "draft")
+      create(:document, :in_progress, entity: entity)
+
+      expect(Document.where(entity: entity).with_status("draft")).to contain_exactly(draft)
+    end
+
+    it "returns all documents when status is blank" do
+      a = create(:document, entity: entity, status: "draft")
+      b = create(:document, :in_progress, entity: entity)
+
+      expect(Document.where(entity: entity).with_status(nil)).to contain_exactly(a, b)
+      expect(Document.where(entity: entity).with_status("")).to contain_exactly(a, b)
+    end
+  end
+
+  describe ".sorted" do
+    it "defaults to document_date desc with created_at desc as a tiebreaker" do
+      older = create(:document, entity: entity, document_date: Date.new(2025, 1, 1))
+      newer = create(:document, entity: entity, document_date: Date.new(2025, 6, 1))
+
+      expect(Document.where(entity: entity).sorted(nil, nil)).to eq([ newer, older ])
+    end
+
+    it "sorts by an explicit sortable column and direction" do
+      a = create(:document, entity: entity, subject: "Alpha")
+      b = create(:document, entity: entity, subject: "Beta")
+
+      expect(Document.where(entity: entity).sorted("subject", "asc")).to eq([ a, b ])
+      expect(Document.where(entity: entity).sorted("subject", "desc")).to eq([ b, a ])
+    end
+
+    it "falls back to the default column for an unknown column while respecting the given direction" do
+      older = create(:document, entity: entity, document_date: Date.new(2025, 1, 1))
+      newer = create(:document, entity: entity, document_date: Date.new(2025, 6, 1))
+
+      expect(Document.where(entity: entity).sorted("not_a_column", "asc")).to eq([ older, newer ])
+    end
+  end
 end

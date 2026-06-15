@@ -96,11 +96,10 @@ RSpec.describe "Entities", type: :request do
         sign_in user
       end
 
-      it "shows the entity" do
+      it "redirects to the documents overview" do
         get entity_path(entity)
 
-        expect(response).to have_http_status(:ok)
-        expect(response.body).to include(entity.name)
+        expect(response).to redirect_to(entity_documents_path(entity))
       end
     end
 
@@ -160,7 +159,7 @@ RSpec.describe "Entities", type: :request do
         patch entity_path(entity), params: { entity: { name: "New Name" } }
 
         expect(entity.reload.name).to eq("New Name")
-        expect(response).to redirect_to(entity_path(entity))
+        expect(response).to redirect_to(entity_settings_path(entity))
       end
     end
 

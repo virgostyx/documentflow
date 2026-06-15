@@ -4,6 +4,8 @@ module EntityScoped
   extend ActiveSupport::Concern
 
   included do
+    layout "entity"
+
     before_action :set_current_entity
     before_action :authorize_entity_access!
     helper_method :current_entity

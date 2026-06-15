@@ -5,6 +5,16 @@ class Document < ApplicationRecord
 
   STATUSES = %w[draft in_progress signed finalized cancelled].freeze
 
+  SORTABLE_COLUMNS = {
+    "reference_number" => "documents.reference_number",
+    "subject"          => "documents.subject",
+    "document_date"    => "documents.document_date",
+    "status"           => "documents.status",
+    "created_at"       => "documents.created_at"
+  }.freeze
+  DEFAULT_SORT_COLUMN = "document_date"
+  DEFAULT_SORT_DIRECTION = "desc"
+
   # Associations
   belongs_to :entity
   belongs_to :created_by, class_name: "User"
@@ -23,6 +33,16 @@ class Document < ApplicationRecord
   validates :status, presence: true, inclusion: { in: STATUSES }
   validate :sender_belongs_to_entity
   validate :addressee_belongs_to_entity
+
+  # Scopes
+  scope :authored_by, ->(user) { where(created_by: user) }
+  scope :received_by, ->(user) { joins(:workflow_steps).where(workflow_steps: { actor_id: user.id }).distinct }
+  scope :with_status, ->(status) { status.present? ? where(status: status) : all }
+  scope :sorted, ->(column, direction) {
+    col = SORTABLE_COLUMNS.fetch(column.to_s, SORTABLE_COLUMNS[DEFAULT_SORT_COLUMN])
+    dir = %w[asc desc].include?(direction.to_s) ? direction.to_s : DEFAULT_SORT_DIRECTION
+    order(Arel.sql("#{col} #{dir}, documents.created_at #{dir}"))
+  }
 
   # Callbacks
   before_validation :generate_reference_number, on: :create

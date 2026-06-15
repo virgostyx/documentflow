@@ -1,0 +1,23 @@
+<% if total_pages > 1 %>
+  <% current = current_page.to_i %>
+  <nav class="flex items-center justify-center gap-1" aria-label="Pagination">
+    <% if current > 1 %>
+      <%= link_to "Previous", "#{request.path}?#{request.query_parameters.merge(page: current - 1).to_query}",
+            class: "px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-primary-600 rounded-md hover:bg-gray-100 transition-colors" %>
+    <% end %>
+
+    <% (1..total_pages).each do |page| %>
+      <% if page == current %>
+        <span class="px-3 py-1.5 text-sm font-medium text-white bg-primary-600 rounded-md"><%= page %></span>
+      <% else %>
+        <%= link_to page, "#{request.path}?#{request.query_parameters.merge(page: page).to_query}",
+              class: "px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-primary-600 rounded-md hover:bg-gray-100 transition-colors" %>
+      <% end %>
+    <% end %>
+
+    <% if current < total_pages %>
+      <%= link_to "Next", "#{request.path}?#{request.query_parameters.merge(page: current + 1).to_query}",
+            class: "px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-primary-600 rounded-md hover:bg-gray-100 transition-colors" %>
+    <% end %>
+  </nav>
+<% end %>

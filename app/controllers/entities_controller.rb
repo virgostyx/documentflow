@@ -9,6 +9,7 @@ class EntitiesController < ApplicationController
 
   def show
     authorize @entity
+    redirect_to entity_documents_path(@entity)
   end
 
   def new
@@ -38,7 +39,7 @@ class EntitiesController < ApplicationController
     authorize @entity
 
     if @entity.update(entity_params)
-      redirect_to entity_path(@entity), notice: "Entity updated successfully."
+      redirect_to entity_settings_path(@entity), notice: "Entity updated successfully."
     else
       flash.now[:alert] = @entity.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_content

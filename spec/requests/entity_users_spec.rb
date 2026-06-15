@@ -45,12 +45,10 @@ RSpec.describe "EntityUsers", type: :request do
     context "when the user is an active member of the entity" do
       before { sign_in member_user }
 
-      it "lists the members" do
+      it "redirects to entity settings" do
         get entity_entity_users_path(entity)
 
-        expect(response).to have_http_status(:ok)
-        expect(response.body).to include(owner.email)
-        expect(response.body).to include(member_user.email)
+        expect(response).to redirect_to(entity_settings_path(entity))
       end
     end
   end
@@ -70,10 +68,10 @@ RSpec.describe "EntityUsers", type: :request do
         expect(invitation).to be_pending
       end
 
-      it "redirects back to the members page" do
+      it "redirects back to entity settings" do
         post entity_entity_users_path(entity), params: invite_params
 
-        expect(response).to redirect_to(entity_entity_users_path(entity))
+        expect(response).to redirect_to(entity_settings_path(entity))
         expect(flash[:notice]).to be_present
       end
     end
@@ -99,7 +97,7 @@ RSpec.describe "EntityUsers", type: :request do
         patch entity_entity_user_path(entity, member_membership), params: { entity_user: { role: "admin" } }
 
         expect(member_membership.reload.role).to eq("admin")
-        expect(response).to redirect_to(entity_entity_users_path(entity))
+        expect(response).to redirect_to(entity_settings_path(entity))
       end
     end
 
@@ -124,7 +122,7 @@ RSpec.describe "EntityUsers", type: :request do
           delete entity_entity_user_path(entity, member_membership)
         }.to change(EntityUser, :count).by(-1)
 
-        expect(response).to redirect_to(entity_entity_users_path(entity))
+        expect(response).to redirect_to(entity_settings_path(entity))
       end
     end
 

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "DocumentFlow" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="DocumentFlow">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="min-h-screen bg-gray-50 flex font-sans antialiased">
+    <%= render Entities::SidebarComponent.new(current_entity: current_entity, current_user: current_user) %>
+
+    <div class="flex-1 flex flex-col min-h-screen">
+      <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-20">
+        <div class="flex items-center text-sm">
+          <%= yield :breadcrumb %>
+        </div>
+        <div class="flex items-center gap-2">
+          <%= yield :actions %>
+        </div>
+      </header>
+
+      <%= render "shared/flash" %>
+
+      <main class="flex-1 p-6">
+        <%= yield %>
+      </main>
+    </div>
+  </body>
+</html>

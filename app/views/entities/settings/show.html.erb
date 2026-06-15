@@ -1,0 +1,54 @@
+<% content_for :breadcrumb do %>
+  <%= render Ui::BreadcrumbsComponent.new(items: [ { label: "Settings" } ]) %>
+<% end %>
+
+<% content_for :actions do %>
+  <% if policy(current_entity).update? %>
+    <%= render(Ui::ButtonComponent.new(href: edit_entity_path(current_entity), variant: :secondary)) { "Edit entity" } %>
+  <% end %>
+  <% if policy(current_entity).destroy? %>
+    <%= render(Ui::ButtonComponent.new(
+      href: entity_path(current_entity), variant: :danger, method: :delete,
+      data: { turbo_confirm: "Are you sure you want to delete this entity? This cannot be undone." }
+    )) { "Delete entity" } %>
+  <% end %>
+<% end %>
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-900"><%= current_entity.name %></h1>
+  <p class="mt-1 text-gray-600"><%= current_entity.code %></p>
+</div>
+
+<% if policy(current_entity).manage_members? %>
+  <%= render Ui::CardComponent.new do |card| %>
+    <% card.with_header { "Invite a member" } %>
+
+    <%= form_with url: entity_entity_users_path(current_entity), method: :post, local: true do |f| %>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <%= f.email_field :"entity_user[invited_email]",
+                          placeholder: "Email address",
+                          required: true,
+                          class: "flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+        <%= f.select :"entity_user[role]", EntityUser::ROLES.map { |role| [ role.titleize, role ] }, { selected: "member" },
+                     class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+        <%= render(Ui::ButtonComponent.new) { "Invite" } %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <div class="mt-6"></div>
+<% end %>
+
+<%= render Ui::CardComponent.new do |card| %>
+  <% card.with_header { "All members" } %>
+
+  <% if @entity_users.any? %>
+    <ul class="divide-y divide-gray-100">
+      <% @entity_users.each do |entity_user| %>
+        <%= render Entities::MemberRowComponent.new(entity_user: entity_user, current_user: current_user, entity: current_entity) %>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-gray-600">No members yet.</p>
+  <% end %>
+<% end %>

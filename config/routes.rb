@@ -39,6 +39,11 @@ Rails.application.routes.draw do
   # Public access to a shared document (no authentication)
   get "share/:token", to: "shared_links#show", as: :shared_document
 
+  # Public invitation acceptance (token-based, no authentication required)
+  get  "/invitations/:token",          to: "invitations#show",           as: :invitation
+  get  "/invitations/:token/register", to: "invitations#register",       as: :invitation_register
+  post "/invitations/:token/register", to: "invitations#create_account", as: :invitation_create_account
+
   # Global dashboard (list of the user's entities)
   get "dashboard", to: "dashboard#index"
 end

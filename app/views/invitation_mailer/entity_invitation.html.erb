@@ -1,0 +1,11 @@
+<p>Hello,</p>
+
+<p>
+  <%= @inviter&.email || "An administrator" %> invites you to join
+  <strong><%= @entity.name %></strong> on DocumentFlow with the role
+  <strong><%= @entity_user.role %></strong>.
+</p>
+
+<p><%= link_to "Accept invitation", @accept_url %></p>
+
+<p>If you weren't expecting this invitation, you can safely ignore this email.</p>

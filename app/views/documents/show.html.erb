@@ -30,6 +30,12 @@
     <% end %>
   </div>
 
+  <% if policy(@document).launch? && !@document.main_file.attached? %>
+    <p class="mb-4 text-sm text-warning-700 bg-warning-50 border border-warning-100 rounded-md px-4 py-2">
+      A main document must be attached before this document can be launched.
+    </p>
+  <% end %>
+
   <%= render Ui::CardComponent.new do |card| %>
     <% card.with_header { render(Documents::DocumentStatusBadgeComponent.new(status: @document.status)) } %>
 
@@ -46,10 +52,59 @@
 
   <div class="mt-6">
     <%= render Ui::CardComponent.new do |card| %>
-      <% card.with_header { "Attached files" } %>
-      <%= render Documents::FileListComponent.new(document: @document) %>
+      <% card.with_header { "Main document" } %>
+      <%= render Documents::MainFileComponent.new(document: @document, current_user: current_user) %>
     <% end %>
   </div>
+
+  <div class="mt-6">
+    <%= render Ui::CardComponent.new do |card| %>
+      <% card.with_header { "Annexes" } %>
+      <%= render Documents::AnnexListComponent.new(document: @document, current_user: current_user) %>
+    <% end %>
+  </div>
+
+  <% new_cc_recipient = CcRecipient.new(document: @document) %>
+  <% if policy(new_cc_recipient).create? || @document.cc_recipients.any? %>
+    <div class="mt-6">
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header { "Copy" } %>
+
+        <% if @document.cc_recipients.any? %>
+          <ul class="divide-y divide-gray-100">
+            <% @document.cc_recipients.each do |cc_recipient| %>
+              <li class="py-3 flex items-center justify-between gap-4">
+                <p class="text-sm text-gray-900">
+                  <%= cc_recipient.party&.display_name %> <%= party_badge(cc_recipient.party) %>
+                </p>
+                <% if policy(cc_recipient).destroy? %>
+                  <%= render(Ui::ButtonComponent.new(
+                    href: entity_document_cc_recipient_path(current_entity, @document, cc_recipient), variant: :danger, method: :delete,
+                    data: { turbo_confirm: "Remove this recipient from the copy list?" }
+                  )) { "Remove" } %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-sm text-gray-500">No one is in copy on this document yet.</p>
+        <% end %>
+
+        <% if policy(new_cc_recipient).create? %>
+          <%= form_with model: [ current_entity, @document, new_cc_recipient ],
+                        builder: FloatingLabelsRails::FormBuilder, local: true, class: "mt-4 flex items-end gap-3" do |f| %>
+            <div class="flex-1">
+              <%= render(Documents::PartyPickerComponent.new(
+                form: f, attribute: :party_token, entity: current_entity,
+                label: "Add to copy", required: true, include_blank: "Select a person..."
+              )) %>
+            </div>
+            <%= render(Ui::ButtonComponent.new(variant: :secondary)) { "Add" } %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
 
   <% if policy(@document.shared_links.new).create? || @document.shared_links.active.any? %>
     <div class="mt-6">

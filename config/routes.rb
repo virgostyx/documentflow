@@ -12,15 +12,24 @@ Rails.application.routes.draw do
   resources :entities do
     resources :entity_users, only: %i[index create update destroy]
     resources :contacts
+    resources :circuit_templates, controller: "entities/circuit_templates"
 
     resources :documents do
-      resources :workflow_steps, only: [] do
+      resources :workflow_steps, only: %i[create update destroy] do
         member do
           post :approve
           post :reject
+          post :move_up
+          post :move_down
+        end
+        collection do
+          post :apply_template
         end
       end
       resources :shared_links, only: %i[create destroy]
+      resources :cc_recipients, only: %i[create destroy]
+      resource :main_file, only: %i[create destroy]
+      resources :annexes, only: %i[create destroy]
 
       member do
         post :launch

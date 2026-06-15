@@ -113,6 +113,62 @@ RSpec.describe "Contacts", type: :request do
     end
   end
 
+  describe "POST /entities/:entity_id/contacts as turbo_stream (party picker)" do
+    before do
+      create(:entity_user, :admin, entity: entity, user: user)
+      sign_in user
+    end
+
+    context "with valid params" do
+      let(:contact_params) do
+        { picker_id: "document_sender_token", contact: { first_name: "Marie", last_name: "Martin", email: "marie@example.com" } }
+      end
+
+      it "creates the contact" do
+        expect {
+          post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
+        }.to change(entity.contacts, :count).by(1)
+      end
+
+      it "appends the new contact as a selected option in the picker's select" do
+        post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
+
+        new_contact = entity.contacts.last
+        expect(response.body).to include(%(target="document_sender_token"))
+        expect(response.body).to include(%(value="Contact-#{new_contact.id}" selected))
+        expect(response.body).to include(new_contact.display_name)
+      end
+
+      it "closes the quick contact form" do
+        post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
+
+        expect(response.body).to include(%(target="document_sender_token_new_contact"))
+        expect(response.body).to include("hidden")
+      end
+    end
+
+    context "with invalid params" do
+      let(:contact_params) do
+        { picker_id: "document_sender_token", contact: { first_name: "", last_name: "Martin", email: "not-an-email" } }
+      end
+
+      it "does not create the contact" do
+        expect {
+          post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
+        }.not_to change(Contact, :count)
+      end
+
+      it "re-renders the quick contact form with errors, left open" do
+        post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include(%(target="document_sender_token_new_contact"))
+        expect(response.body).not_to include(%(action="append"))
+        expect(response.body).to include("can&#39;t be blank")
+      end
+    end
+  end
+
   describe "GET /entities/:entity_id/contacts/:id/edit" do
     let!(:contact) { create(:contact, entity: entity) }
 

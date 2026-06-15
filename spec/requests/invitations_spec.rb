@@ -89,7 +89,12 @@ RSpec.describe "Invitations", type: :request do
 
   describe "POST /invitations/:token/register" do
     let(:valid_params) do
-      { user: { password: "Password123!", password_confirmation: "Password123!" } }
+      {
+        user: {
+          first_name: "Jean", last_name: "Dupont",
+          password: "Password123!", password_confirmation: "Password123!"
+        }
+      }
     end
 
     it "creates the user, signs them in, and accepts the invitation" do
@@ -106,7 +111,12 @@ RSpec.describe "Invitations", type: :request do
 
     context "with invalid password confirmation" do
       let(:invalid_params) do
-        { user: { password: "Password123!", password_confirmation: "Mismatch123!" } }
+        {
+          user: {
+            first_name: "Jean", last_name: "Dupont",
+            password: "Password123!", password_confirmation: "Mismatch123!"
+          }
+        }
       end
 
       it "re-renders the registration form with errors" do

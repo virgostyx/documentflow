@@ -7,10 +7,32 @@
     <div class="flex items-center gap-2">
       <p class="font-medium text-gray-900"><%= step.role %></p>
       <%= render(Ui::BadgeComponent.new(color: status_color)) { step.status.titleize } %>
+      <% if step.parallel? %>
+        <%= render(Ui::BadgeComponent.new(color: :gray)) { "Parallel group #{step.parallel_group}" } %>
+      <% end %>
     </div>
     <p class="text-sm text-gray-600"><%= step.actor&.email || "Unassigned" %></p>
     <% if step.comment.present? %>
       <p class="mt-1 text-sm text-gray-500 italic">&ldquo;<%= step.comment %>&rdquo;</p>
     <% end %>
   </div>
+
+  <% if manageable? %>
+    <div class="flex items-center gap-2">
+      <% unless first? %>
+        <%= render(Ui::ButtonComponent.new(
+          href: move_up_entity_document_workflow_step_path(step.document.entity, step.document, step), variant: :secondary, method: :post
+        )) { "Move up" } %>
+      <% end %>
+      <% unless last? %>
+        <%= render(Ui::ButtonComponent.new(
+          href: move_down_entity_document_workflow_step_path(step.document.entity, step.document, step), variant: :secondary, method: :post
+        )) { "Move down" } %>
+      <% end %>
+      <%= render(Ui::ButtonComponent.new(
+        href: entity_document_workflow_step_path(step.document.entity, step.document, step), variant: :danger, method: :delete,
+        data: { turbo_confirm: "Remove this step from the circuit?" }
+      )) { "Remove" } %>
+    </div>
+  <% end %>
 </div>

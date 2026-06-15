@@ -54,6 +54,20 @@ RSpec.describe Documents::LaunchOrganizer do
       end
     end
 
+    context "quand le document n'a pas de document principal" do
+      let(:document) do
+        create(:document, :with_workflow, created_by: user).tap { |doc| doc.main_file.purge }
+      end
+
+      it "retourne un échec explicite et ne change pas le statut" do
+        result = described_class.call(document: document, current_user: user)
+
+        expect(result).not_to be_success
+        expect(result.message).to include("main document")
+        expect(document.reload.status).to eq("draft")
+      end
+    end
+
     context "quand le document n'est pas en draft" do
       let(:document) { create(:document, :with_workflow, :in_progress, created_by: user) }
 

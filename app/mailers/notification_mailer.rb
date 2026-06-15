@@ -17,4 +17,12 @@ class NotificationMailer < ApplicationMailer
 
     mail(to: user.email, subject: "Document rejected: #{document.reference_number}")
   end
+
+  def cc_notification(recipient_email, recipient_name, document)
+    @recipient_name = recipient_name
+    @document = document
+    @document_url = entity_document_url(document.entity, document)
+
+    mail(to: recipient_email, subject: "Document finalized: #{document.reference_number}")
+  end
 end

@@ -32,6 +32,8 @@ class InvitationsController < ApplicationController
 
     @user = User.new(
       email: @entity_user.invited_email,
+      first_name: account_params[:first_name],
+      last_name: account_params[:last_name],
       password: account_params[:password],
       password_confirmation: account_params[:password_confirmation]
     )
@@ -66,6 +68,6 @@ class InvitationsController < ApplicationController
   end
 
   def account_params
-    params.require(:user).permit(:password, :password_confirmation)
+    params.require(:user).permit(:first_name, :last_name, :password, :password_confirmation)
   end
 end

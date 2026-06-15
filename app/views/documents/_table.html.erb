@@ -16,7 +16,7 @@
             <%= link_to document.reference_number, entity_document_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800" %>
           </td>
           <td class="px-4 py-3 text-gray-900"><%= document.subject %></td>
-          <td class="px-4 py-3 text-gray-500"><%= document.sender&.full_name %> &rarr; <%= document.addressee&.full_name %></td>
+          <td class="px-4 py-3 text-gray-500"><%= document.sender&.display_name %> &rarr; <%= document.addressee&.display_name %></td>
           <td class="px-4 py-3 text-gray-500"><%= l(document.document_date) %></td>
           <td class="px-4 py-3"><%= render Documents::DocumentStatusBadgeComponent.new(status: document.status) %></td>
         </tr>

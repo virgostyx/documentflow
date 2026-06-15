@@ -33,6 +33,20 @@ RSpec.describe Documents::FinalizeOrganizer do
           described_class.call(document: document, current_user: user)
         }.to change(AuditLog, :count).by(1)
       end
+
+      context "when the document has cc recipients" do
+        let(:contact) { create(:contact, entity: document.entity) }
+
+        before do
+          create(:cc_recipient, document: document, party: contact)
+        end
+
+        it "notifies each cc recipient" do
+          expect(CcNotificationJob).to receive(:perform_later).with("Contact", contact.id, document.id)
+
+          described_class.call(document: document, current_user: user)
+        end
+      end
     end
 
     context "quand le document n'est pas signé" do

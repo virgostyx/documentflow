@@ -8,41 +8,16 @@
   <%= f.floating_text_field :subject, label: "Subject", required: true, autofocus: true, placeholder: " " %>
   <%= f.floating_date_field :document_date, label: "Document date", required: true, placeholder: " " %>
 
-  <%= f.floating_collection_select :sender_id, @contacts, :id, :full_name,
-                                   { label: "Sender", include_blank: "Select a sender..." },
-                                   { required: true } %>
-  <%= f.floating_collection_select :addressee_id, @contacts, :id, :full_name,
-                                   { label: "Addressee", include_blank: "Select an addressee..." },
-                                   { required: true } %>
-
-  <%= f.file_field :files, multiple: true,
-                   class: "mt-4 block w-full text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
-
-  <% if document.draft? %>
-    <div class="mt-6 border-t border-gray-200 pt-6" data-controller="workflow-builder">
-      <h3 class="text-sm font-medium text-gray-900">Validation circuit</h3>
-      <p class="mt-1 text-sm text-gray-500">
-        Define the sequence of approval steps this document must go through before it can be launched. Drag steps to reorder them.
-      </p>
-
-      <div data-workflow-builder-target="steps" class="mt-4 space-y-3">
-        <%= f.fields_for :workflow_steps do |step_form| %>
-          <%= render "workflow_step_fields", f: step_form %>
-        <% end %>
-      </div>
-
-      <template data-workflow-builder-target="template">
-        <%= f.fields_for :workflow_steps, WorkflowStep.new, child_index: "NEW_RECORD" do |step_form| %>
-          <%= render "workflow_step_fields", f: step_form %>
-        <% end %>
-      </template>
-
-      <button type="button" data-action="workflow-builder#addStep"
-              class="mt-3 text-sm font-medium text-primary-600 hover:text-primary-700">
-        + Add step
-      </button>
-    </div>
-  <% end %>
+  <%= render(Documents::PartyPickerComponent.new(
+    form: f, attribute: :sender_token, entity: current_entity,
+    label: "Sender", required: true, include_blank: "Select a sender...",
+    selected: document.sender_token
+  )) %>
+  <%= render(Documents::PartyPickerComponent.new(
+    form: f, attribute: :addressee_token, entity: current_entity,
+    label: "Addressee", required: true, include_blank: "Select an addressee...",
+    selected: document.addressee_token
+  )) %>
 
   <div class="mt-6 flex justify-end gap-3">
     <%= render(Ui::ButtonComponent.new(

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_07_115532) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_15_140100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -59,6 +59,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_115532) do
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
   end
 
+  create_table "cc_recipients", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "document_id", null: false
+    t.bigint "party_id", null: false
+    t.string "party_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_id", "party_type", "party_id"], name: "index_cc_recipients_unique", unique: true
+    t.index ["document_id"], name: "index_cc_recipients_on_document_id"
+    t.index ["party_type", "party_id"], name: "index_cc_recipients_on_party_type_and_party_id"
+  end
+
+  create_table "circuit_template_steps", force: :cascade do |t|
+    t.bigint "actor_id"
+    t.bigint "circuit_template_id", null: false
+    t.datetime "created_at", null: false
+    t.boolean "is_parallel", default: false, null: false
+    t.integer "order", null: false
+    t.integer "parallel_group"
+    t.string "role", null: false
+    t.datetime "updated_at", null: false
+    t.index ["circuit_template_id", "order"], name: "index_circuit_template_steps_on_circuit_template_id_and_order", unique: true
+    t.index ["circuit_template_id"], name: "index_circuit_template_steps_on_circuit_template_id"
+  end
+
+  create_table "circuit_templates", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "entity_id", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_id", "name"], name: "index_circuit_templates_on_entity_id_and_name", unique: true
+    t.index ["entity_id"], name: "index_circuit_templates_on_entity_id"
+  end
+
   create_table "contacts", force: :cascade do |t|
     t.string "company"
     t.datetime "created_at", null: false
@@ -74,6 +107,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_115532) do
 
   create_table "documents", force: :cascade do |t|
     t.bigint "addressee_id", null: false
+    t.string "addressee_type", null: false
     t.datetime "created_at", null: false
     t.bigint "created_by_id", null: false
     t.date "document_date", null: false
@@ -81,14 +115,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_115532) do
     t.boolean "is_frozen", default: false, null: false
     t.string "reference_number", null: false
     t.bigint "sender_id", null: false
+    t.string "sender_type", null: false
     t.string "status", default: "draft", null: false
     t.string "subject", null: false
     t.datetime "updated_at", null: false
-    t.index ["addressee_id"], name: "index_documents_on_addressee_id"
+    t.index ["addressee_type", "addressee_id"], name: "index_documents_on_addressee_type_and_addressee_id"
     t.index ["created_by_id"], name: "index_documents_on_created_by_id"
     t.index ["entity_id", "reference_number"], name: "index_documents_on_entity_id_and_reference_number", unique: true
     t.index ["entity_id"], name: "index_documents_on_entity_id"
-    t.index ["sender_id"], name: "index_documents_on_sender_id"
+    t.index ["sender_type", "sender_id"], name: "index_documents_on_sender_type_and_sender_id"
     t.index ["status"], name: "index_documents_on_status"
   end
 
@@ -138,6 +173,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_115532) do
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
+    t.string "first_name", default: "", null: false
+    t.string "last_name", default: "", null: false
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
@@ -168,9 +205,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_115532) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "audit_logs", "users"
+  add_foreign_key "cc_recipients", "documents"
+  add_foreign_key "circuit_template_steps", "circuit_templates"
+  add_foreign_key "circuit_template_steps", "users", column: "actor_id"
+  add_foreign_key "circuit_templates", "entities"
   add_foreign_key "contacts", "entities"
-  add_foreign_key "documents", "contacts", column: "addressee_id"
-  add_foreign_key "documents", "contacts", column: "sender_id"
   add_foreign_key "documents", "entities"
   add_foreign_key "documents", "users", column: "created_by_id"
   add_foreign_key "entity_users", "entities"

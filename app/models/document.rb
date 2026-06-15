@@ -2,6 +2,7 @@
 
 class Document < ApplicationRecord
   include AASM
+  include PartyAssignable
 
   STATUSES = %w[draft in_progress signed finalized cancelled].freeze
 
@@ -18,14 +19,16 @@ class Document < ApplicationRecord
   # Associations
   belongs_to :entity
   belongs_to :created_by, class_name: "User"
-  belongs_to :sender, class_name: "Contact"
-  belongs_to :addressee, class_name: "Contact"
+  belongs_to :sender, polymorphic: true
+  belongs_to :addressee, polymorphic: true
   has_many :workflow_steps, dependent: :destroy
   has_many :shared_links, dependent: :destroy
+  has_many :cc_recipients, dependent: :destroy
   has_many :audit_logs, as: :auditable, dependent: :destroy
-  has_many_attached :files
+  has_one_attached :main_file
+  has_many_attached :annexes
 
-  accepts_nested_attributes_for :workflow_steps, allow_destroy: true, reject_if: :all_blank
+  party_assignable :sender, :addressee
 
   # Validations
   validates :subject, presence: true, length: { maximum: 255 }
@@ -98,13 +101,13 @@ class Document < ApplicationRecord
   end
 
   def sender_belongs_to_entity
-    return if sender.nil? || entity.nil? || sender.entity_id == entity_id
+    return if entity.nil? || party_in_entity?(sender)
 
     errors.add(:sender, "must belong to the same entity")
   end
 
   def addressee_belongs_to_entity
-    return if addressee.nil? || entity.nil? || addressee.entity_id == entity_id
+    return if entity.nil? || party_in_entity?(addressee)
 
     errors.add(:addressee, "must belong to the same entity")
   end

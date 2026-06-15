@@ -1,0 +1,31 @@
+<% if annexes.attached? %>
+  <ul class="divide-y divide-gray-100">
+    <% annexes.each do |annex| %>
+      <li class="flex items-center justify-between py-2 text-sm">
+        <span class="text-gray-900"><%= annex.filename %></span>
+        <div class="flex items-center gap-3">
+          <%= link_to "Download", rails_blob_path(annex, disposition: "attachment"), class: "text-primary-600 hover:text-primary-700 font-medium" %>
+          <% if show_actions? %>
+            <%= render(Ui::ButtonComponent.new(
+              href: entity_document_annex_path(document.entity, document, annex), variant: :danger, method: :delete,
+              data: { turbo_confirm: "Remove this annex?" }
+            )) { "Remove" } %>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="text-sm text-gray-500">No annexes attached.</p>
+<% end %>
+
+<% if show_actions? %>
+  <div class="mt-4">
+    <%= form_with url: entity_document_annexes_path(document.entity, document), method: :post, local: true,
+                  multipart: true, class: "flex items-center gap-3" do %>
+      <%= file_field_tag "document[annex]",
+                         class: "block text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
+      <%= render(Ui::ButtonComponent.new(variant: :secondary)) { "Add annex" } %>
+    <% end %>
+  </div>
+<% end %>

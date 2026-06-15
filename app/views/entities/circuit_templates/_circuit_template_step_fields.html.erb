@@ -6,10 +6,10 @@
   <div class="flex flex-wrap items-center gap-3">
     <span class="drag-handle cursor-grab text-gray-400" title="Drag to reorder">&#10495;</span>
 
-    <%= f.select :role, WorkflowStep::ROLES.map { |role| [ role, role ] }, {},
+    <%= f.select :role, CircuitTemplateStep::ROLES.map { |role| [ role, role ] }, {},
                  class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
 
-    <%= f.collection_select :actor_id, @entity_members, :id, :email, { include_blank: "Select an actor..." },
+    <%= f.collection_select :actor_id, entity_actors, :id, :display_name, { include_blank: "Unassigned" },
                             class: "min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
 
     <button type="button" data-action="workflow-builder#removeStep"

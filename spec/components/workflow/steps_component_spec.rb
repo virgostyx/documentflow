@@ -28,4 +28,34 @@ RSpec.describe Workflow::StepsComponent, type: :component do
       expect(subject).to have_text("No validation circuit defined")
     end
   end
+
+  context "when the current user can manage the circuit" do
+    let(:user) { document.created_by }
+
+    it "displays the add step form" do
+      expect(subject).to have_button("Add step")
+      expect(subject).to have_select("workflow_step_role")
+      expect(subject).to have_select("workflow_step_actor_id")
+    end
+
+    it "displays management controls for each step" do
+      expect(subject).to have_link("Remove", count: 4)
+    end
+
+    context "when the entity has circuit templates" do
+      let!(:circuit_template) { create(:circuit_template, entity: document.entity, name: "Standard circuit") }
+
+      it "displays the apply template form" do
+        expect(subject).to have_select("circuit_template_id", with_options: [ "Standard circuit" ])
+        expect(subject).to have_button("Apply")
+      end
+    end
+  end
+
+  context "when the current user cannot manage the circuit" do
+    it "does not display the add step form" do
+      expect(subject).not_to have_button("Add step")
+      expect(subject).not_to have_link("Remove")
+    end
+  end
 end

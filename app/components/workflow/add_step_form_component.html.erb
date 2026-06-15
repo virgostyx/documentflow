@@ -1,0 +1,19 @@
+<%= form_with model: [ document.entity, document, WorkflowStep.new(document: document) ],
+              builder: FloatingLabelsRails::FormBuilder, local: true, class: "mt-4 grid grid-cols-1 sm:grid-cols-4 gap-3 sm:items-end" do |f| %>
+  <div>
+    <%= f.floating_select :role, options_for_select(role_options), { include_blank: "Select a role..." }, { label: "Role", required: true } %>
+  </div>
+  <div>
+    <%= f.floating_select :actor_id, options_for_select(actor_options), { include_blank: "Unassigned" }, { label: "Actor" } %>
+  </div>
+  <div>
+    <%= f.floating_field :parallel_group, field_type: :number_field, label: "Parallel group" %>
+  </div>
+  <div class="flex items-center gap-2 sm:mb-6">
+    <%= f.check_box :is_parallel, class: "h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" %>
+    <%= f.label :is_parallel, "Parallel step", class: "text-sm text-gray-700" %>
+  </div>
+  <div class="sm:col-span-4">
+    <%= render(Ui::ButtonComponent.new(variant: :secondary)) { "Add step" } %>
+  </div>
+<% end %>

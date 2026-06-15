@@ -26,8 +26,15 @@
 
   <div class="mt-6">
     <%= render Ui::CardComponent.new do |card| %>
-      <% card.with_header { "Attached files" } %>
-      <%= render Documents::FileListComponent.new(document: @document) %>
+      <% card.with_header { "Main document" } %>
+      <%= render Documents::MainFileComponent.new(document: @document, current_user: current_user) %>
+    <% end %>
+  </div>
+
+  <div class="mt-6">
+    <%= render Ui::CardComponent.new do |card| %>
+      <% card.with_header { "Annexes" } %>
+      <%= render Documents::AnnexListComponent.new(document: @document, current_user: current_user) %>
     <% end %>
   </div>
 </div>

@@ -1,0 +1,14 @@
+<% if @contact.persisted? %>
+  <%= turbo_stream.append params[:picker_id] do %>
+    <option value="Contact-<%= @contact.id %>" selected><%= @contact.display_name %></option>
+  <% end %>
+<% end %>
+
+<%= turbo_stream.replace "#{params[:picker_id]}_new_contact" do %>
+  <%= render(Documents::ContactQuickFormComponent.new(
+    entity: current_entity,
+    picker_id: params[:picker_id],
+    contact: @contact.persisted? ? nil : @contact,
+    open: !@contact.persisted?
+  )) %>
+<% end %>

@@ -9,8 +9,23 @@ module Workflow
       "skipped" => :gray
     }.freeze
 
-    def initialize(step:)
+    def initialize(step:, manageable: false, first: false, last: false)
       @step = step
+      @manageable = manageable
+      @first = first
+      @last = last
+    end
+
+    def manageable?
+      @manageable
+    end
+
+    def first?
+      @first
+    end
+
+    def last?
+      @last
     end
 
     private

@@ -13,12 +13,25 @@
 
     <%= render "devise/shared/error_messages", resource: resource %>
 
+    <%# Name %>
+    <%= f.floating_text_field :first_name,
+                              label: "First name",
+                              required: true,
+                              autocomplete: "given-name",
+                              autofocus: true,
+                              placeholder: " " %>
+
+    <%= f.floating_text_field :last_name,
+                              label: "Last name",
+                              required: true,
+                              autocomplete: "family-name",
+                              placeholder: " " %>
+
     <%# Email %>
     <%= f.floating_email_field :email,
                                label: "Email address",
                                required: true,
                                autocomplete: "email",
-                               autofocus: true,
                                placeholder: " " %>
 
     <%# Password %>

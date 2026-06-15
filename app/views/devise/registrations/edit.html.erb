@@ -14,9 +14,21 @@
 
     <%= render "devise/shared/error_messages", resource: resource %>
 
-    <%# Email %>
+    <%# Identity %>
     <div class="mb-6">
       <h3 class="text-sm font-semibold text-gray-900 mb-4">Account information</h3>
+
+      <%= f.floating_text_field :first_name,
+                                label: "First name",
+                                required: true,
+                                autocomplete: "given-name",
+                                placeholder: " " %>
+
+      <%= f.floating_text_field :last_name,
+                                label: "Last name",
+                                required: true,
+                                autocomplete: "family-name",
+                                placeholder: " " %>
 
       <%= f.floating_email_field :email,
                                  label: "Email address",

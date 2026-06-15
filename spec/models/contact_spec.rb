@@ -48,4 +48,20 @@ RSpec.describe Contact, type: :model do
       expect(contact.full_name).to eq("Jean Dupont")
     end
   end
+
+  describe "Party concern" do
+    before do
+      contact.first_name = "Jean"
+      contact.last_name = "Dupont"
+    end
+
+    it "exposes display_name as full_name" do
+      expect(contact.display_name).to eq("Jean Dupont")
+    end
+
+    it "is external" do
+      expect(contact).to be_external
+      expect(contact).not_to be_internal
+    end
+  end
 end

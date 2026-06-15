@@ -21,6 +21,19 @@
                       method: :post,
                       builder: FloatingLabelsRails::FormBuilder do |f| %>
 
+          <%= f.floating_text_field :first_name,
+                label: "First name",
+                required: true,
+                autofocus: true,
+                autocomplete: "given-name",
+                placeholder: " " %>
+
+          <%= f.floating_text_field :last_name,
+                label: "Last name",
+                required: true,
+                autocomplete: "family-name",
+                placeholder: " " %>
+
           <%= f.floating_email_field :email,
                 label: "Email",
                 value: @entity_user.invited_email,
@@ -30,7 +43,6 @@
           <%= f.floating_password_field :password,
                 label: "Password",
                 required: true,
-                autofocus: true,
                 autocomplete: "new-password",
                 placeholder: " " %>
 

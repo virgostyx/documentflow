@@ -4,8 +4,6 @@ class DocumentsController < ApplicationController
   include EntityScoped
 
   before_action :set_document, only: %i[show edit update destroy launch cancel]
-  before_action :set_contacts, only: %i[new create edit update]
-  before_action :set_entity_members, only: %i[new create edit update]
 
   def index
     @list_scope = "all"
@@ -106,14 +104,6 @@ class DocumentsController < ApplicationController
     @document = current_entity.documents.find(params[:id])
   end
 
-  def set_contacts
-    @contacts = current_entity.contacts.order(:last_name, :first_name)
-  end
-
-  def set_entity_members
-    @entity_members = current_entity.users.merge(EntityUser.active).order(:email)
-  end
-
   def base_scope
     policy_scope(Document).where(entity: current_entity)
   end
@@ -134,10 +124,6 @@ class DocumentsController < ApplicationController
   end
 
   def document_params
-    params.require(:document).permit(
-      :subject, :document_date, :sender_id, :addressee_id,
-      files: [],
-      workflow_steps_attributes: %i[id role order actor_id is_parallel parallel_group _destroy]
-    )
+    params.require(:document).permit(:subject, :document_date, :sender_token, :addressee_token)
   end
 end

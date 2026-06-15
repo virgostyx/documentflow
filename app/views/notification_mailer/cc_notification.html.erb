@@ -1,0 +1,5 @@
+<p>Hello <%= @recipient_name %>,</p>
+
+<p>Document <strong><%= @document.reference_number %></strong> (<%= @document.subject %>) has been finalized.</p>
+
+<p><%= link_to "View the document", @document_url %></p>

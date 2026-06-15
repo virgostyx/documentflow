@@ -29,6 +29,8 @@ FactoryBot.define do
 
     trait :with_workflow do
       after(:create) do |document|
+        document.main_file.attach(io: StringIO.new("content"), filename: "main.pdf", content_type: "application/pdf")
+
         create(:workflow_step, :red,  document: document, order: 1, actor: document.created_by)
         create(:workflow_step, :visa, document: document, order: 2, actor: create(:user))
         create(:workflow_step, :sign, document: document, order: 3, actor: create(:user))

@@ -1,0 +1,38 @@
+<%= form_with model: [ current_entity, circuit_template ], builder: FloatingLabelsRails::FormBuilder, local: true do |f| %>
+  <% if circuit_template.errors.any? %>
+    <div class="mb-4 rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+      <%= circuit_template.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= f.floating_text_field :name, label: "Name", required: true, autofocus: true, placeholder: " " %>
+
+  <div class="mt-6 border-t border-gray-200 pt-6" data-controller="workflow-builder">
+    <h3 class="text-sm font-medium text-gray-900">Steps</h3>
+    <p class="mt-1 text-sm text-gray-500">
+      Define the sequence of approval steps for this template. Drag steps to reorder them.
+    </p>
+
+    <div data-workflow-builder-target="steps" class="mt-4 space-y-3">
+      <%= f.fields_for :circuit_template_steps do |step_form| %>
+        <%= render "circuit_template_step_fields", f: step_form %>
+      <% end %>
+    </div>
+
+    <template data-workflow-builder-target="template">
+      <%= f.fields_for :circuit_template_steps, CircuitTemplateStep.new, child_index: "NEW_RECORD" do |step_form| %>
+        <%= render "circuit_template_step_fields", f: step_form %>
+      <% end %>
+    </template>
+
+    <button type="button" data-action="workflow-builder#addStep"
+            class="mt-3 text-sm font-medium text-primary-600 hover:text-primary-700">
+      + Add step
+    </button>
+  </div>
+
+  <div class="mt-6 flex justify-end gap-3">
+    <%= render(Ui::ButtonComponent.new(href: entity_circuit_templates_path(current_entity), variant: :secondary)) { "Cancel" } %>
+    <%= render(Ui::ButtonComponent.new) { circuit_template.persisted? ? "Save changes" : "Create circuit template" } %>
+  </div>
+<% end %>

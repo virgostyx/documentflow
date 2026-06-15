@@ -1,0 +1,26 @@
+<% if attached? %>
+  <div class="flex items-center justify-between py-2 text-sm">
+    <span class="text-gray-900"><%= document.main_file.filename %></span>
+    <%= link_to "Download", rails_blob_path(document.main_file, disposition: "attachment"), class: "text-primary-600 hover:text-primary-700 font-medium" %>
+  </div>
+<% else %>
+  <p class="text-sm text-gray-500">No main document attached yet.</p>
+<% end %>
+
+<% if show_actions? %>
+  <div class="mt-4 flex flex-wrap items-center gap-3">
+    <%= form_with url: entity_document_main_file_path(document.entity, document), method: :post, local: true,
+                  multipart: true, class: "flex items-center gap-3" do %>
+      <%= file_field_tag "document[main_file]",
+                         class: "block text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
+      <%= render(Ui::ButtonComponent.new(variant: :secondary)) { attached? ? "Replace" : "Upload" } %>
+    <% end %>
+
+    <% if attached? %>
+      <%= render(Ui::ButtonComponent.new(
+        href: entity_document_main_file_path(document.entity, document), variant: :danger, method: :delete,
+        data: { turbo_confirm: "Remove the main document?" }
+      )) { "Remove" } %>
+    <% end %>
+  </div>
+<% end %>

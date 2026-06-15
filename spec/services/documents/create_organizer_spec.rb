@@ -12,8 +12,8 @@ RSpec.describe Documents::CreateOrganizer do
     {
       subject: "Contrat de prestation",
       document_date: Date.current,
-      sender_id: sender.id,
-      addressee_id: addressee.id
+      sender_token: "Contact-#{sender.id}",
+      addressee_token: "Contact-#{addressee.id}"
     }
   end
 
@@ -46,7 +46,9 @@ RSpec.describe Documents::CreateOrganizer do
     end
 
     context "avec des paramètres invalides" do
-      let(:document_params) { { subject: "", document_date: nil, sender_id: sender.id, addressee_id: addressee.id } }
+      let(:document_params) do
+        { subject: "", document_date: nil, sender_token: "Contact-#{sender.id}", addressee_token: "Contact-#{addressee.id}" }
+      end
 
       it "ne crée pas de document" do
         expect {
@@ -68,8 +70,8 @@ RSpec.describe Documents::CreateOrganizer do
         {
           subject: "Contrat de prestation",
           document_date: Date.current,
-          sender_id: other_contact.id,
-          addressee_id: addressee.id
+          sender_token: "Contact-#{other_contact.id}",
+          addressee_token: "Contact-#{addressee.id}"
         }
       end
 

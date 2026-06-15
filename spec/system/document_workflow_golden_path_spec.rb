@@ -14,6 +14,8 @@ RSpec.describe "Document validation circuit golden path", type: :system do
   end
 
   before do
+    document.main_file.attach(io: StringIO.new("content"), filename: "main.pdf", content_type: "application/pdf")
+
     create(:entity_user, :owner, entity: entity, user: owner)
     create(:entity_user, entity: entity, user: visa_actor)
     create(:entity_user, entity: entity, user: sign_actor)

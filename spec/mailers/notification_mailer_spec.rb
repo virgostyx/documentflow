@@ -38,4 +38,18 @@ RSpec.describe NotificationMailer do
       expect(mail.html_part.body.encoded).to include("Pièce manquante", document_url)
     end
   end
+
+  describe "#cc_notification" do
+    let(:mail) { described_class.cc_notification("cc@example.com", "Jane Doe", document) }
+
+    it "is addressed to the given recipient with a subject mentioning the reference number" do
+      expect(mail.to).to eq([ "cc@example.com" ])
+      expect(mail.subject).to include(document.reference_number)
+    end
+
+    it "renders a text and an html part greeting the recipient and linking to the document" do
+      expect(mail.text_part.body.encoded).to include("Jane Doe", document.reference_number, document.subject, document_url)
+      expect(mail.html_part.body.encoded).to include("Jane Doe", document.reference_number, document.subject, document_url)
+    end
+  end
 end

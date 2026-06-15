@@ -12,9 +12,10 @@ RSpec.describe Document, type: :model do
   describe "associations" do
     it { is_expected.to belong_to(:entity) }
     it { is_expected.to belong_to(:created_by).class_name("User") }
-    it { is_expected.to belong_to(:sender).class_name("Contact") }
-    it { is_expected.to belong_to(:addressee).class_name("Contact") }
-    it { is_expected.to have_many_attached(:files) }
+    it { is_expected.to belong_to(:sender) }
+    it { is_expected.to belong_to(:addressee) }
+    it { is_expected.to have_one_attached(:main_file) }
+    it { is_expected.to have_many_attached(:annexes) }
   end
 
   # ── Validations ───────────────────────────────────────────────────────────
@@ -51,6 +52,22 @@ RSpec.describe Document, type: :model do
         document.addressee = create(:contact, entity: create(:entity))
         expect(document).not_to be_valid
         expect(document.errors[:addressee]).to be_present
+      end
+
+      it "accepts a sender who is an internal user of the entity" do
+        user = create(:user)
+        create(:entity_user, entity: entity, user: user, status: "active")
+
+        document.sender = user
+
+        expect(document).to be_valid
+      end
+
+      it "rejects a sender who is a user not belonging to the entity" do
+        document.sender = create(:user)
+
+        expect(document).not_to be_valid
+        expect(document.errors[:sender]).to be_present
       end
     end
   end
@@ -149,6 +166,25 @@ RSpec.describe Document, type: :model do
   end
 
   # ── Methods ───────────────────────────────────────────────────────────────
+
+  describe "#sender_token and #addressee_token" do
+    it "reads back as Type-id for a contact" do
+      contact = create(:contact, entity: entity)
+      document.sender = contact
+
+      expect(document.sender_token).to eq("Contact-#{contact.id}")
+    end
+
+    it "assigns the polymorphic sender from a token" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user, status: "active")
+
+      document.sender_token = "User-#{user.id}"
+
+      expect(document.sender).to eq(user)
+      expect(document.sender_type).to eq("User")
+    end
+  end
 
   describe "#frozen?" do
     it "returns true once finalized" do

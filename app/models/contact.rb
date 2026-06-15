@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Contact < ApplicationRecord
+  include Party
+
   EMAIL_FORMAT = URI::MailTo::EMAIL_REGEXP
 
   # Associations

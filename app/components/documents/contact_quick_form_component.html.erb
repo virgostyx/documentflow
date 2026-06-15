@@ -1,0 +1,22 @@
+<div id="<%= picker_id %>_new_contact" data-party-picker-target="panel"
+     class="<%= "hidden" unless open? %> mt-2 p-3 border border-gray-200 rounded-md bg-gray-50 grid grid-cols-1 sm:grid-cols-2 gap-3">
+  <% if contact.errors.any? %>
+    <div class="sm:col-span-2 text-sm text-danger-700"><%= contact.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <input type="text" value="<%= contact.first_name %>" placeholder="First name" data-party-picker-target="firstName"
+         class="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+  <input type="text" value="<%= contact.last_name %>" placeholder="Last name" data-party-picker-target="lastName"
+         class="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+  <input type="email" value="<%= contact.email %>" placeholder="Email" data-party-picker-target="email"
+         class="sm:col-span-2 block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+  <input type="text" value="<%= contact.company %>" placeholder="Company" data-party-picker-target="company"
+         class="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+  <input type="text" value="<%= contact.phone %>" placeholder="Phone" data-party-picker-target="phone"
+         class="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+  <div class="sm:col-span-2 flex justify-end gap-2">
+    <button type="button" data-action="click->party-picker#toggle" class="text-sm text-gray-600 hover:text-gray-800">Cancel</button>
+    <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->party-picker#create" })) { "Create contact" } %>
+  </div>
+</div>

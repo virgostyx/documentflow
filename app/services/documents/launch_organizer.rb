@@ -5,7 +5,6 @@ module Documents
     workflow_steps Actions::ValidateHasCircuit,
                    Actions::ValidateHasMainFile,
                    Actions::LaunchDocument,
-                   Actions::CompleteRedStep,
                    Actions::NotifyFirstActor
   end
 end

@@ -14,23 +14,23 @@ RSpec.describe Documents::LaunchOrganizer do
         }.to change { document.reload.status }.from("draft").to("in_progress")
       end
 
-      it "approuve l'étape RED (le rédacteur a terminé son brouillon)" do
+      it "leaves the RED step pending" do
         described_class.call(document: document, current_user: user)
 
         red_step = document.workflow_steps.find_by(role: "RED")
-        expect(red_step.reload).to be_approved
+        expect(red_step.reload.status).to eq("pending")
       end
 
-      it "fait passer l'étape courante à la première étape VISA" do
+      it "keeps the current step as the RED step" do
         described_class.call(document: document, current_user: user)
 
-        expect(document.reload.current_step.role).to eq("VISA")
+        expect(document.reload.current_step.role).to eq("RED")
       end
 
-      it "notifie le premier acteur (le validateur VISA)" do
-        visa_actor = document.workflow_steps.find_by(role: "VISA").actor
+      it "notifies the RED actor" do
+        red_actor = document.workflow_steps.find_by(role: "RED").actor
 
-        expect(NotificationJob).to receive(:perform_later).with(visa_actor.id, "action_required", document.id)
+        expect(NotificationJob).to receive(:perform_later).with(red_actor.id, "action_required", document.id)
 
         described_class.call(document: document, current_user: user)
       end

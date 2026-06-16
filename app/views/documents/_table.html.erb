@@ -11,7 +11,10 @@
     </thead>
     <tbody class="divide-y divide-gray-100">
       <% documents.each do |document| %>
-        <tr class="hover:bg-gray-50 transition-colors">
+        <tr class="hover:bg-gray-50 transition-colors cursor-pointer"
+            data-controller="row-link"
+            data-row-link-url-value="<%= entity_document_path(current_entity, document) %>"
+            data-action="click->row-link#navigate">
           <td class="px-4 py-3">
             <%= link_to document.reference_number, entity_document_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800", data: { turbo_frame: "_top" } %>
           </td>

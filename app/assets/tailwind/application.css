@@ -19,6 +19,17 @@
 /* Bouton "afficher/masquer" du floating_password_field (positionnement absolu à droite du champ) */
 @source inline("inset-y-0 right-0 flex items-center pr-3 pr-12 text-gray-600 hover:text-gray-800 focus:outline-none");
 
+/*
+ * The floating label sits above the input/select with z-10.
+ * In Firefox, clicking a <label for="select"> only focuses the select — it does NOT
+ * open the native dropdown. pointer-events-none lets the click pass straight through
+ * to the underlying <select>, fixing the "role list doesn't open" behaviour.
+ * Text inputs are unaffected: clicking through to an <input> still focuses it.
+ */
+[data-controller="floating-label"] label {
+  pointer-events: none;
+}
+
 @theme {
   --font-sans: "Inter var", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 

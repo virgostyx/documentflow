@@ -4,7 +4,7 @@ module Documents
   class PartyPickerComponent < ViewComponent::Base
     include PartyOptionsHelper
 
-    def initialize(form:, attribute:, entity:, label:, required: false, include_blank: nil, selected: nil, show_new_contact: true, additional_picker_ids: [])
+    def initialize(form:, attribute:, entity:, label:, required: false, include_blank: nil, selected: nil, show_new_contact: true, additional_picker_ids: [], internal_only: false)
       @form = form
       @attribute = attribute
       @entity = entity
@@ -14,6 +14,7 @@ module Documents
       @selected = selected
       @show_new_contact = show_new_contact
       @additional_picker_ids = additional_picker_ids
+      @internal_only = internal_only
     end
 
     def picker_id
@@ -21,7 +22,11 @@ module Documents
     end
 
     def grouped_options
-      party_grouped_options(entity, selected)
+      if @internal_only
+        party_internal_options(entity, selected)
+      else
+        party_grouped_options(entity, selected)
+      end
     end
 
     def select_options

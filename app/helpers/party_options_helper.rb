@@ -3,22 +3,22 @@
 # Helpers for rendering sender/addressee/CC pickers and badges that
 # distinguish internal Users from external Contacts (see Party concern).
 module PartyOptionsHelper
+  # Builds <option> tags restricted to internal users only (e.g. for sender).
+  def party_internal_options(entity, selected = nil)
+    options = entity.users.merge(EntityUser.active).order(:first_name, :last_name)
+                    .map { |user| [ user.display_name, "User-#{user.id}" ] }
+    options_for_select(options, selected)
+  end
+
   # Builds grouped <option> tags for a token-based <select> (party_token),
   # separating internal entity members from external contacts.
   def party_grouped_options(entity, selected = nil)
-    users = entity.users.merge(EntityUser.active).order(:first_name, :last_name)
-                  .map { |user| [ user.display_name, "User-#{user.id}" ] }
+    internal = entity.users.merge(EntityUser.active).order(:first_name, :last_name)
+                      .map { |user| [ user.display_name, "User-#{user.id}" ] }
+    external = entity.contacts.order(:last_name, :first_name)
+                      .map { |contact| [ contact.display_name, "Contact-#{contact.id}" ] }
 
-    contacts = entity.contacts.order(:last_name, :first_name)
-    internal_contacts = contacts.where(internal: true).map { |c| [ c.display_name, "Contact-#{c.id}" ] }
-    external_contacts = contacts.where(internal: false).map { |c| [ c.display_name, "Contact-#{c.id}" ] }
-
-    groups = {}
-    groups["Internal users"] = users
-    groups["Internal contacts"] = internal_contacts if internal_contacts.any?
-    groups["External contacts"] = external_contacts
-
-    grouped_options_for_select(groups, selected)
+    grouped_options_for_select({ "Internal users" => internal, "External contacts" => external }, selected)
   end
 
   # Returns the active members of an entity, for use as actor options on a

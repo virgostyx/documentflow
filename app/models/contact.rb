@@ -18,11 +18,4 @@ class Contact < ApplicationRecord
     "#{first_name} #{last_name}"
   end
 
-  def internal?
-    self[:internal]
-  end
-
-  def external?
-    !internal?
-  end
 end

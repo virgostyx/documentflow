@@ -20,10 +20,6 @@ RSpec.describe Documents::ContactQuickFormComponent, type: :component do
     it "renders a create contact button" do
       expect(subject).to have_button("Create contact")
     end
-
-    it "renders an unchecked Internal checkbox" do
-      expect(subject).to have_unchecked_field("Internal")
-    end
   end
 
   context "when open with a contact that failed validation" do

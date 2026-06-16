@@ -139,17 +139,6 @@ RSpec.describe "Contacts", type: :request do
         expect(response.body).not_to include(%(value="Contact-#{new_contact.id}" selected))
       end
 
-      context "when internal: true is passed" do
-        let(:contact_params) do
-          { picker_id: "document_sender_token", contact: { first_name: "Marie", last_name: "Martin", email: "marie2@example.com", internal: "1" } }
-        end
-
-        it "creates an internal contact" do
-          post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
-          expect(entity.contacts.last).to be_internal
-        end
-      end
-
       it "closes the quick contact form" do
         post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
 

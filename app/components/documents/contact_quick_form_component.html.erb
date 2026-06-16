@@ -25,13 +25,6 @@
     </div>
   <% end %>
 
-  <div class="sm:col-span-2 flex items-center gap-2">
-    <input type="checkbox" id="<%= picker_id %>_internal" name="contact[internal]" value="1"
-           data-party-picker-target="internal"
-           class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
-    <label for="<%= picker_id %>_internal" class="text-sm text-gray-700">Internal</label>
-  </div>
-
   <div class="sm:col-span-2 flex justify-end gap-2">
     <button type="button" data-action="click->party-picker#toggle" class="text-sm text-gray-600 hover:text-gray-800">Cancel</button>
     <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->party-picker#create" })) { "Create contact" } %>

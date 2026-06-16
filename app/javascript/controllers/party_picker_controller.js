@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["panel", "firstName", "lastName", "email", "company", "phone", "internal"]
+  static targets = ["panel", "firstName", "lastName", "email", "company", "phone"]
   static values = { pickerId: String, url: String, additionalPickerIds: Array }
 
   toggle() {
@@ -17,7 +17,6 @@ export default class extends Controller {
     body.append("contact[email]", this.emailTarget.value)
     body.append("contact[company]", this.companyTarget.value)
     body.append("contact[phone]", this.phoneTarget.value)
-    body.append("contact[internal]", this.internalTarget.checked ? "1" : "0")
 
     const response = await fetch(this.urlValue, {
       method: "POST",

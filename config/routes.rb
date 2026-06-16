@@ -24,6 +24,7 @@ Rails.application.routes.draw do
         end
         collection do
           post :apply_template
+          post :reorder
         end
       end
       resources :shared_links, only: %i[create destroy]

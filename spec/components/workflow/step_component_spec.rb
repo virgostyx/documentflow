@@ -59,41 +59,21 @@ RSpec.describe Workflow::StepComponent, type: :component do
   context "when not manageable" do
     it "does not display management controls" do
       expect(subject).not_to have_link("Remove")
-      expect(subject).not_to have_link("Move up")
-      expect(subject).not_to have_link("Move down")
+      expect(subject).not_to have_css(".drag-handle")
     end
   end
 
   context "when manageable" do
-    subject { render_inline(described_class.new(step: step, manageable: true, first: first, last: last)) }
+    subject { render_inline(described_class.new(step: step, manageable: true)) }
 
-    let(:first) { false }
-    let(:last) { false }
     let(:routes) { Rails.application.routes.url_helpers }
 
     it "displays a remove link" do
       expect(subject).to have_link("Remove", href: routes.entity_document_workflow_step_path(step.document.entity, step.document, step))
     end
 
-    it "displays move up and move down links" do
-      expect(subject).to have_link("Move up", href: routes.move_up_entity_document_workflow_step_path(step.document.entity, step.document, step))
-      expect(subject).to have_link("Move down", href: routes.move_down_entity_document_workflow_step_path(step.document.entity, step.document, step))
-    end
-
-    context "when it is the first step" do
-      let(:first) { true }
-
-      it "hides the move up link" do
-        expect(subject).not_to have_link("Move up")
-      end
-    end
-
-    context "when it is the last step" do
-      let(:last) { true }
-
-      it "hides the move down link" do
-        expect(subject).not_to have_link("Move down")
-      end
+    it "displays a drag handle" do
+      expect(subject).to have_css(".drag-handle")
     end
   end
 end

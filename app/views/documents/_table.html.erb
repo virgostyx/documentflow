@@ -13,7 +13,7 @@
       <% documents.each do |document| %>
         <tr class="hover:bg-gray-50 transition-colors">
           <td class="px-4 py-3">
-            <%= link_to document.reference_number, entity_document_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800" %>
+            <%= link_to document.reference_number, entity_document_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800", data: { turbo_frame: "_top" } %>
           </td>
           <td class="px-4 py-3 text-gray-900"><%= document.subject %></td>
           <td class="px-4 py-3 text-gray-500"><%= document.sender&.display_name %> &rarr; <%= document.addressee&.display_name %></td>

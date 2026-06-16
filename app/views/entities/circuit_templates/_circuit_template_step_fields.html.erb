@@ -17,17 +17,4 @@
       Remove
     </button>
   </div>
-
-  <div class="mt-3 flex flex-wrap items-center gap-3">
-    <label class="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
-      <%= f.check_box :is_parallel, class: "rounded border-gray-300 text-primary-600 focus:ring-primary-500" %>
-      Parallel step
-    </label>
-
-    <label class="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
-      Group
-      <%= f.number_field :parallel_group, min: 1,
-                         class: "w-20 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
-    </label>
-  </div>
 </div>

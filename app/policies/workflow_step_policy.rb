@@ -25,6 +25,10 @@ class WorkflowStepPolicy < ApplicationPolicy
     manageable?
   end
 
+  def reorder?
+    manageable?
+  end
+
   private
 
   def entity

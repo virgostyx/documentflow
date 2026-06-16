@@ -2,13 +2,14 @@
   <% card.with_header { "Validation circuit" } %>
 
   <% if steps.any? %>
-    <div class="divide-y divide-gray-100">
-      <% steps.each_with_index do |step, index| %>
-        <%= render Workflow::StepComponent.new(
-          step: step, manageable: manageable?, first: index.zero?, last: index == steps.size - 1
-        ) %>
+    <% sortable_data = manageable? ? { controller: "sortable-steps", sortable_steps_url_value: reorder_entity_document_workflow_steps_path(document.entity, document) } : {} %>
+    <%= tag.div class: "divide-y divide-gray-100", data: sortable_data do %>
+      <% steps.each do |step| %>
+        <div data-step-id="<%= step.id %>">
+          <%= render Workflow::StepComponent.new(step: step, manageable: manageable?) %>
+        </div>
       <% end %>
-    </div>
+    <% end %>
   <% else %>
     <p class="text-sm text-gray-500">No validation circuit defined for this document yet.</p>
   <% end %>

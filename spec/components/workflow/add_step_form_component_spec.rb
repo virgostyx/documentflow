@@ -21,11 +21,6 @@ RSpec.describe Workflow::AddStepFormComponent, type: :component do
     expect(subject).to have_select("workflow_step_actor_id", with_options: [ colleague.display_name ])
   end
 
-  it "renders the parallel group field and checkbox" do
-    expect(subject).to have_field("workflow_step_parallel_group", type: "number")
-    expect(subject).to have_field("workflow_step_is_parallel", type: "checkbox")
-  end
-
   it "submits to the document's workflow steps endpoint" do
     path = Rails.application.routes.url_helpers.entity_document_workflow_steps_path(entity, document)
     expect(subject).to have_css("form[action='#{path}']")

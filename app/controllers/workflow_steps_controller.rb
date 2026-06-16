@@ -50,6 +50,17 @@ class WorkflowStepsController < ApplicationController
     redirect_to entity_document_path(current_entity, @document), notice: "Step moved down."
   end
 
+  def reorder
+    authorize @document.workflow_steps.new, :reorder?
+
+    step_ids = Array(params[:step_ids])
+    step_ids.each_with_index do |id, index|
+      @document.workflow_steps.where(id: id).update_all(order: index + 1)
+    end
+
+    head :ok
+  end
+
   def apply_template
     authorize @document.workflow_steps.new, :apply_template?
 

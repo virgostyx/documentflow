@@ -1,5 +1,9 @@
-<div class="flex items-start gap-4 py-3" data-role="<%= step.role %>">
-  <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">
+<div class="flex items-center gap-4 py-3" data-role="<%= step.role %>">
+  <% if manageable? %>
+    <span class="drag-handle cursor-grab text-gray-400 shrink-0 select-none" title="Drag to reorder">&#10495;</span>
+  <% end %>
+
+  <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700" data-order-badge>
     <%= step.order %>
   </span>
 
@@ -18,21 +22,9 @@
   </div>
 
   <% if manageable? %>
-    <div class="flex items-center gap-2">
-      <% unless first? %>
-        <%= render(Ui::ButtonComponent.new(
-          href: move_up_entity_document_workflow_step_path(step.document.entity, step.document, step), variant: :secondary, method: :post
-        )) { "Move up" } %>
-      <% end %>
-      <% unless last? %>
-        <%= render(Ui::ButtonComponent.new(
-          href: move_down_entity_document_workflow_step_path(step.document.entity, step.document, step), variant: :secondary, method: :post
-        )) { "Move down" } %>
-      <% end %>
-      <%= render(Ui::ButtonComponent.new(
-        href: entity_document_workflow_step_path(step.document.entity, step.document, step), variant: :danger, method: :delete,
-        data: { turbo_confirm: "Remove this step from the circuit?" }
-      )) { "Remove" } %>
-    </div>
+    <%= render(Ui::ButtonComponent.new(
+      href: entity_document_workflow_step_path(step.document.entity, step.document, step), variant: :danger, method: :delete,
+      data: { turbo_confirm: "Remove this step from the circuit?" }
+    )) { "Remove" } %>
   <% end %>
 </div>

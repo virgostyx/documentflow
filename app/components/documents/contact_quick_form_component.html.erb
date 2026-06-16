@@ -4,16 +4,33 @@
     <div class="sm:col-span-2 text-sm text-danger-700"><%= contact.errors.full_messages.to_sentence %></div>
   <% end %>
 
-  <input type="text" value="<%= contact.first_name %>" placeholder="First name" data-party-picker-target="firstName"
-         class="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-  <input type="text" value="<%= contact.last_name %>" placeholder="Last name" data-party-picker-target="lastName"
-         class="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-  <input type="email" value="<%= contact.email %>" placeholder="Email" data-party-picker-target="email"
-         class="sm:col-span-2 block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-  <input type="text" value="<%= contact.company %>" placeholder="Company" data-party-picker-target="company"
-         class="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-  <input type="text" value="<%= contact.phone %>" placeholder="Phone" data-party-picker-target="phone"
-         class="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+  <% fields.each do |field| %>
+    <div class="relative <%= field[:wrapper_class] %>" data-controller="floating-label">
+      <%= public_send("#{field[:type]}_field_tag", "contact[#{field[:attribute]}]", field_value(field[:attribute]),
+            id: field_id(field[:attribute]),
+            placeholder: " ",
+            class: input_classes(field[:attribute]),
+            data: {
+              party_picker_target: field[:target],
+              floating_label_target: "input",
+              action: "focus->floating-label#focus blur->floating-label#blur input->floating-label#checkValue"
+            }
+          ) %>
+      <%= label_tag field_id(field[:attribute]), field_label(field),
+            class: label_classes(field[:attribute]),
+            data: { floating_label_target: "label" } %>
+      <% if field_error(field[:attribute]) %>
+        <p class="mt-1 text-sm text-red-600"><%= field_error(field[:attribute]) %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="sm:col-span-2 flex items-center gap-2">
+    <input type="checkbox" id="<%= picker_id %>_internal" name="contact[internal]" value="1"
+           data-party-picker-target="internal"
+           class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+    <label for="<%= picker_id %>_internal" class="text-sm text-gray-700">Internal</label>
+  </div>
 
   <div class="sm:col-span-2 flex justify-end gap-2">
     <button type="button" data-action="click->party-picker#toggle" class="text-sm text-gray-600 hover:text-gray-800">Cancel</button>

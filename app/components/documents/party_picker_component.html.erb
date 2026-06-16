@@ -1,12 +1,15 @@
 <div data-controller="party-picker"
      data-party-picker-picker-id-value="<%= picker_id %>"
-     data-party-picker-url-value="<%= entity_contacts_path(entity) %>">
+     data-party-picker-url-value="<%= entity_contacts_path(entity) %>"
+     data-party-picker-additional-picker-ids-value="<%= additional_picker_ids.to_json %>">
   <%= form.floating_select attribute, grouped_options, select_options, { label: label, required: required } %>
 
-  <button type="button" data-action="click->party-picker#toggle"
-          class="text-sm text-primary-600 hover:text-primary-700 font-medium">
-    + New contact
-  </button>
+  <% if show_new_contact? %>
+    <button type="button" data-action="click->party-picker#toggle"
+            class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+      + New contact
+    </button>
 
-  <%= render(Documents::ContactQuickFormComponent.new(entity: entity, picker_id: picker_id)) %>
+    <%= render(Documents::ContactQuickFormComponent.new(entity: entity, picker_id: picker_id)) %>
+  <% end %>
 </div>

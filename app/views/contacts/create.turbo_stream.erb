@@ -1,6 +1,12 @@
 <% if @contact.persisted? %>
   <%= turbo_stream.append params[:picker_id] do %>
-    <option value="Contact-<%= @contact.id %>" selected><%= @contact.display_name %></option>
+    <option value="Contact-<%= @contact.id %>"><%= @contact.display_name %></option>
+  <% end %>
+
+  <% Array(params[:additional_picker_ids]).each do |picker_id| %>
+    <%= turbo_stream.append picker_id do %>
+      <option value="Contact-<%= @contact.id %>"><%= @contact.display_name %></option>
+    <% end %>
   <% end %>
 <% end %>
 

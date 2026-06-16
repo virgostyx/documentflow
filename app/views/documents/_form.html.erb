@@ -11,12 +11,14 @@
   <%= render(Documents::PartyPickerComponent.new(
     form: f, attribute: :sender_token, entity: current_entity,
     label: "Sender", required: true, include_blank: "Select a sender...",
-    selected: document.sender_token
+    selected: document.sender_token,
+    show_new_contact: false
   )) %>
   <%= render(Documents::PartyPickerComponent.new(
     form: f, attribute: :addressee_token, entity: current_entity,
     label: "Addressee", required: true, include_blank: "Select an addressee...",
-    selected: document.addressee_token
+    selected: document.addressee_token,
+    additional_picker_ids: [ "document_sender_token" ]
   )) %>
 
   <div class="mt-6 flex justify-end gap-3">

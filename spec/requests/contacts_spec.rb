@@ -130,13 +130,24 @@ RSpec.describe "Contacts", type: :request do
         }.to change(entity.contacts, :count).by(1)
       end
 
-      it "appends the new contact as a selected option in the picker's select" do
+      it "appends the new contact as an (unselected) option in the picker's select" do
         post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
 
         new_contact = entity.contacts.last
         expect(response.body).to include(%(target="document_sender_token"))
-        expect(response.body).to include(%(value="Contact-#{new_contact.id}" selected))
-        expect(response.body).to include(new_contact.display_name)
+        expect(response.body).to include(%(value="Contact-#{new_contact.id}">#{new_contact.display_name}))
+        expect(response.body).not_to include(%(value="Contact-#{new_contact.id}" selected))
+      end
+
+      context "when internal: true is passed" do
+        let(:contact_params) do
+          { picker_id: "document_sender_token", contact: { first_name: "Marie", last_name: "Martin", email: "marie2@example.com", internal: "1" } }
+        end
+
+        it "creates an internal contact" do
+          post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
+          expect(entity.contacts.last).to be_internal
+        end
       end
 
       it "closes the quick contact form" do
@@ -165,6 +176,33 @@ RSpec.describe "Contacts", type: :request do
         expect(response.body).to include(%(target="document_sender_token_new_contact"))
         expect(response.body).not_to include(%(action="append"))
         expect(response.body).to include("can&#39;t be blank")
+      end
+    end
+
+    context "with additional_picker_ids" do
+      let(:contact_params) do
+        {
+          picker_id: "document_addressee_token",
+          additional_picker_ids: [ "document_sender_token" ],
+          contact: { first_name: "Marie", last_name: "Martin", email: "marie@example.com" }
+        }
+      end
+
+      it "appends the new contact as an unselected option in all pickers" do
+        post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
+
+        new_contact = entity.contacts.last
+        expect(response.body).to include(%(target="document_addressee_token"))
+        expect(response.body).to include(%(value="Contact-#{new_contact.id}">#{new_contact.display_name}))
+        expect(response.body).not_to include("selected")
+      end
+
+      it "also appends the new contact as a non-selected option in the additional pickers" do
+        post entity_contacts_path(entity), params: contact_params, as: :turbo_stream
+
+        new_contact = entity.contacts.last
+        expect(response.body).to include(%(target="document_sender_token"))
+        expect(response.body).to include(%(value="Contact-#{new_contact.id}">#{new_contact.display_name}))
       end
     end
   end

@@ -31,7 +31,39 @@ RSpec.describe Documents::PartyPickerComponent, type: :component do
 
   it "renders a hidden quick contact form scoped to this picker" do
     expect(subject).to have_css("#document_sender_token_new_contact.hidden")
-    expect(subject).to have_field(placeholder: "First name")
-    expect(subject).to have_field(placeholder: "Email")
+    expect(subject).to have_field("First name")
+    expect(subject).to have_field("Email")
+  end
+
+  context "when show_new_contact is false" do
+    subject do
+      render_inline(described_class.new(
+        form: form, attribute: :sender_token, entity: entity,
+        label: "Sender", required: true, include_blank: "Select a sender...",
+        show_new_contact: false
+      ))
+    end
+
+    it "does not render a button to reveal the quick contact form" do
+      expect(subject).not_to have_button("+ New contact")
+    end
+
+    it "does not render the quick contact form" do
+      expect(subject).not_to have_css("#document_sender_token_new_contact")
+    end
+  end
+
+  context "with additional_picker_ids" do
+    subject do
+      render_inline(described_class.new(
+        form: form, attribute: :addressee_token, entity: entity,
+        label: "Addressee", required: true, include_blank: "Select an addressee...",
+        additional_picker_ids: [ "document_sender_token" ]
+      ))
+    end
+
+    it "exposes the additional picker ids to the party-picker controller" do
+      expect(subject).to have_css(%(div[data-party-picker-additional-picker-ids-value='["document_sender_token"]']))
+    end
   end
 end

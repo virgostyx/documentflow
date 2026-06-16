@@ -12,12 +12,17 @@ RSpec.describe Documents::ContactQuickFormComponent, type: :component do
       expect(subject).to have_css("#document_sender_token_new_contact.hidden")
     end
 
-    it "renders empty input fields" do
-      expect(subject).to have_field(placeholder: "First name", with: "")
+    it "renders empty input fields with floating labels" do
+      expect(subject).to have_field("First name", with: "")
+      expect(subject).to have_field("Email", with: "")
     end
 
     it "renders a create contact button" do
       expect(subject).to have_button("Create contact")
+    end
+
+    it "renders an unchecked Internal checkbox" do
+      expect(subject).to have_unchecked_field("Internal")
     end
   end
 
@@ -35,7 +40,11 @@ RSpec.describe Documents::ContactQuickFormComponent, type: :component do
     end
 
     it "preserves entered values" do
-      expect(subject).to have_field(placeholder: "First name", with: "Bob")
+      expect(subject).to have_field("First name", with: "Bob")
+    end
+
+    it "highlights the invalid field" do
+      expect(subject).to have_css("label[for='document_sender_token_last_name'].text-red-600")
     end
   end
 end

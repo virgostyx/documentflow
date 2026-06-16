@@ -59,9 +59,15 @@ RSpec.describe Contact, type: :model do
       expect(contact.display_name).to eq("Jean Dupont")
     end
 
-    it "is external" do
+    it "is external by default" do
       expect(contact).to be_external
       expect(contact).not_to be_internal
+    end
+
+    it "can be marked as internal" do
+      contact.internal = true
+      expect(contact).to be_internal
+      expect(contact).not_to be_external
     end
   end
 end

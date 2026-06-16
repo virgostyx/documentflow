@@ -6,12 +6,19 @@ module PartyOptionsHelper
   # Builds grouped <option> tags for a token-based <select> (party_token),
   # separating internal entity members from external contacts.
   def party_grouped_options(entity, selected = nil)
-    internal = entity.users.merge(EntityUser.active).order(:first_name, :last_name)
-                      .map { |user| [ user.display_name, "User-#{user.id}" ] }
-    external = entity.contacts.order(:last_name, :first_name)
-                      .map { |contact| [ contact.display_name, "Contact-#{contact.id}" ] }
+    users = entity.users.merge(EntityUser.active).order(:first_name, :last_name)
+                  .map { |user| [ user.display_name, "User-#{user.id}" ] }
 
-    grouped_options_for_select({ "Internal users" => internal, "External contacts" => external }, selected)
+    contacts = entity.contacts.order(:last_name, :first_name)
+    internal_contacts = contacts.where(internal: true).map { |c| [ c.display_name, "Contact-#{c.id}" ] }
+    external_contacts = contacts.where(internal: false).map { |c| [ c.display_name, "Contact-#{c.id}" ] }
+
+    groups = {}
+    groups["Internal users"] = users
+    groups["Internal contacts"] = internal_contacts if internal_contacts.any?
+    groups["External contacts"] = external_contacts
+
+    grouped_options_for_select(groups, selected)
   end
 
   # Returns the active members of an entity, for use as actor options on a

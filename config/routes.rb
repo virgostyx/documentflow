@@ -46,6 +46,9 @@ Rails.application.routes.draw do
         get :search
         get :mine
         get :received
+        get :todo
+        get :waiting
+        get :info
       end
     end
 

@@ -16,7 +16,7 @@ module Documents
           ctx[:user] = ctx.current_user
           ctx[:auditable] = document
           ctx[:action] = "create"
-          ctx[:audit_changes] = { subject: document.subject, reference_number: document.reference_number }
+          ctx[:audit_changes] = { subject: document.subject, reference_number: document.reference_number, expects_response: document.expects_response }
         else
           fail_with!(ctx, document.errors.full_messages.to_sentence, :validation_error)
         end

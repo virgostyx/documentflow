@@ -1,4 +1,4 @@
-<% list_scope_label = { "mine" => "My documents", "received" => "Received documents" }.fetch(@list_scope, "Overview") %>
+<% list_scope_label = { "mine" => "My Outbox", "received" => "My Inbox", "todo" => "ToDo", "waiting" => "Waiting", "info" => "Info" }.fetch(@list_scope, "Overview") %>
 
 <% content_for :breadcrumb do %>
   <%= render Ui::BreadcrumbsComponent.new(items: [

@@ -41,7 +41,29 @@ class Document < ApplicationRecord
 
   # Scopes
   scope :authored_by, ->(user) { where(created_by: user) }
-  scope :received_by, ->(user) { joins(:workflow_steps).where(workflow_steps: { actor_id: user.id }).distinct }
+  scope :received_by, ->(user) {
+    left_joins(:cc_recipients).where(
+      "(documents.addressee_type = 'User' AND documents.addressee_id = :user_id) " \
+      "OR (cc_recipients.party_type = 'User' AND cc_recipients.party_id = :user_id)",
+      user_id: user.id
+    ).distinct
+  }
+  scope :todo_for, ->(user) {
+    where(addressee_type: "User", addressee_id: user.id, expects_response: true)
+  }
+  scope :waiting_for, ->(user) {
+    where(created_by: user, expects_response: true)
+  }
+  scope :info_for, ->(user) {
+    left_joins(:cc_recipients).where(
+      "(" \
+        "(documents.addressee_type = 'User' AND documents.addressee_id = :user_id AND documents.expects_response = false) " \
+        "OR (documents.created_by_id = :user_id AND documents.expects_response = false) " \
+        "OR (cc_recipients.party_type = 'User' AND cc_recipients.party_id = :user_id)" \
+      ")",
+      user_id: user.id
+    ).distinct
+  }
   scope :with_status, ->(status) { status.present? ? where(status: status) : all }
   scope :sorted, ->(column, direction) {
     col = SORTABLE_COLUMNS.fetch(column.to_s, SORTABLE_COLUMNS[DEFAULT_SORT_COLUMN])

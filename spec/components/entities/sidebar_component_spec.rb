@@ -30,10 +30,27 @@ RSpec.describe Entities::SidebarComponent, type: :component do
   end
 
   describe "Documents section" do
-    it "links to Overview, My documents and Received documents" do
+    it "links to Overview, My Inbox, My Outbox, ToDo, Waiting and Info, in that order" do
       expect(rendered).to have_link("Overview", href: entity_documents_path(entity))
-      expect(rendered).to have_link("My documents", href: mine_entity_documents_path(entity))
-      expect(rendered).to have_link("Received documents", href: received_entity_documents_path(entity))
+      expect(rendered).to have_link("My Inbox", href: received_entity_documents_path(entity))
+      expect(rendered).to have_link("My Outbox", href: mine_entity_documents_path(entity))
+      expect(rendered).to have_link("ToDo", href: todo_entity_documents_path(entity))
+      expect(rendered).to have_link("Waiting", href: waiting_entity_documents_path(entity))
+      expect(rendered).to have_link("Info", href: info_entity_documents_path(entity))
+
+      links = rendered.css("nav a").map { |a| a.text.strip }
+      overview_index = links.index("Overview")
+      inbox_index = links.index("My Inbox")
+      outbox_index = links.index("My Outbox")
+      todo_index = links.index("ToDo")
+      waiting_index = links.index("Waiting")
+      info_index = links.index("Info")
+
+      expect(overview_index).to be < inbox_index
+      expect(inbox_index).to be < outbox_index
+      expect(outbox_index).to be < todo_index
+      expect(todo_index).to be < waiting_index
+      expect(waiting_index).to be < info_index
     end
 
     context "when on the documents overview page" do
@@ -41,26 +58,61 @@ RSpec.describe Entities::SidebarComponent, type: :component do
 
       it "highlights only Overview" do
         expect(rendered).to have_css("a.bg-primary-100", text: "Overview")
-        expect(rendered).not_to have_css("a.bg-primary-100", text: "My documents")
-        expect(rendered).not_to have_css("a.bg-primary-100", text: "Received documents")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "My Inbox")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "My Outbox")
       end
     end
 
-    context "when on the my documents page" do
+    context "when on the my outbox page" do
       let(:current_path) { mine_entity_documents_path(entity) }
 
-      it "highlights only My documents" do
-        expect(rendered).to have_css("a.bg-primary-100", text: "My documents")
+      it "highlights only My Outbox" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "My Outbox")
         expect(rendered).not_to have_css("a.bg-primary-100", text: "Overview")
       end
     end
 
-    context "when on the received documents page" do
+    context "when on the my inbox page" do
       let(:current_path) { received_entity_documents_path(entity) }
 
-      it "highlights only Received documents" do
-        expect(rendered).to have_css("a.bg-primary-100", text: "Received documents")
+      it "highlights only My Inbox" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "My Inbox")
         expect(rendered).not_to have_css("a.bg-primary-100", text: "Overview")
+      end
+    end
+
+    context "when on the todo page" do
+      let(:current_path) { todo_entity_documents_path(entity) }
+
+      it "highlights only ToDo" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "ToDo")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "Overview")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "My Inbox")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "My Outbox")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "Waiting")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "Info")
+      end
+    end
+
+    context "when on the waiting page" do
+      let(:current_path) { waiting_entity_documents_path(entity) }
+
+      it "highlights only Waiting" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "Waiting")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "Overview")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "ToDo")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "Info")
+      end
+    end
+
+    context "when on the info page" do
+      let(:current_path) { info_entity_documents_path(entity) }
+
+      it "highlights only Info" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "Info")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "Overview")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "ToDo")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "Waiting")
       end
     end
   end

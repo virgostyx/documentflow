@@ -22,6 +22,24 @@ class DocumentsController < ApplicationController
     render :index
   end
 
+  def todo
+    @list_scope = "todo"
+    @documents = load_documents(base_scope.todo_for(current_user))
+    render :index
+  end
+
+  def waiting
+    @list_scope = "waiting"
+    @documents = load_documents(base_scope.waiting_for(current_user))
+    render :index
+  end
+
+  def info
+    @list_scope = "info"
+    @documents = load_documents(base_scope.info_for(current_user))
+    render :index
+  end
+
   def search
     @list_scope = params[:scope].presence || "all"
     @documents = load_documents(scoped_base_for(@list_scope))
@@ -112,6 +130,9 @@ class DocumentsController < ApplicationController
     case list_scope
     when "mine" then base_scope.authored_by(current_user)
     when "received" then base_scope.received_by(current_user)
+    when "todo" then base_scope.todo_for(current_user)
+    when "waiting" then base_scope.waiting_for(current_user)
+    when "info" then base_scope.info_for(current_user)
     else base_scope
     end
   end
@@ -124,6 +145,6 @@ class DocumentsController < ApplicationController
   end
 
   def document_params
-    params.require(:document).permit(:subject, :document_date, :department_id, :sender_token, :addressee_token)
+    params.require(:document).permit(:subject, :document_date, :department_id, :expects_response, :sender_token, :addressee_token)
   end
 end

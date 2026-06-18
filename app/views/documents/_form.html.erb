@@ -18,6 +18,11 @@
     <%= f.hidden_field :department_id, value: default_department_id %>
   <% end %>
 
+  <div class="flex items-center gap-2 mt-4">
+    <%= f.check_box :expects_response, class: "h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded" %>
+    <%= f.label :expects_response, "This document expects a response from the recipient", class: "text-sm text-gray-700" %>
+  </div>
+
   <%= render(Documents::PartyPickerComponent.new(
     form: f, attribute: :sender_token, entity: current_entity,
     label: "Sender", required: true, include_blank: "Select a sender...",

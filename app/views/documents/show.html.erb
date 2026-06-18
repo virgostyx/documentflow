@@ -46,6 +46,7 @@
         <% dl.with_item(term: "Reference number") { @document.reference_number } %>
         <% dl.with_item(term: "Document date") { l(@document.document_date) } %>
         <% dl.with_item(term: "Created by") { @document.created_by.email } %>
+        <% dl.with_item(term: "Expects a response") { @document.expects_response? ? "Yes" : "No" } %>
       <% end %>
     </div>
   <% end %>

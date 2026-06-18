@@ -214,6 +214,17 @@ RSpec.describe Document, type: :model do
     end
   end
 
+  describe "#expects_response" do
+    it "defaults to false" do
+      expect(build(:document, entity: entity).expects_response).to be false
+    end
+
+    it "can be set to true and persists" do
+      document = create(:document, entity: entity, expects_response: true)
+      expect(document.reload.expects_response).to be true
+    end
+  end
+
   # ── Scopes ────────────────────────────────────────────────────────────────
 
   describe ".authored_by" do
@@ -228,24 +239,153 @@ RSpec.describe Document, type: :model do
   end
 
   describe ".received_by" do
-    it "returns documents where the user is an actor on any workflow step, regardless of status" do
+    it "returns documents where the user is the addressee" do
       user = create(:user)
-      received = create(:document, entity: entity)
-      create(:workflow_step, document: received, actor: user, status: "approved")
-
+      create(:entity_user, entity: entity, user: user)
+      received = create(:document, entity: entity, addressee: user)
       not_received = create(:document, entity: entity)
-      create(:workflow_step, document: not_received, actor: create(:user))
 
       expect(Document.received_by(user)).to contain_exactly(received)
     end
 
-    it "does not return duplicate rows for a document with multiple steps assigned to the same user" do
+    it "returns documents where the user is a cc recipient" do
       user = create(:user)
-      document = create(:document, entity: entity)
-      create(:workflow_step, document: document, actor: user, role: "RED", order: 1)
-      create(:workflow_step, document: document, actor: user, role: "VISA", order: 2)
+      create(:entity_user, entity: entity, user: user)
+      other_user = create(:user)
+      create(:entity_user, entity: entity, user: other_user)
+
+      received = create(:document, entity: entity)
+      create(:cc_recipient, document: received, party: user)
+
+      not_received = create(:document, entity: entity)
+      create(:cc_recipient, document: not_received, party: other_user)
+
+      expect(Document.received_by(user)).to contain_exactly(received)
+    end
+
+    it "does not return duplicate rows for a document where the user is both addressee and cc recipient" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      document = create(:document, entity: entity, addressee: user)
+      create(:cc_recipient, document: document, party: user)
 
       expect(Document.received_by(user)).to contain_exactly(document)
+    end
+  end
+
+  describe ".todo_for" do
+    it "returns documents where the user is the addressee and expects a response" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      todo = create(:document, :expecting_response, entity: entity, addressee: user)
+
+      expect(Document.todo_for(user)).to contain_exactly(todo)
+    end
+
+    it "excludes documents where the user is the addressee but no response is expected" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      create(:document, entity: entity, addressee: user)
+
+      expect(Document.todo_for(user)).to be_empty
+    end
+
+    it "excludes documents where the user is only a cc recipient, even if a response is expected" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      document = create(:document, :expecting_response, entity: entity)
+      create(:cc_recipient, document: document, party: user)
+
+      expect(Document.todo_for(user)).to be_empty
+    end
+
+    it "excludes documents authored by the user where a response is expected" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      create(:document, :expecting_response, entity: entity, created_by: user)
+
+      expect(Document.todo_for(user)).to be_empty
+    end
+  end
+
+  describe ".waiting_for" do
+    it "returns documents authored by the user where a response is expected" do
+      user = create(:user)
+      waiting = create(:document, :expecting_response, entity: entity, created_by: user)
+
+      expect(Document.waiting_for(user)).to contain_exactly(waiting)
+    end
+
+    it "excludes documents authored by the user where no response is expected" do
+      user = create(:user)
+      create(:document, entity: entity, created_by: user)
+
+      expect(Document.waiting_for(user)).to be_empty
+    end
+
+    it "excludes documents expecting a response that were authored by someone else" do
+      user = create(:user)
+      create(:document, :expecting_response, entity: entity, created_by: create(:user))
+
+      expect(Document.waiting_for(user)).to be_empty
+    end
+  end
+
+  describe ".info_for" do
+    it "returns documents where the user is a cc recipient, regardless of expects_response" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      document = create(:document, :expecting_response, entity: entity)
+      create(:cc_recipient, document: document, party: user)
+
+      expect(Document.info_for(user)).to contain_exactly(document)
+    end
+
+    it "returns documents where the user is the addressee and no response is expected" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      document = create(:document, entity: entity, addressee: user)
+
+      expect(Document.info_for(user)).to contain_exactly(document)
+    end
+
+    it "returns documents authored by the user where no response is expected" do
+      user = create(:user)
+      document = create(:document, entity: entity, created_by: user)
+
+      expect(Document.info_for(user)).to contain_exactly(document)
+    end
+
+    it "excludes documents where the user is the addressee and a response is expected" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      create(:document, :expecting_response, entity: entity, addressee: user)
+
+      expect(Document.info_for(user)).to be_empty
+    end
+
+    it "excludes documents authored by the user where a response is expected" do
+      user = create(:user)
+      create(:document, :expecting_response, entity: entity, created_by: user)
+
+      expect(Document.info_for(user)).to be_empty
+    end
+
+    it "excludes unrelated documents" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      create(:document, entity: entity)
+
+      expect(Document.info_for(user)).to be_empty
+    end
+
+    it "does not return duplicate rows for a document where the user is both addressee and cc recipient" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      document = create(:document, entity: entity, addressee: user)
+      create(:cc_recipient, document: document, party: user)
+
+      expect(Document.info_for(user)).to contain_exactly(document)
     end
   end
 

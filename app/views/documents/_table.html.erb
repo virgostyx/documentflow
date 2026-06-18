@@ -7,6 +7,7 @@
         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sender &rarr; Addressee</th>
         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Date", "document_date") %></th>
         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Status", "status") %></th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Response expected</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
@@ -22,6 +23,11 @@
           <td class="px-4 py-3 text-gray-500"><%= document.sender&.display_name %> &rarr; <%= document.addressee&.display_name %></td>
           <td class="px-4 py-3 text-gray-500"><%= l(document.document_date) %></td>
           <td class="px-4 py-3"><%= render Documents::DocumentStatusBadgeComponent.new(status: document.status) %></td>
+          <td class="px-4 py-3">
+            <% if document.expects_response? %>
+              <%= render(Ui::BadgeComponent.new(color: :info)) { "Yes" } %>
+            <% end %>
+          </td>
         </tr>
       <% end %>
     </tbody>

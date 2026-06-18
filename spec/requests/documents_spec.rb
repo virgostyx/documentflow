@@ -41,6 +41,15 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).to include('data-turbo-frame="documents_list"')
       end
 
+      it "shows a response-expected badge for documents flagged as such" do
+        expecting = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Needs a reply")
+
+        get entity_documents_path(entity)
+
+        expect(response.body).to include("Response expected")
+        expect(response.body).to include("Needs a reply")
+      end
+
       it "filters by the search query" do
         other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Annual report")
 
@@ -107,6 +116,43 @@ RSpec.describe "Documents", type: :request do
         expect(flash[:alert]).to be_present
       end
     end
+
+    context "when the user is a regular member of a single department" do
+      let(:other_department) { create(:department, entity: entity) }
+      let!(:own_department_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Own department deal") }
+      let!(:other_department_document) { create(:document, entity: entity, department: other_department, sender: sender, addressee: addressee, subject: "Other department deal") }
+
+      before do
+        eu = create(:entity_user, entity: entity, user: user, role: "member")
+        create(:entity_user_department, entity_user: eu, department: department)
+        sign_in user
+      end
+
+      it "only shows documents belonging to the user's department(s)" do
+        get entity_documents_path(entity)
+
+        expect(response.body).to include(own_department_document.subject)
+        expect(response.body).not_to include(other_department_document.subject)
+      end
+    end
+
+    context "when the user is an owner" do
+      let(:other_department) { create(:department, entity: entity) }
+      let!(:department_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Department deal") }
+      let!(:other_department_document) { create(:document, entity: entity, department: other_department, sender: sender, addressee: addressee, subject: "Other department deal") }
+
+      before do
+        create(:entity_user, entity: entity, user: user, role: "owner")
+        sign_in user
+      end
+
+      it "shows documents across all departments" do
+        get entity_documents_path(entity)
+
+        expect(response.body).to include(department_document.subject)
+        expect(response.body).to include(other_department_document.subject)
+      end
+    end
   end
 
   describe "GET /entities/:entity_id/documents/mine" do
@@ -129,23 +175,103 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "GET /entities/:entity_id/documents/received" do
-    let!(:received) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Routed to me") }
-    let!(:not_received) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Not routed to me") }
-
-    before do
+    let!(:entity_user) do
       eu = create(:entity_user, entity: entity, user: user)
       create(:entity_user_department, entity_user: eu, department: department)
-      create(:workflow_step, document: received, actor: user, status: "approved")
-      create(:workflow_step, document: not_received, actor: create(:user))
+      eu
+    end
+    let!(:addressed_to_me) { create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me") }
+    let!(:cc_to_me) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me") }
+    let!(:not_received) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Not received") }
+
+    before do
+      create(:cc_recipient, document: cc_to_me, party: user)
       sign_in user
     end
 
-    it "lists only documents where the current user is an actor on a workflow step, regardless of status" do
+    it "lists documents where the current user is the addressee or a cc recipient" do
       get received_entity_documents_path(entity)
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include(received.subject)
+      expect(response.body).to include(addressed_to_me.subject)
+      expect(response.body).to include(cc_to_me.subject)
       expect(response.body).not_to include(not_received.subject)
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/todo" do
+    let!(:entity_user) do
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
+      eu
+    end
+    let!(:todo) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply") }
+    let!(:addressed_no_response) { create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me, no reply needed") }
+    let!(:cc_expecting_response) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me, expecting a reply") }
+
+    before do
+      create(:cc_recipient, document: cc_expecting_response, party: user)
+      sign_in user
+    end
+
+    it "lists only documents where the current user is the addressee and a response is expected" do
+      get todo_entity_documents_path(entity)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(todo.subject)
+      expect(response.body).not_to include(addressed_no_response.subject)
+      expect(response.body).not_to include(cc_expecting_response.subject)
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/waiting" do
+    let!(:entity_user) do
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
+      eu
+    end
+    let!(:waiting) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting on a reply", created_by: user) }
+    let!(:mine_no_response) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "No reply needed", created_by: user) }
+    let!(:others_expecting_response) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Colleague is waiting") }
+
+    before { sign_in user }
+
+    it "lists only documents created by the current user where a response is expected" do
+      get waiting_entity_documents_path(entity)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(waiting.subject)
+      expect(response.body).not_to include(mine_no_response.subject)
+      expect(response.body).not_to include(others_expecting_response.subject)
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/info" do
+    let!(:entity_user) do
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
+      eu
+    end
+    let!(:cc_to_me) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me") }
+    let!(:addressed_no_response) { create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me, no reply needed") }
+    let!(:mine_no_response) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "No reply needed", created_by: user) }
+    let!(:todo) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply") }
+    let!(:waiting) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting on a reply", created_by: user) }
+
+    before do
+      create(:cc_recipient, document: cc_to_me, party: user)
+      sign_in user
+    end
+
+    it "lists cc'd documents and documents not expecting a response, excluding ToDo and Waiting documents" do
+      get info_entity_documents_path(entity)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(cc_to_me.subject)
+      expect(response.body).to include(addressed_no_response.subject)
+      expect(response.body).to include(mine_no_response.subject)
+      expect(response.body).not_to include(todo.subject)
+      expect(response.body).not_to include(waiting.subject)
     end
   end
 
@@ -182,14 +308,43 @@ RSpec.describe "Documents", type: :request do
     end
 
     it "re-applies the 'received' scope when searching" do
-      received = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Received supplier deal")
+      received = create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Received supplier deal")
       other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
-      create(:workflow_step, document: received, actor: user)
 
       get search_entity_documents_path(entity), params: { q: "supplier", scope: "received" }
 
       expect(response.body).to include(received.subject)
       expect(response.body).not_to include(other.subject)
+    end
+
+    it "re-applies the 'todo' scope when searching" do
+      todo = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Todo supplier deal")
+      other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
+
+      get search_entity_documents_path(entity), params: { q: "supplier", scope: "todo" }
+
+      expect(response.body).to include(todo.subject)
+      expect(response.body).not_to include(other.subject)
+    end
+
+    it "re-applies the 'waiting' scope when searching" do
+      waiting = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting supplier deal", created_by: user)
+      other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
+
+      get search_entity_documents_path(entity), params: { q: "supplier", scope: "waiting" }
+
+      expect(response.body).to include(waiting.subject)
+      expect(response.body).not_to include(other.subject)
+    end
+
+    it "re-applies the 'info' scope when searching" do
+      info = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Info supplier deal", created_by: user)
+      todo = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Other supplier deal")
+
+      get search_entity_documents_path(entity), params: { q: "supplier", scope: "info" }
+
+      expect(response.body).to include(info.subject)
+      expect(response.body).not_to include(todo.subject)
     end
   end
 
@@ -253,6 +408,20 @@ RSpec.describe "Documents", type: :request do
 
           document = entity.documents.find_by(subject: "New supplier agreement")
           expect(response).to redirect_to(entity_document_path(entity, document))
+        end
+
+        it "defaults expects_response to false when the checkbox is not submitted" do
+          post entity_documents_path(entity), params: document_params
+
+          document = entity.documents.find_by(subject: "New supplier agreement")
+          expect(document.expects_response).to be false
+        end
+
+        it "persists expects_response as true when the checkbox is checked" do
+          post entity_documents_path(entity), params: document_params.deep_merge(document: { expects_response: "1" })
+
+          document = entity.documents.find_by(subject: "New supplier agreement")
+          expect(document.expects_response).to be true
         end
 
         context "with an internal user as sender" do
@@ -358,6 +527,24 @@ RSpec.describe "Documents", type: :request do
         expect(response).to have_http_status(:ok)
         expect(response.body).to include(document.reference_number)
         expect(response.body).to include(document.sender.full_name)
+      end
+
+      it "shows whether the document expects a response" do
+        get entity_document_path(entity, document)
+
+        expect(response.body).to include("Expects a response")
+        expect(response.body).to include("No")
+      end
+
+      context "when the document expects a response" do
+        let!(:document) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee) }
+
+        it "shows Yes" do
+          get entity_document_path(entity, document)
+
+          expect(response.body).to include("Expects a response")
+          expect(response.body).to include("Yes")
+        end
       end
 
       context "when the document has a validation circuit" do
@@ -520,6 +707,20 @@ RSpec.describe "Documents", type: :request do
 
         expect(document.reload.subject).to eq("New subject")
         expect(response).to redirect_to(entity_document_path(entity, document))
+      end
+
+      it "updates expects_response to true when checked" do
+        patch entity_document_path(entity, document), params: { document: { expects_response: "1" } }
+
+        expect(document.reload.expects_response).to be true
+      end
+
+      it "updates expects_response back to false when unchecked" do
+        document.update!(expects_response: true)
+
+        patch entity_document_path(entity, document), params: { document: { expects_response: "0" } }
+
+        expect(document.reload.expects_response).to be false
       end
     end
   end

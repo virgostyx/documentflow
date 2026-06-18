@@ -28,6 +28,10 @@ FactoryBot.define do
       status { "cancelled" }
     end
 
+    trait :expecting_response do
+      expects_response { true }
+    end
+
     trait :with_workflow do
       after(:create) do |document|
         document.main_file.attach(io: StringIO.new("content"), filename: "main.pdf", content_type: "application/pdf")

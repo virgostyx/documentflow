@@ -23,6 +23,14 @@ RSpec.describe Entities::CreateOrganizer do
         expect(entity_user).to be_active
       end
 
+      it "crée un département par défaut pour l'entité" do
+        result = described_class.call(current_user: user, entity_params: entity_params)
+
+        department = result.entity.departments.find_by(is_default: true)
+        expect(department).to be_present
+        expect(department.name).to eq("General")
+      end
+
       it "retourne l'entité créée dans le contexte" do
         result = described_class.call(current_user: user, entity_params: entity_params)
 
@@ -41,10 +49,10 @@ RSpec.describe Entities::CreateOrganizer do
     context "avec des paramètres invalides" do
       let(:entity_params) { { name: "" } }
 
-      it "ne crée ni entité ni EntityUser" do
+      it "ne crée ni entité ni EntityUser ni département" do
         expect {
           described_class.call(current_user: user, entity_params: entity_params)
-        }.to change(Entity, :count).by(0).and change(EntityUser, :count).by(0)
+        }.to change(Entity, :count).by(0).and change(EntityUser, :count).by(0).and change(Department, :count).by(0)
       end
 
       it "retourne un échec avec un message d'erreur" do

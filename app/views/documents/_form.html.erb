@@ -8,6 +8,16 @@
   <%= f.floating_text_field :subject, label: "Subject", required: true, autofocus: true, placeholder: " " %>
   <%= f.floating_date_field :document_date, label: "Document date", required: true, placeholder: " " %>
 
+  <% department_options = current_entity_user.departments.presence || current_entity.departments %>
+  <% default_department_id = document.department_id || current_entity_user.primary_department&.id || current_entity.departments.default.first&.id %>
+  <% if department_options.size > 1 %>
+    <%= f.floating_select :department_id, department_options.map { |d| [ d.name, d.id ] },
+          { selected: default_department_id, include_blank: "Select a department..." },
+          { label: "Department", required: true } %>
+  <% else %>
+    <%= f.hidden_field :department_id, value: default_department_id %>
+  <% end %>
+
   <%= render(Documents::PartyPickerComponent.new(
     form: f, attribute: :sender_token, entity: current_entity,
     label: "Sender", required: true, include_blank: "Select a sender...",

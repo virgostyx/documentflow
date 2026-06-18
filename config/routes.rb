@@ -10,9 +10,15 @@ Rails.application.routes.draw do
 
   # Authenticated application
   resources :entities do
-    resources :entity_users, only: %i[index create update destroy]
+    resources :entity_users, only: %i[index create update destroy] do
+      member do
+        get :edit_departments
+        patch :update_departments
+      end
+    end
     resources :contacts
     resources :circuit_templates, controller: "entities/circuit_templates"
+    resources :departments, controller: "entities/departments"
 
     resources :documents do
       resources :workflow_steps, only: %i[create update destroy] do

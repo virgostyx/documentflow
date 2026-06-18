@@ -227,4 +227,48 @@ RSpec.describe EntityUser, type: :model do
       expect(eu.accepted_at).not_to be_nil
     end
   end
+
+  describe "departments" do
+    it { is_expected.to have_many(:entity_user_departments).dependent(:destroy) }
+    it { is_expected.to have_many(:departments).through(:entity_user_departments) }
+
+    describe "#primary_department" do
+      it "returns the department flagged as primary" do
+        eu = create(:entity_user, entity: entity)
+        primary = create(:department, entity: entity)
+        other = create(:department, entity: entity)
+        create(:entity_user_department, :primary, entity_user: eu, department: primary)
+        create(:entity_user_department, entity_user: eu, department: other)
+
+        expect(eu.primary_department).to eq(primary)
+      end
+
+      it "returns nil when no department is marked primary" do
+        eu = create(:entity_user, entity: entity)
+        expect(eu.primary_department).to be_nil
+      end
+    end
+
+    describe "#member_of?" do
+      it "returns true when the entity_user is assigned to the department" do
+        eu = create(:entity_user, entity: entity)
+        department = create(:department, entity: entity)
+        create(:entity_user_department, entity_user: eu, department: department)
+
+        expect(eu.member_of?(department)).to be true
+      end
+
+      it "returns false when the entity_user is not assigned to the department" do
+        eu = create(:entity_user, entity: entity)
+        department = create(:department, entity: entity)
+
+        expect(eu.member_of?(department)).to be false
+      end
+
+      it "returns false when given a nil department" do
+        eu = create(:entity_user, entity: entity)
+        expect(eu.member_of?(nil)).to be false
+      end
+    end
+  end
 end

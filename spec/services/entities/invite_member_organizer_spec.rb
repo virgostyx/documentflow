@@ -8,7 +8,10 @@ RSpec.describe Entities::InviteMemberOrganizer do
   let!(:owner_entity_user) { create(:entity_user, :owner, entity: entity, user: owner) }
 
   let(:params) do
-    { entity: entity, current_user: owner, invited_email: "nouveau@example.com", role: "member" }
+    {
+      entity: entity, current_user: owner, invited_email: "nouveau@example.com", role: "member",
+      department_ids: [], primary_department_id: nil
+    }
   end
 
   describe ".call" do
@@ -60,6 +63,34 @@ RSpec.describe Entities::InviteMemberOrganizer do
 
         expect(result).not_to be_success
         expect(result.message).to include("already")
+      end
+    end
+
+    context "avec des départements assignés" do
+      let(:department_a) { create(:department, entity: entity) }
+      let(:department_b) { create(:department, entity: entity) }
+
+      let(:params) do
+        {
+          entity: entity, current_user: owner, invited_email: "nouveau@example.com", role: "member",
+          department_ids: [ department_a.id, department_b.id ], primary_department_id: department_a.id
+        }
+      end
+
+      it "assigne les départements avec le bon département primaire" do
+        result = described_class.call(**params)
+
+        entity_user = result.entity_user
+        expect(entity_user.departments).to contain_exactly(department_a, department_b)
+        expect(entity_user.primary_department).to eq(department_a)
+      end
+    end
+
+    context "sans département (rôle owner/admin)" do
+      it "n'assigne aucun département" do
+        result = described_class.call(**params)
+
+        expect(result.entity_user.departments).to be_empty
       end
     end
   end

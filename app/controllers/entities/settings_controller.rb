@@ -6,7 +6,8 @@ module Entities
 
     def show
       authorize current_entity
-      @entity_users = current_entity.entity_users.includes(:user).order(:role)
+      @entity_users = current_entity.entity_users.includes(:user, :departments).order(:role)
+      @departments = current_entity.departments.order(:name)
     end
   end
 end

@@ -35,6 +35,16 @@ def add_pending_invitation!(entity:, email:, role:, inviter:)
   end
 end
 
+def add_department!(entity:, name:, is_default: false)
+  entity.departments.find_or_create_by!(name: name) { |d| d.is_default = is_default }
+end
+
+def assign_department!(entity_user:, department:, primary: false)
+  EntityUserDepartment.find_or_create_by!(entity_user: entity_user, department: department) do |eud|
+    eud.primary = primary
+  end
+end
+
 def add_contact!(entity:, first_name:, last_name:, email:, company:, phone:)
   entity.contacts.find_or_create_by!(email: email) do |contact|
     contact.first_name = first_name
@@ -53,8 +63,9 @@ def add_template_step!(template, order:, role:, actor: nil, is_parallel: false, 
   end
 end
 
-def add_document!(entity:, subject:, created_by:, sender:, addressee:, status:, is_frozen: false, document_date: Date.current)
+def add_document!(entity:, subject:, department:, created_by:, sender:, addressee:, status:, is_frozen: false, document_date: Date.current)
   entity.documents.find_or_create_by!(subject: subject) do |doc|
+    doc.department = department
     doc.created_by = created_by
     doc.sender = sender
     doc.addressee = addressee
@@ -112,6 +123,7 @@ priya  = find_or_create_user!(email: "priya.patel@northbridge.example", first_na
 daniel = find_or_create_user!(email: "daniel.okafor@northbridge.example", first_name: "Daniel", last_name: "Okafor")
 emma   = find_or_create_user!(email: "emma.thompson@harborview.example", first_name: "Emma", last_name: "Thompson")
 liam   = find_or_create_user!(email: "liam.carter@harborview.example", first_name: "Liam", last_name: "Carter")
+fatima = find_or_create_user!(email: "fatima.alsayed@acme-mfg.example", first_name: "Fatima", last_name: "Al-Sayed")
 
 puts "== Seeding entities =="
 acme        = Entity.find_or_create_by!(name: "Acme Manufacturing Ltd") { |e| e.status = "active" }
@@ -134,6 +146,41 @@ add_member!(entity: harborview, user: emma, role: "owner", inviter: emma)
 add_member!(entity: harborview, user: liam, role: "member", inviter: emma)
 add_member!(entity: harborview, user: priya, role: "guest", inviter: emma)
 add_member!(entity: harborview, user: olivia, role: "admin", inviter: emma)
+
+puts "== Seeding departments =="
+acme_sales      = add_department!(entity: acme, name: "Sales")
+acme_finance    = add_department!(entity: acme, name: "Finance & Administration")
+acme_operations = add_department!(entity: acme, name: "Operations")
+
+northbridge_advisory = add_department!(entity: northbridge, name: "Advisory Services")
+northbridge_finance  = add_department!(entity: northbridge, name: "Finance & Administration")
+
+harborview_logistics = add_department!(entity: harborview, name: "Logistics Operations")
+harborview_finance   = add_department!(entity: harborview, name: "Finance & Administration")
+
+puts "== Assigning members to departments =="
+# james belongs to a single department: he only sees Operations documents.
+james_acme_membership = EntityUser.find_by(entity: acme, user: james)
+assign_department!(entity_user: james_acme_membership, department: acme_operations, primary: true)
+
+# fatima is a regular member who oversees two departments at once (the
+# "Finance & Administration Director" scenario): she sees documents from both,
+# but not from Operations.
+fatima_acme_membership = add_member!(entity: acme, user: fatima, role: "member", inviter: marcus)
+assign_department!(entity_user: fatima_acme_membership, department: acme_finance, primary: true)
+assign_department!(entity_user: fatima_acme_membership, department: acme_sales)
+
+# marcus is only a guest in Northbridge: he is scoped to Advisory Services there.
+marcus_northbridge_membership = EntityUser.find_by(entity: northbridge, user: marcus)
+assign_department!(entity_user: marcus_northbridge_membership, department: northbridge_advisory, primary: true)
+
+# liam belongs to a single department in Harborview.
+liam_harborview_membership = EntityUser.find_by(entity: harborview, user: liam)
+assign_department!(entity_user: liam_harborview_membership, department: harborview_logistics, primary: true)
+
+# priya is only a guest in Harborview: she is scoped to Finance & Administration there.
+priya_harborview_membership = EntityUser.find_by(entity: harborview, user: priya)
+assign_department!(entity_user: priya_harborview_membership, department: harborview_finance, primary: true)
 
 puts "== Seeding contacts =="
 robert_hayes   = add_contact!(entity: acme, first_name: "Robert", last_name: "Hayes", email: "robert.hayes@hayesco.example", company: "Hayes & Co Distribution", phone: "+1 415 555 0142")
@@ -174,12 +221,12 @@ add_template_step!(harborview_standard, order: 4, role: "EXP", actor: liam)
 puts "== Seeding documents for Acme Manufacturing Ltd =="
 
 add_document!(
-  entity: acme, subject: "Service Agreement Renewal - Hayes & Co Distribution",
+  entity: acme, subject: "Service Agreement Renewal - Hayes & Co Distribution", department: acme_sales,
   created_by: sophia, sender: sophia, addressee: robert_hayes, status: "draft"
 )
 
 doc = add_document!(
-  entity: acme, subject: "Purchase Order #2026-014 - Martinez Supply Chain",
+  entity: acme, subject: "Purchase Order #2026-014 - Martinez Supply Chain", department: acme_operations,
   created_by: james, sender: james, addressee: linda_martinez, status: "in_progress"
 )
 attach_main_file!(doc)
@@ -190,7 +237,7 @@ add_step!(doc, order: 4, role: "EXP", status: "pending", actor: james)
 add_cc!(doc, sophia)
 
 doc = add_document!(
-  entity: acme, subject: "Non-Disclosure Agreement - Hayes & Co Distribution",
+  entity: acme, subject: "Non-Disclosure Agreement - Hayes & Co Distribution", department: acme_finance,
   created_by: sophia, sender: sophia, addressee: robert_hayes, status: "signed"
 )
 attach_main_file!(doc)
@@ -201,7 +248,7 @@ add_step!(doc, order: 4, role: "EXP", status: "pending", actor: james)
 add_cc!(doc, linda_martinez)
 
 doc = add_document!(
-  entity: acme, subject: "Annual Compliance Report 2025",
+  entity: acme, subject: "Annual Compliance Report 2025", department: acme_finance,
   created_by: marcus, sender: marcus, addressee: james, status: "finalized", is_frozen: true
 )
 attach_main_file!(doc)
@@ -214,19 +261,19 @@ add_step!(doc, order: 5, role: "EXP", status: "approved", actor: james)
 add_shared_link!(doc)
 
 add_document!(
-  entity: acme, subject: "Equipment Lease Proposal (Cancelled)",
+  entity: acme, subject: "Equipment Lease Proposal (Cancelled)", department: acme_sales,
   created_by: sophia, sender: sophia, addressee: linda_martinez, status: "cancelled"
 )
 
 puts "== Seeding documents for Northbridge Consulting Group =="
 
 add_document!(
-  entity: northbridge, subject: "Consulting Proposal - Reed Capital Partners",
+  entity: northbridge, subject: "Consulting Proposal - Reed Capital Partners", department: northbridge_advisory,
   created_by: daniel, sender: daniel, addressee: thomas_reed, status: "draft"
 )
 
 doc = add_document!(
-  entity: northbridge, subject: "Engagement Letter - Hussain & Associates",
+  entity: northbridge, subject: "Engagement Letter - Hussain & Associates", department: northbridge_advisory,
   created_by: daniel, sender: daniel, addressee: nadia_hussain, status: "in_progress"
 )
 attach_main_file!(doc)
@@ -237,7 +284,7 @@ add_step!(doc, order: 4, role: "EXP", status: "pending", actor: daniel)
 add_cc!(doc, marcus)
 
 doc = add_document!(
-  entity: northbridge, subject: "Master Services Agreement - Reed Capital Partners",
+  entity: northbridge, subject: "Master Services Agreement - Reed Capital Partners", department: northbridge_advisory,
   created_by: priya, sender: priya, addressee: thomas_reed, status: "signed"
 )
 attach_main_file!(doc)
@@ -247,7 +294,7 @@ add_step!(doc, order: 3, role: "SIGN", status: "approved", actor: priya, comment
 add_step!(doc, order: 4, role: "EXP", status: "pending", actor: daniel)
 
 doc = add_document!(
-  entity: northbridge, subject: "Quarterly Advisory Report - Q4 2025",
+  entity: northbridge, subject: "Quarterly Advisory Report - Q4 2025", department: northbridge_finance,
   created_by: priya, sender: priya, addressee: daniel, status: "finalized", is_frozen: true
 )
 attach_main_file!(doc)
@@ -259,19 +306,19 @@ add_step!(doc, order: 4, role: "EXP", status: "approved", actor: daniel)
 add_shared_link!(doc)
 
 add_document!(
-  entity: northbridge, subject: "Partnership Term Sheet (Withdrawn)",
+  entity: northbridge, subject: "Partnership Term Sheet (Withdrawn)", department: northbridge_advisory,
   created_by: daniel, sender: daniel, addressee: nadia_hussain, status: "cancelled"
 )
 
 puts "== Seeding documents for Harborview Logistics Inc =="
 
 add_document!(
-  entity: harborview, subject: "Freight Forwarding Agreement - Kowalski Freight Services",
+  entity: harborview, subject: "Freight Forwarding Agreement - Kowalski Freight Services", department: harborview_logistics,
   created_by: liam, sender: liam, addressee: anna_kowalski, status: "draft"
 )
 
 doc = add_document!(
-  entity: harborview, subject: "Customs Brokerage Contract - Mendes Shipping Co",
+  entity: harborview, subject: "Customs Brokerage Contract - Mendes Shipping Co", department: harborview_logistics,
   created_by: liam, sender: liam, addressee: carlos_mendes, status: "in_progress"
 )
 attach_main_file!(doc)
@@ -282,7 +329,7 @@ add_step!(doc, order: 4, role: "EXP", status: "pending", actor: liam)
 add_cc!(doc, priya)
 
 doc = add_document!(
-  entity: harborview, subject: "Warehouse Lease Renewal - Kowalski Freight Services",
+  entity: harborview, subject: "Warehouse Lease Renewal - Kowalski Freight Services", department: harborview_logistics,
   created_by: emma, sender: emma, addressee: anna_kowalski, status: "signed"
 )
 attach_main_file!(doc)
@@ -292,7 +339,7 @@ add_step!(doc, order: 3, role: "SIGN", status: "approved", actor: emma)
 add_step!(doc, order: 4, role: "EXP", status: "pending", actor: liam)
 
 doc = add_document!(
-  entity: harborview, subject: "Annual Safety Compliance Certificate 2025",
+  entity: harborview, subject: "Annual Safety Compliance Certificate 2025", department: harborview_finance,
   created_by: emma, sender: emma, addressee: liam, status: "finalized", is_frozen: true
 )
 attach_main_file!(doc)
@@ -304,11 +351,11 @@ add_step!(doc, order: 4, role: "EXP", status: "approved", actor: liam)
 add_shared_link!(doc, expires_at: 1.day.ago)
 
 add_document!(
-  entity: harborview, subject: "Fleet Maintenance Contract (Cancelled Draft)",
+  entity: harborview, subject: "Fleet Maintenance Contract (Cancelled Draft)", department: harborview_logistics,
   created_by: liam, sender: liam, addressee: carlos_mendes, status: "cancelled"
 )
 
 puts "\nSeed data created successfully."
-puts "Entities: #{Entity.count}, Users: #{User.count}, Contacts: #{Contact.count}, Documents: #{Document.count}"
+puts "Entities: #{Entity.count}, Departments: #{Department.count}, Users: #{User.count}, Contacts: #{Contact.count}, Documents: #{Document.count}"
 puts "All seeded users share the password: #{PASSWORD}"
 puts "Super admin login: olivia.bennett@documentflow.example"

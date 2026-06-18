@@ -4,14 +4,22 @@ require "rails_helper"
 
 RSpec.describe Documents::CreateOrganizer do
   let(:entity) { create(:entity) }
+  let(:department) { create(:department, entity: entity) }
   let(:user) { create(:user) }
   let(:sender) { create(:contact, entity: entity) }
   let(:addressee) { create(:contact, entity: entity) }
+
+  let!(:entity_user) do
+    eu = create(:entity_user, entity: entity, user: user, role: "member", status: "active")
+    create(:entity_user_department, entity_user: eu, department: department)
+    eu
+  end
 
   let(:document_params) do
     {
       subject: "Contrat de prestation",
       document_date: Date.current,
+      department_id: department.id,
       sender_token: "Contact-#{sender.id}",
       addressee_token: "Contact-#{addressee.id}"
     }
@@ -19,13 +27,14 @@ RSpec.describe Documents::CreateOrganizer do
 
   describe ".call" do
     context "avec des paramètres valides" do
-      it "crée le document scopé à l'entité" do
+      it "crée le document scopé à l'entité et au département" do
         expect {
           described_class.call(entity: entity, current_user: user, document_params: document_params)
         }.to change(Document, :count).by(1)
 
         document = entity.documents.last
         expect(document.entity).to eq(entity)
+        expect(document.department).to eq(department)
         expect(document.created_by).to eq(user)
         expect(document.status).to eq("draft")
       end
@@ -47,7 +56,8 @@ RSpec.describe Documents::CreateOrganizer do
 
     context "avec des paramètres invalides" do
       let(:document_params) do
-        { subject: "", document_date: nil, sender_token: "Contact-#{sender.id}", addressee_token: "Contact-#{addressee.id}" }
+        { subject: "", document_date: nil, department_id: department.id,
+          sender_token: "Contact-#{sender.id}", addressee_token: "Contact-#{addressee.id}" }
       end
 
       it "ne crée pas de document" do
@@ -70,6 +80,7 @@ RSpec.describe Documents::CreateOrganizer do
         {
           subject: "Contrat de prestation",
           document_date: Date.current,
+          department_id: department.id,
           sender_token: "Contact-#{other_contact.id}",
           addressee_token: "Contact-#{addressee.id}"
         }
@@ -82,6 +93,40 @@ RSpec.describe Documents::CreateOrganizer do
         }.not_to change(Document, :count)
 
         expect(result).not_to be_success
+      end
+    end
+
+    context "quand l'utilisateur n'appartient pas au département sélectionné" do
+      let(:other_department) { create(:department, entity: entity) }
+      let(:document_params) do
+        {
+          subject: "Contrat de prestation",
+          document_date: Date.current,
+          department_id: other_department.id,
+          sender_token: "Contact-#{sender.id}",
+          addressee_token: "Contact-#{addressee.id}"
+        }
+      end
+
+      it "ne crée pas de document et retourne un message explicite" do
+        result = nil
+        expect {
+          result = described_class.call(entity: entity, current_user: user, document_params: document_params)
+        }.not_to change(Document, :count)
+
+        expect(result).not_to be_success
+        expect(result.message).to include("not a member of the selected department")
+      end
+    end
+
+    context "quand l'utilisateur est owner et n'appartient à aucun département" do
+      let(:owner) { create(:user) }
+      let!(:owner_entity_user) { create(:entity_user, :owner, entity: entity, user: owner) }
+
+      it "crée tout de même le document" do
+        expect {
+          described_class.call(entity: entity, current_user: owner, document_params: document_params)
+        }.to change(Document, :count).by(1)
       end
     end
   end

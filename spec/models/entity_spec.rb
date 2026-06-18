@@ -11,6 +11,7 @@ RSpec.describe Entity, type: :model do
     it { is_expected.to have_many(:entity_users).dependent(:destroy) }
     it { is_expected.to have_many(:users).through(:entity_users) }
     it { is_expected.to have_many(:contacts).dependent(:destroy) }
+    it { is_expected.to have_many(:departments).dependent(:destroy) }
     it { is_expected.to have_one_attached(:logo) }
   end
 

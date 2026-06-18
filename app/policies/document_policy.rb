@@ -6,11 +6,17 @@ class DocumentPolicy < ApplicationPolicy
   end
 
   def show?
-    entity_staff? || entity_guest?
+    return false unless entity_staff? || entity_guest?
+    return true if entity_owner? || entity_admin?
+
+    entity_user.member_of?(record.department) || record.workflow_steps.exists?(actor: user)
   end
 
   def create?
-    entity_staff?
+    return false unless entity_staff?
+    return true if entity_owner? || entity_admin?
+
+    entity_user.departments.exists?
   end
 
   def update?
@@ -49,13 +55,27 @@ class DocumentPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      scope.where(entity: accessible_entities)
+      scope.where(entity_id: unrestricted_entity_ids)
+           .or(scope.where(entity_id: restricted_entity_ids, department_id: accessible_department_ids))
     end
 
     private
 
-    def accessible_entities
-      EntityUser.active.where(user: user).select(:entity_id)
+    def active_entity_users
+      EntityUser.active.where(user: user)
+    end
+
+    def unrestricted_entity_ids
+      active_entity_users.where(role: %w[owner admin]).select(:entity_id)
+    end
+
+    def restricted_entity_ids
+      active_entity_users.where(role: %w[member guest]).select(:entity_id)
+    end
+
+    def accessible_department_ids
+      EntityUserDepartment.where(entity_user_id: active_entity_users.where(role: %w[member guest]).select(:id))
+                           .select(:department_id)
     end
   end
 end

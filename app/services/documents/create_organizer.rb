@@ -2,6 +2,7 @@
 
 module Documents
   class CreateOrganizer < ApplicationService
-    workflow_steps Actions::CreateDocument
+    workflow_steps Actions::ValidateDepartmentMembership,
+                   Actions::CreateDocument
   end
 end

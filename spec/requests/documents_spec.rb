@@ -4,6 +4,7 @@ require "rails_helper"
 
 RSpec.describe "Documents", type: :request do
   let(:entity) { create(:entity) }
+  let(:department) { create(:department, entity: entity) }
   let(:user) { create(:user) }
   let(:sender) { create(:contact, entity: entity) }
   let(:addressee) { create(:contact, entity: entity) }
@@ -18,10 +19,11 @@ RSpec.describe "Documents", type: :request do
     end
 
     context "when the user is an active member" do
-      let!(:document) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Supplier contract") }
+      let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Supplier contract") }
 
       before do
-        create(:entity_user, entity: entity, user: user)
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in user
       end
 
@@ -40,7 +42,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "filters by the search query" do
-        other = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Annual report")
+        other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Annual report")
 
         get entity_documents_path(entity), params: { q: "Supplier" }
 
@@ -59,8 +61,8 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "sorts documents by document date, most recent first, by default" do
-        older = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Older contract", document_date: 5.days.ago.to_date)
-        newer = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Newer contract", document_date: Date.current)
+        older = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Older contract", document_date: 5.days.ago.to_date)
+        newer = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Newer contract", document_date: Date.current)
 
         get entity_documents_path(entity)
 
@@ -68,8 +70,8 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "sorts by an explicit column and direction" do
-        alpha = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Alpha contract")
-        beta = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Beta contract")
+        alpha = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Alpha contract")
+        beta = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Beta contract")
 
         get entity_documents_path(entity), params: { sort: "subject", direction: "asc" }
 
@@ -77,7 +79,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "filters by status" do
-        in_progress = create(:document, :in_progress, entity: entity, sender: sender, addressee: addressee, subject: "In progress contract")
+        in_progress = create(:document, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee, subject: "In progress contract")
 
         get entity_documents_path(entity), params: { status: "in_progress" }
 
@@ -87,7 +89,7 @@ RSpec.describe "Documents", type: :request do
 
       it "paginates the results" do
         allow(Kaminari.config).to receive(:default_per_page).and_return(1)
-        create_list(:document, 2, entity: entity, sender: sender, addressee: addressee)
+        create_list(:document, 2, entity: entity, department: department, sender: sender, addressee: addressee)
 
         get entity_documents_path(entity)
 
@@ -108,11 +110,12 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "GET /entities/:entity_id/documents/mine" do
-    let!(:mine) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "My contract", created_by: user) }
-    let!(:others_document) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Colleague's contract") }
+    let!(:mine) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "My contract", created_by: user) }
+    let!(:others_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Colleague's contract") }
 
     before do
-      create(:entity_user, entity: entity, user: user)
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
       sign_in user
     end
 
@@ -126,11 +129,12 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "GET /entities/:entity_id/documents/received" do
-    let!(:received) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Routed to me") }
-    let!(:not_received) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Not routed to me") }
+    let!(:received) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Routed to me") }
+    let!(:not_received) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Not routed to me") }
 
     before do
-      create(:entity_user, entity: entity, user: user)
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
       create(:workflow_step, document: received, actor: user, status: "approved")
       create(:workflow_step, document: not_received, actor: create(:user))
       sign_in user
@@ -146,10 +150,11 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "GET /entities/:entity_id/documents/search" do
-    let!(:document) { create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Supplier contract") }
+    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Supplier contract") }
 
     before do
-      create(:entity_user, entity: entity, user: user)
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
       sign_in user
     end
 
@@ -167,8 +172,8 @@ RSpec.describe "Documents", type: :request do
     end
 
     it "re-applies the 'mine' scope when searching" do
-      mine = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Mine supplier deal", created_by: user)
-      other = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Other supplier deal")
+      mine = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Mine supplier deal", created_by: user)
+      other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
 
       get search_entity_documents_path(entity), params: { q: "supplier", scope: "mine" }
 
@@ -177,8 +182,8 @@ RSpec.describe "Documents", type: :request do
     end
 
     it "re-applies the 'received' scope when searching" do
-      received = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Received supplier deal")
-      other = create(:document, entity: entity, sender: sender, addressee: addressee, subject: "Other supplier deal")
+      received = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Received supplier deal")
+      other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
       create(:workflow_step, document: received, actor: user)
 
       get search_entity_documents_path(entity), params: { q: "supplier", scope: "received" }
@@ -230,6 +235,7 @@ RSpec.describe "Documents", type: :request do
             document: {
               subject: "New supplier agreement",
               document_date: Date.current,
+              department_id: department.id,
               sender_token: "Contact-#{sender.id}",
               addressee_token: "Contact-#{addressee.id}"
             }
@@ -255,6 +261,7 @@ RSpec.describe "Documents", type: :request do
               document: {
                 subject: "Internal memo",
                 document_date: Date.current,
+                department_id: department.id,
                 sender_token: "User-#{user.id}",
                 addressee_token: "Contact-#{addressee.id}"
               }
@@ -272,7 +279,7 @@ RSpec.describe "Documents", type: :request do
 
       context "with invalid params" do
         let(:document_params) do
-          { document: { subject: "", document_date: nil, sender_token: "Contact-#{sender.id}", addressee_token: "Contact-#{addressee.id}" } }
+          { document: { subject: "", document_date: nil, department_id: department.id, sender_token: "Contact-#{sender.id}", addressee_token: "Contact-#{addressee.id}" } }
         end
 
         it "does not create the document" do
@@ -287,11 +294,37 @@ RSpec.describe "Documents", type: :request do
           expect(response).to have_http_status(:unprocessable_content)
         end
       end
+
+      context "when the department belongs to a department the user isn't a member of" do
+        let(:other_department) { create(:department, entity: entity) }
+        let(:document_params) do
+          {
+            document: {
+              subject: "Should fail",
+              document_date: Date.current,
+              department_id: other_department.id,
+              sender_token: "Contact-#{sender.id}",
+              addressee_token: "Contact-#{addressee.id}"
+            }
+          }
+        end
+
+        before do
+          # the admin is replaced with a plain member with no department for this scenario
+          EntityUser.find_by(entity: entity, user: user).update!(role: "member")
+        end
+
+        it "does not create the document" do
+          expect {
+            post entity_documents_path(entity), params: document_params
+          }.not_to change(Document, :count)
+        end
+      end
     end
 
     context "when the user is a guest" do
       let(:document_params) do
-        { document: { subject: "Sneaky", document_date: Date.current, sender_token: "Contact-#{sender.id}", addressee_token: "Contact-#{addressee.id}" } }
+        { document: { subject: "Sneaky", document_date: Date.current, department_id: department.id, sender_token: "Contact-#{sender.id}", addressee_token: "Contact-#{addressee.id}" } }
       end
 
       before do
@@ -310,11 +343,12 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "GET /entities/:entity_id/documents/:id" do
-    let!(:document) { create(:document, entity: entity, sender: sender, addressee: addressee) }
+    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee) }
 
-    context "when the user is an active member" do
+    context "when the user is an active member of the document's department" do
       before do
-        create(:entity_user, entity: entity, user: user)
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in user
       end
 
@@ -327,7 +361,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       context "when the document has a validation circuit" do
-        let!(:document) { create(:document, :with_workflow, :in_progress, entity: entity, sender: sender, addressee: addressee) }
+        let!(:document) { create(:document, :with_workflow, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee) }
 
         it "displays the workflow steps" do
           get entity_document_path(entity, document)
@@ -339,7 +373,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       context "as the current step's actor" do
-        let!(:document) { create(:document, :with_workflow, :in_progress, entity: entity, sender: sender, addressee: addressee, created_by: user) }
+        let!(:document) { create(:document, :with_workflow, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
 
         before { document.workflow_steps.find_by(role: "RED").update!(actor: user) }
 
@@ -351,9 +385,24 @@ RSpec.describe "Documents", type: :request do
       end
     end
 
+    context "when the user is a member of a different department" do
+      before do
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: create(:department, entity: entity))
+        sign_in user
+      end
+
+      it "redirects with an authorization error" do
+        get entity_document_path(entity, document)
+
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to be_present
+      end
+    end
+
     context "public sharing" do
       context "when the document is finalized" do
-        let!(:document) { create(:document, :finalized, entity: entity, sender: sender, addressee: addressee) }
+        let!(:document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee) }
         let!(:shared_link) { create(:shared_link, document: document) }
 
         context "as entity staff" do
@@ -394,7 +443,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       context "when the document is not finalized" do
-        let!(:document) { create(:document, :in_progress, entity: entity, sender: sender, addressee: addressee) }
+        let!(:document) { create(:document, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee) }
 
         before do
           create(:entity_user, :admin, entity: entity, user: user)
@@ -422,11 +471,12 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "GET /entities/:entity_id/documents/:id/edit" do
-    let!(:document) { create(:document, entity: entity, sender: sender, addressee: addressee, created_by: user) }
+    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
 
     context "as the document's author" do
       before do
-        create(:entity_user, entity: entity, user: user)
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in user
       end
 
@@ -441,7 +491,8 @@ RSpec.describe "Documents", type: :request do
       let(:other) { create(:user) }
 
       before do
-        create(:entity_user, entity: entity, user: other)
+        eu = create(:entity_user, entity: entity, user: other)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in other
       end
 
@@ -455,11 +506,12 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "PATCH /entities/:entity_id/documents/:id" do
-    let!(:document) { create(:document, entity: entity, sender: sender, addressee: addressee, created_by: user, subject: "Old subject") }
+    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user, subject: "Old subject") }
 
     context "as the document's author" do
       before do
-        create(:entity_user, entity: entity, user: user)
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in user
       end
 
@@ -473,7 +525,7 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "DELETE /entities/:entity_id/documents/:id" do
-    let!(:document) { create(:document, entity: entity, sender: sender, addressee: addressee, created_by: user) }
+    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
 
     context "as entity owner" do
       before do
@@ -494,7 +546,8 @@ RSpec.describe "Documents", type: :request do
       let(:author) { document.created_by }
 
       before do
-        create(:entity_user, entity: entity, user: user)
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in user
       end
 
@@ -510,10 +563,11 @@ RSpec.describe "Documents", type: :request do
 
   describe "POST /entities/:entity_id/documents/:id/launch" do
     context "as the document's author" do
-      let!(:document) { create(:document, :with_workflow, entity: entity, sender: sender, addressee: addressee, created_by: user) }
+      let!(:document) { create(:document, :with_workflow, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
 
       before do
-        create(:entity_user, entity: entity, user: user)
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in user
       end
 
@@ -527,10 +581,11 @@ RSpec.describe "Documents", type: :request do
     end
 
     context "when the document has no validation circuit" do
-      let!(:document) { create(:document, entity: entity, sender: sender, addressee: addressee, created_by: user) }
+      let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
 
       before do
-        create(:entity_user, entity: entity, user: user)
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in user
       end
 
@@ -544,11 +599,12 @@ RSpec.describe "Documents", type: :request do
     end
 
     context "as another member" do
-      let!(:document) { create(:document, :with_workflow, entity: entity, sender: sender, addressee: addressee, created_by: user) }
+      let!(:document) { create(:document, :with_workflow, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
       let(:other) { create(:user) }
 
       before do
-        create(:entity_user, entity: entity, user: other)
+        eu = create(:entity_user, entity: entity, user: other)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in other
       end
 
@@ -563,10 +619,11 @@ RSpec.describe "Documents", type: :request do
 
   describe "POST /entities/:entity_id/documents/:id/cancel" do
     context "as the document's author" do
-      let!(:document) { create(:document, :in_progress, entity: entity, sender: sender, addressee: addressee, created_by: user) }
+      let!(:document) { create(:document, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
 
       before do
-        create(:entity_user, entity: entity, user: user)
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: department)
         sign_in user
       end
 
@@ -580,7 +637,7 @@ RSpec.describe "Documents", type: :request do
     end
 
     context "when the document is finalized" do
-      let!(:document) { create(:document, :finalized, entity: entity, sender: sender, addressee: addressee, created_by: user) }
+      let!(:document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
 
       before do
         create(:entity_user, :owner, entity: entity, user: user)

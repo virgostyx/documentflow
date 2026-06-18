@@ -36,11 +36,47 @@
                      class: "rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
         <%= render(Ui::ButtonComponent.new) { "Invite" } %>
       </div>
+
+      <div class="mt-3 flex flex-col sm:flex-row gap-3">
+        <%= f.select :"entity_user[department_ids][]", @departments.map { |d| [ d.name, d.id ] }, { include_blank: false },
+                     multiple: true, class: "flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+        <%= f.select :"entity_user[primary_department_id]", @departments.map { |d| [ d.name, d.id ] }, { include_blank: "Primary department (optional)" },
+                     class: "flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+      </div>
+      <p class="mt-1 text-xs text-gray-500">Departments are required for members and guests; owners and admins may skip this.</p>
     <% end %>
   <% end %>
 
   <div class="mt-6"></div>
 <% end %>
+
+<%= render Ui::CardComponent.new do |card| %>
+  <% card.with_header { "Departments" } %>
+
+  <% if @departments.any? %>
+    <ul class="divide-y divide-gray-100">
+      <% @departments.each do |department| %>
+        <li class="flex items-center justify-between py-3">
+          <span class="text-gray-900"><%= department.name %><%= " (default)" if department.default? %></span>
+
+          <% if policy(department).update? %>
+            <%= render(Ui::ButtonComponent.new(href: edit_entity_department_path(current_entity, department), variant: :secondary)) { "Edit" } %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-gray-600">No departments yet.</p>
+  <% end %>
+
+  <% if policy(Department.new(entity: current_entity)).create? %>
+    <div class="mt-4">
+      <%= render(Ui::ButtonComponent.new(href: new_entity_department_path(current_entity), variant: :secondary)) { "Add department" } %>
+    </div>
+  <% end %>
+<% end %>
+
+<div class="mt-6"></div>
 
 <%= render Ui::CardComponent.new do |card| %>
   <% card.with_header { "All members" } %>

@@ -4,6 +4,7 @@ FactoryBot.define do
   factory :document do
     association :entity
     association :created_by, factory: :user
+    department { create(:department, entity: entity) }
     sender { create(:contact, entity: entity) }
     addressee { create(:contact, entity: entity) }
     subject { "Contrat de prestation" }

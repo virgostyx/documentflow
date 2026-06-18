@@ -8,6 +8,8 @@ class EntityUser < ApplicationRecord
   belongs_to :entity
   belongs_to :user, optional: true
   belongs_to :invited_by, class_name: "User", optional: true
+  has_many :entity_user_departments, dependent: :destroy
+  has_many :departments, through: :entity_user_departments
 
   # Validations
   validates :role, presence: true, inclusion: { in: ROLES }
@@ -59,6 +61,14 @@ class EntityUser < ApplicationRecord
 
   def accept_for!(accepting_user)
     update!(user: accepting_user, status: "active", accepted_at: Time.current)
+  end
+
+  def primary_department
+    entity_user_departments.find_by(primary: true)&.department
+  end
+
+  def member_of?(department)
+    department.present? && departments.exists?(department.id)
   end
 
   private

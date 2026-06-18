@@ -31,6 +31,10 @@ module Entities
       ROLE_COLORS[entity_user.role] || :gray
     end
 
+    def department_names
+      entity_user.departments.map(&:name).join(", ")
+    end
+
     def manage_members?
       Pundit.policy!(current_user, entity).manage_members?
     end

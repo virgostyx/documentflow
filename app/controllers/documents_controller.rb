@@ -124,6 +124,6 @@ class DocumentsController < ApplicationController
   end
 
   def document_params
-    params.require(:document).permit(:subject, :document_date, :sender_token, :addressee_token)
+    params.require(:document).permit(:subject, :document_date, :department_id, :sender_token, :addressee_token)
   end
 end

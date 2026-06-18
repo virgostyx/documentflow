@@ -1,0 +1,38 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: "Manage departments",
+    description: @entity_user.user&.email || @entity_user.invited_email,
+    back_path: entity_settings_path(current_entity),
+    back_text: "Settings"
+  ) %>
+
+  <%= render Ui::CardComponent.new do %>
+    <%= form_with url: update_departments_entity_entity_user_path(current_entity, @entity_user), method: :patch, local: true do |f| %>
+      <fieldset class="space-y-3">
+        <legend class="text-sm font-medium text-gray-900 mb-2">Departments</legend>
+
+        <% @departments.each do |department| %>
+          <div class="flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2 text-sm text-gray-700">
+              <%= check_box_tag "entity_user[department_ids][]", department.id,
+                    @entity_user.member_of?(department), id: "department_#{department.id}",
+                    class: "rounded border-gray-300" %>
+              <%= department.name %>
+            </label>
+
+            <label class="flex items-center gap-2 text-sm text-gray-500">
+              <%= radio_button_tag "entity_user[primary_department_id]", department.id,
+                    @entity_user.primary_department == department, id: "primary_department_#{department.id}" %>
+              Primary
+            </label>
+          </div>
+        <% end %>
+      </fieldset>
+
+      <div class="mt-6 flex justify-end gap-3">
+        <%= render(Ui::ButtonComponent.new(href: entity_settings_path(current_entity), variant: :secondary)) { "Cancel" } %>
+        <%= render(Ui::ButtonComponent.new) { "Save changes" } %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

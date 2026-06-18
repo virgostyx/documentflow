@@ -11,6 +11,7 @@ RSpec.describe Document, type: :model do
 
   describe "associations" do
     it { is_expected.to belong_to(:entity) }
+    it { is_expected.to belong_to(:department) }
     it { is_expected.to belong_to(:created_by).class_name("User") }
     it { is_expected.to belong_to(:sender) }
     it { is_expected.to belong_to(:addressee) }
@@ -68,6 +69,21 @@ RSpec.describe Document, type: :model do
 
         expect(document).not_to be_valid
         expect(document.errors[:sender]).to be_present
+      end
+    end
+
+    describe "department scoped to the document's entity" do
+      it "rejects a department belonging to another entity" do
+        document.department = create(:department, entity: create(:entity))
+
+        expect(document).not_to be_valid
+        expect(document.errors[:department]).to be_present
+      end
+
+      it "accepts a department belonging to the same entity" do
+        document.department = create(:department, entity: entity)
+
+        expect(document).to be_valid
       end
     end
   end

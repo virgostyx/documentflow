@@ -18,6 +18,7 @@ class Document < ApplicationRecord
 
   # Associations
   belongs_to :entity
+  belongs_to :department
   belongs_to :created_by, class_name: "User"
   belongs_to :sender, polymorphic: true
   belongs_to :addressee, polymorphic: true
@@ -36,6 +37,7 @@ class Document < ApplicationRecord
   validates :status, presence: true, inclusion: { in: STATUSES }
   validate :sender_belongs_to_entity
   validate :addressee_belongs_to_entity
+  validate :department_belongs_to_entity
 
   # Scopes
   scope :authored_by, ->(user) { where(created_by: user) }
@@ -110,5 +112,11 @@ class Document < ApplicationRecord
     return if entity.nil? || party_in_entity?(addressee)
 
     errors.add(:addressee, "must belong to the same entity")
+  end
+
+  def department_belongs_to_entity
+    return if entity.nil? || department.nil? || department.entity_id == entity_id
+
+    errors.add(:department, "must belong to the same entity")
   end
 end

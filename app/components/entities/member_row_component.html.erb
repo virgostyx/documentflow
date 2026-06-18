@@ -8,11 +8,19 @@
       <% if entity_user.pending? %>
         <%= render(Ui::BadgeComponent.new(color: :warning)) { "Pending" } %>
       <% end %>
+      <% if department_names.present? %>
+        <p class="text-xs text-gray-500"><%= department_names %></p>
+      <% end %>
     </div>
   </div>
 
   <div class="flex items-center gap-3">
     <%= render(Ui::BadgeComponent.new(color: role_color)) { role_label } %>
+
+    <% if manage_members? %>
+      <%= link_to "Manage departments", edit_departments_entity_entity_user_path(entity, entity_user),
+            class: "text-sm text-gray-600 hover:text-gray-900" %>
+    <% end %>
 
     <% if manage_members? && entity_user.user != current_user %>
       <%= link_to "Remove", entity_entity_user_path(entity, entity_user),

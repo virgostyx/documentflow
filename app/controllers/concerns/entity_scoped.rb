@@ -8,13 +8,17 @@ module EntityScoped
 
     before_action :set_current_entity
     before_action :authorize_entity_access!
-    helper_method :current_entity
+    helper_method :current_entity, :current_entity_user
   end
 
   private
 
   def current_entity
     @current_entity
+  end
+
+  def current_entity_user
+    @current_entity_user ||= EntityUser.active.find_by(entity: current_entity, user: current_user)
   end
 
   def set_current_entity

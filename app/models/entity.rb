@@ -8,6 +8,7 @@ class Entity < ApplicationRecord
   has_many :users, through: :entity_users
   has_many :contacts, dependent: :destroy
   has_many :documents, dependent: :destroy
+  has_many :departments, dependent: :destroy
   has_many :circuit_templates, dependent: :destroy
   has_one_attached :logo
 

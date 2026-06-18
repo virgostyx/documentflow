@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_15_140100) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_18_123933) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -105,11 +105,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_15_140100) do
     t.index ["entity_id"], name: "index_contacts_on_entity_id"
   end
 
+  create_table "departments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "entity_id", null: false
+    t.boolean "is_default", default: false, null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entity_id", "name"], name: "index_departments_on_entity_id_and_name", unique: true
+    t.index ["entity_id"], name: "index_departments_on_entity_id"
+  end
+
   create_table "documents", force: :cascade do |t|
     t.bigint "addressee_id", null: false
     t.string "addressee_type", null: false
     t.datetime "created_at", null: false
     t.bigint "created_by_id", null: false
+    t.bigint "department_id", null: false
     t.date "document_date", null: false
     t.bigint "entity_id", null: false
     t.boolean "is_frozen", default: false, null: false
@@ -121,6 +132,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_15_140100) do
     t.datetime "updated_at", null: false
     t.index ["addressee_type", "addressee_id"], name: "index_documents_on_addressee_type_and_addressee_id"
     t.index ["created_by_id"], name: "index_documents_on_created_by_id"
+    t.index ["department_id"], name: "index_documents_on_department_id"
     t.index ["entity_id", "reference_number"], name: "index_documents_on_entity_id_and_reference_number", unique: true
     t.index ["entity_id"], name: "index_documents_on_entity_id"
     t.index ["sender_type", "sender_id"], name: "index_documents_on_sender_type_and_sender_id"
@@ -136,6 +148,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_15_140100) do
     t.index ["code"], name: "index_entities_on_code", unique: true
     t.index ["name"], name: "index_entities_on_name", unique: true
     t.index ["status"], name: "index_entities_on_status"
+  end
+
+  create_table "entity_user_departments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "department_id", null: false
+    t.bigint "entity_user_id", null: false
+    t.boolean "primary", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.index ["department_id"], name: "index_entity_user_departments_on_department_id"
+    t.index ["entity_user_id", "department_id"], name: "idx_on_entity_user_id_department_id_be10080a56", unique: true
+    t.index ["entity_user_id"], name: "index_entity_user_departments_on_entity_user_id"
+    t.index ["entity_user_id"], name: "index_one_primary_department_per_entity_user", unique: true, where: "\"primary\""
   end
 
   create_table "entity_users", force: :cascade do |t|
@@ -210,8 +234,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_15_140100) do
   add_foreign_key "circuit_template_steps", "users", column: "actor_id"
   add_foreign_key "circuit_templates", "entities"
   add_foreign_key "contacts", "entities"
+  add_foreign_key "departments", "entities"
+  add_foreign_key "documents", "departments"
   add_foreign_key "documents", "entities"
   add_foreign_key "documents", "users", column: "created_by_id"
+  add_foreign_key "entity_user_departments", "departments"
+  add_foreign_key "entity_user_departments", "entity_users"
   add_foreign_key "entity_users", "entities"
   add_foreign_key "entity_users", "users"
   add_foreign_key "entity_users", "users", column: "invited_by_id"

@@ -87,6 +87,93 @@ RSpec.describe "EntityUsers", type: :request do
         expect(response).to redirect_to(root_path)
       end
     end
+
+    context "with departments assigned" do
+      let(:department_a) { create(:department, entity: entity) }
+      let(:department_b) { create(:department, entity: entity) }
+      let(:invite_params) do
+        {
+          entity_user: {
+            invited_email: "new@example.com", role: "member",
+            department_ids: [ department_a.id, department_b.id ], primary_department_id: department_a.id
+          }
+        }
+      end
+
+      before { sign_in owner }
+
+      it "assigns the departments with the right primary department" do
+        post entity_entity_users_path(entity), params: invite_params
+
+        invitation = entity.entity_users.find_by(invited_email: "new@example.com")
+        expect(invitation.departments).to contain_exactly(department_a, department_b)
+        expect(invitation.primary_department).to eq(department_a)
+      end
+    end
+  end
+
+  describe "GET /entities/:entity_id/entity_users/:id/edit_departments" do
+    context "when the current user can manage members" do
+      before { sign_in owner }
+
+      it "renders the manage departments form" do
+        get edit_departments_entity_entity_user_path(entity, member_membership)
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "when the current user cannot manage members" do
+      before { sign_in member_user }
+
+      it "redirects with an authorization error" do
+        get edit_departments_entity_entity_user_path(entity, member_membership)
+
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
+  describe "PATCH /entities/:entity_id/entity_users/:id/update_departments" do
+    let(:department_a) { create(:department, entity: entity) }
+    let(:department_b) { create(:department, entity: entity) }
+
+    context "when the current user can manage members" do
+      before { sign_in owner }
+
+      it "replaces the member's departments" do
+        patch update_departments_entity_entity_user_path(entity, member_membership), params: {
+          entity_user: { department_ids: [ department_a.id, department_b.id ], primary_department_id: department_b.id }
+        }
+
+        member_membership.reload
+        expect(member_membership.departments).to contain_exactly(department_a, department_b)
+        expect(member_membership.primary_department).to eq(department_b)
+        expect(response).to redirect_to(entity_settings_path(entity))
+      end
+
+      it "rejects an empty department list for a member" do
+        patch update_departments_entity_entity_user_path(entity, member_membership), params: {
+          entity_user: { department_ids: [], primary_department_id: nil }
+        }
+
+        expect(response).to redirect_to(entity_settings_path(entity))
+        expect(flash[:alert]).to be_present
+      end
+    end
+
+    context "when the current user cannot manage members" do
+      before { sign_in member_user }
+
+      it "does not change departments and is redirected with an authorization error" do
+        patch update_departments_entity_entity_user_path(entity, owner_membership), params: {
+          entity_user: { department_ids: [ department_a.id ], primary_department_id: department_a.id }
+        }
+
+        expect(owner_membership.reload.departments).to be_empty
+        expect(response).to redirect_to(root_path)
+      end
+    end
   end
 
   describe "PATCH /entities/:entity_id/entity_users/:id (change role)" do

@@ -103,4 +103,66 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       expect(rendered).to have_css("a[data-turbo-method='delete']", text: "Sign out")
     end
   end
+
+  describe "department badge" do
+    let(:finance) { create(:department, entity: entity, name: "Finance") }
+    let(:sales) { create(:department, entity: entity, name: "Sales") }
+
+    context "when no current_entity_user is given" do
+      it "does not show any department badge" do
+        expect(rendered).not_to have_text("All departments")
+      end
+    end
+
+    context "when the current user is an owner or admin" do
+      let(:entity_user) { create(:entity_user, :owner, entity: entity, user: user) }
+
+      subject(:rendered) do
+        with_request_url(current_path) do
+          render_inline(described_class.new(current_entity: entity, current_user: user, current_entity_user: entity_user))
+        end
+      end
+
+      it "shows an All departments badge" do
+        expect(rendered).to have_text("All departments")
+      end
+    end
+
+    context "when the current user belongs to a single department" do
+      let(:entity_user) { create(:entity_user, entity: entity, user: user, role: "member") }
+
+      before { create(:entity_user_department, :primary, entity_user: entity_user, department: finance) }
+
+      subject(:rendered) do
+        with_request_url(current_path) do
+          render_inline(described_class.new(current_entity: entity, current_user: user, current_entity_user: entity_user))
+        end
+      end
+
+      it "shows the department name" do
+        expect(rendered).to have_text("Finance")
+        expect(rendered).not_to have_text("All departments")
+      end
+    end
+
+    context "when the current user belongs to multiple departments" do
+      let(:entity_user) { create(:entity_user, entity: entity, user: user, role: "member") }
+
+      before do
+        create(:entity_user_department, :primary, entity_user: entity_user, department: finance)
+        create(:entity_user_department, entity_user: entity_user, department: sales)
+      end
+
+      subject(:rendered) do
+        with_request_url(current_path) do
+          render_inline(described_class.new(current_entity: entity, current_user: user, current_entity_user: entity_user))
+        end
+      end
+
+      it "shows both department names" do
+        expect(rendered).to have_text("Finance")
+        expect(rendered).to have_text("Sales")
+      end
+    end
+  end
 end

@@ -11,6 +11,19 @@
   <div class="px-5 py-3 border-b border-gray-100">
     <p class="text-sm font-semibold text-gray-900 truncate"><%= current_entity.name %></p>
     <p class="text-xs text-gray-400 truncate"><%= current_entity.code %></p>
+
+    <% if current_entity_user %>
+      <div class="mt-2 flex flex-wrap gap-1">
+        <% if unrestricted_access? %>
+          <%= render(Ui::BadgeComponent.new(color: :info)) { "All departments" } %>
+        <% else %>
+          <% departments.each do |department| %>
+            <%= render(Ui::BadgeComponent.new(color: department == current_entity_user.primary_department ? :primary : :gray)) { department.name } %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
     <%= link_to "Switch entity", entities_path, class: "mt-1 inline-flex items-center text-xs text-primary-600 hover:text-primary-700 transition-colors" %>
   </div>
 

@@ -1,0 +1,125 @@
+- generic [active] [ref=e1]:
+  - complementary [ref=e2]:
+    - link "DocumentFlow" [ref=e3] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e4]
+      - generic [ref=e6]: DocumentFlow
+    - generic [ref=e7]:
+      - paragraph [ref=e8]: Acme Manufacturing Ltd
+      - paragraph [ref=e9]: ENT-CKIARV
+      - generic [ref=e11]: All departments
+      - link "Switch entity" [ref=e12] [cursor=pointer]:
+        - /url: /entities
+    - navigation [ref=e13]:
+      - paragraph [ref=e15]: Documents
+      - link "Overview" [ref=e16] [cursor=pointer]:
+        - /url: /entities/1/documents
+        - img [ref=e17]
+        - text: Overview
+      - link "My documents" [ref=e19] [cursor=pointer]:
+        - /url: /entities/1/documents/mine
+        - img [ref=e20]
+        - text: My documents
+      - link "Received documents" [ref=e22] [cursor=pointer]:
+        - /url: /entities/1/documents/received
+        - img [ref=e23]
+        - text: Received documents
+      - paragraph [ref=e26]: Contacts
+      - link "Overview" [ref=e27] [cursor=pointer]:
+        - /url: /entities/1/contacts
+        - img [ref=e28]
+        - text: Overview
+      - paragraph [ref=e31]: Settings
+      - link "Settings" [ref=e32] [cursor=pointer]:
+        - /url: /entities/1/settings
+        - img [ref=e33]
+        - text: Settings
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: M
+        - paragraph [ref=e40]: marcus.chen@acme-mfg.example
+      - link "Sign out" [ref=e41] [cursor=pointer]:
+        - /url: /users/sign_out
+        - img [ref=e42]
+        - text: Sign out
+  - generic [ref=e44]:
+    - banner [ref=e45]:
+      - navigation "Breadcrumb" [ref=e47]:
+        - list [ref=e48]:
+          - listitem [ref=e49]:
+            - link "Documents" [ref=e50] [cursor=pointer]:
+              - /url: /entities/1/documents
+          - listitem [ref=e51]:
+            - img [ref=e52]
+            - generic [ref=e54]: Overview
+      - link "New document" [ref=e56] [cursor=pointer]:
+        - /url: /entities/1/documents/new
+    - main [ref=e57]:
+      - generic [ref=e58]:
+        - searchbox "Search documents..." [ref=e60]
+        - button "Filters" [ref=e62]:
+          - img [ref=e63]
+          - text: Filters
+          - img [ref=e65]
+      - table [ref=e69]:
+        - rowgroup [ref=e70]:
+          - row "Reference Subject Sender → Addressee Date ▼ Status" [ref=e71]:
+            - columnheader "Reference" [ref=e72]:
+              - link "Reference" [ref=e73] [cursor=pointer]:
+                - /url: /entities/1/documents?direction=asc&sort=reference_number
+            - columnheader "Subject" [ref=e74]:
+              - link "Subject" [ref=e75] [cursor=pointer]:
+                - /url: /entities/1/documents?direction=asc&sort=subject
+            - columnheader "Sender → Addressee" [ref=e76]
+            - columnheader "Date ▼" [ref=e77]:
+              - link "Date ▼" [ref=e78] [cursor=pointer]:
+                - /url: /entities/1/documents?direction=asc&sort=document_date
+            - columnheader "Status" [ref=e79]:
+              - link "Status" [ref=e80] [cursor=pointer]:
+                - /url: /entities/1/documents?direction=asc&sort=status
+        - rowgroup [ref=e81]:
+          - row "2026/00005 Equipment Lease Proposal (Cancelled) Sophia Rodriguez → Linda Martinez 2026-06-18 Cancelled" [ref=e82] [cursor=pointer]:
+            - cell "2026/00005" [ref=e83]:
+              - link "2026/00005" [ref=e84]:
+                - /url: /entities/1/documents/5
+            - cell "Equipment Lease Proposal (Cancelled)" [ref=e85]
+            - cell "Sophia Rodriguez → Linda Martinez" [ref=e86]
+            - cell "2026-06-18" [ref=e87]
+            - cell "Cancelled" [ref=e88]:
+              - generic [ref=e89]: Cancelled
+          - row "2026/00004 Annual Compliance Report 2025 Marcus Chen → James Whitfield 2026-06-18 Finalized" [ref=e90] [cursor=pointer]:
+            - cell "2026/00004" [ref=e91]:
+              - link "2026/00004" [ref=e92]:
+                - /url: /entities/1/documents/4
+            - cell "Annual Compliance Report 2025" [ref=e93]
+            - cell "Marcus Chen → James Whitfield" [ref=e94]
+            - cell "2026-06-18" [ref=e95]
+            - cell "Finalized" [ref=e96]:
+              - generic [ref=e97]: Finalized
+          - row "2026/00003 Non-Disclosure Agreement - Hayes & Co Distribution Sophia Rodriguez → Robert Hayes 2026-06-18 Signed" [ref=e98] [cursor=pointer]:
+            - cell "2026/00003" [ref=e99]:
+              - link "2026/00003" [ref=e100]:
+                - /url: /entities/1/documents/3
+            - cell "Non-Disclosure Agreement - Hayes & Co Distribution" [ref=e101]
+            - cell "Sophia Rodriguez → Robert Hayes" [ref=e102]
+            - cell "2026-06-18" [ref=e103]
+            - cell "Signed" [ref=e104]:
+              - generic [ref=e105]: Signed
+          - 'row "2026/00002 Purchase Order #2026-014 - Martinez Supply Chain James Whitfield → Linda Martinez 2026-06-18 In Progress" [ref=e106] [cursor=pointer]':
+            - cell "2026/00002" [ref=e107]:
+              - link "2026/00002" [ref=e108]:
+                - /url: /entities/1/documents/2
+            - 'cell "Purchase Order #2026-014 - Martinez Supply Chain" [ref=e109]'
+            - cell "James Whitfield → Linda Martinez" [ref=e110]
+            - cell "2026-06-18" [ref=e111]
+            - cell "In Progress" [ref=e112]:
+              - generic [ref=e113]: In Progress
+          - row "2026/00001 Service Agreement Renewal - Hayes & Co Distribution Sophia Rodriguez → Robert Hayes 2026-06-18 Draft" [ref=e114] [cursor=pointer]:
+            - cell "2026/00001" [ref=e115]:
+              - link "2026/00001" [ref=e116]:
+                - /url: /entities/1/documents/1
+            - cell "Service Agreement Renewal - Hayes & Co Distribution" [ref=e117]
+            - cell "Sophia Rodriguez → Robert Hayes" [ref=e118]
+            - cell "2026-06-18" [ref=e119]
+            - cell "Draft" [ref=e120]:
+              - generic [ref=e121]: Draft

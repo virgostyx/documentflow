@@ -1,0 +1,31 @@
+- generic [active] [ref=e64]:
+  - banner [ref=e65]:
+    - generic [ref=e66]:
+      - link "DocumentFlow" [ref=e67] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e68]
+        - generic [ref=e70]: DocumentFlow
+      - button "J james.whitfield@acme-mfg.example" [ref=e72]:
+        - generic [ref=e73]: J
+        - generic [ref=e74]: james.whitfield@acme-mfg.example
+        - img [ref=e75]
+  - alert [ref=e78]:
+    - img [ref=e80]
+    - paragraph [ref=e82]: Signed in successfully.
+    - button [ref=e83]:
+      - img [ref=e84]
+  - main [ref=e87]:
+    - generic [ref=e88]:
+      - generic [ref=e89]:
+        - heading "Dashboard" [level=1] [ref=e91]
+        - paragraph [ref=e92]: Welcome, james.whitfield@acme-mfg.example.
+      - link "New entity" [ref=e94] [cursor=pointer]:
+        - /url: /entities/new
+      - link "Acme Manufacturing Ltd ENT-CKIARV Member 5 members" [ref=e96] [cursor=pointer]:
+        - /url: /entities/1
+        - generic [ref=e97]:
+          - generic [ref=e98]:
+            - heading "Acme Manufacturing Ltd" [level=3] [ref=e99]
+            - paragraph [ref=e100]: ENT-CKIARV
+          - generic [ref=e101]: Member
+        - paragraph [ref=e102]: 5 members

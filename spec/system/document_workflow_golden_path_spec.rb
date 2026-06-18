@@ -35,6 +35,10 @@ RSpec.describe "Document validation circuit golden path", type: :system do
     click_link "Launch"
     expect(page).to have_content("Document launched successfully")
     expect(page).to have_content("In Progress")
+    within("[data-role='RED']") { expect(page).to have_content("Pending") }
+
+    click_button "Approve"
+    expect(page).to have_content("approved")
     within("[data-role='RED']") { expect(page).to have_content("Approved") }
     within("[data-role='VISA']") { expect(page).to have_content("Pending") }
 

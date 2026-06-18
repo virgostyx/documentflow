@@ -63,7 +63,7 @@ def add_template_step!(template, order:, role:, actor: nil, is_parallel: false, 
   end
 end
 
-def add_document!(entity:, subject:, department:, created_by:, sender:, addressee:, status:, is_frozen: false, document_date: Date.current)
+def add_document!(entity:, subject:, department:, created_by:, sender:, addressee:, status:, is_frozen: false, document_date: Date.current, expects_response: false)
   entity.documents.find_or_create_by!(subject: subject) do |doc|
     doc.department = department
     doc.created_by = created_by
@@ -72,6 +72,7 @@ def add_document!(entity:, subject:, department:, created_by:, sender:, addresse
     doc.document_date = document_date
     doc.status = status
     doc.is_frozen = is_frozen
+    doc.expects_response = expects_response
   end
 end
 
@@ -265,6 +266,20 @@ add_document!(
   created_by: sophia, sender: sophia, addressee: linda_martinez, status: "cancelled"
 )
 
+# ToDo for james: he is the addressee and a response is expected from him.
+add_document!(
+  entity: acme, subject: "Quote Request - Need Confirmation from Operations", department: acme_operations,
+  created_by: marcus, sender: marcus, addressee: james, status: "in_progress", expects_response: true
+)
+
+# Waiting for james (he created it and is awaiting Martinez Supply Chain's reply);
+# Info for sophia, who is cc'd and therefore not on the hook for a response.
+doc = add_document!(
+  entity: acme, subject: "Updated Pricing Sheet - Martinez Supply Chain", department: acme_operations,
+  created_by: james, sender: james, addressee: linda_martinez, status: "in_progress", expects_response: true
+)
+add_cc!(doc, sophia)
+
 puts "== Seeding documents for Northbridge Consulting Group =="
 
 add_document!(
@@ -310,6 +325,20 @@ add_document!(
   created_by: daniel, sender: daniel, addressee: nadia_hussain, status: "cancelled"
 )
 
+# ToDo for daniel: he is the addressee and a response is expected from him.
+add_document!(
+  entity: northbridge, subject: "Budget Approval Needed - Q1 2026", department: northbridge_finance,
+  created_by: priya, sender: priya, addressee: daniel, status: "in_progress", expects_response: true
+)
+
+# Waiting for priya (she created it and is awaiting Reed Capital's reply);
+# Info for daniel, who is cc'd and therefore not on the hook for a response.
+doc = add_document!(
+  entity: northbridge, subject: "Updated Engagement Terms - Reed Capital Partners", department: northbridge_advisory,
+  created_by: priya, sender: priya, addressee: thomas_reed, status: "in_progress", expects_response: true
+)
+add_cc!(doc, daniel)
+
 puts "== Seeding documents for Harborview Logistics Inc =="
 
 add_document!(
@@ -354,6 +383,20 @@ add_document!(
   entity: harborview, subject: "Fleet Maintenance Contract (Cancelled Draft)", department: harborview_logistics,
   created_by: liam, sender: liam, addressee: carlos_mendes, status: "cancelled"
 )
+
+# ToDo for liam: he is the addressee and a response is expected from him.
+add_document!(
+  entity: harborview, subject: "Insurance Renewal Confirmation Needed", department: harborview_logistics,
+  created_by: emma, sender: emma, addressee: liam, status: "in_progress", expects_response: true
+)
+
+# Waiting for emma (she created it and is awaiting Mendes Shipping's reply);
+# Info for liam, who is cc'd and therefore not on the hook for a response.
+doc = add_document!(
+  entity: harborview, subject: "Rate Adjustment Proposal - Mendes Shipping Co", department: harborview_logistics,
+  created_by: emma, sender: emma, addressee: carlos_mendes, status: "in_progress", expects_response: true
+)
+add_cc!(doc, liam)
 
 puts "\nSeed data created successfully."
 puts "Entities: #{Entity.count}, Departments: #{Department.count}, Users: #{User.count}, Contacts: #{Contact.count}, Documents: #{Document.count}"

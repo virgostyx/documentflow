@@ -66,6 +66,37 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).not_to include("Due ")
       end
 
+      it "shows the deadline in red when today is on or after the deadline" do
+        travel_to Date.new(2026, 7, 1) do
+          create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Overdue reply", response_deadline: Date.new(2026, 7, 1))
+
+          get entity_documents_path(entity)
+
+          expect(response.body).to include("bg-danger-100")
+        end
+      end
+
+      it "shows the deadline in yellow when today is the day before the deadline" do
+        travel_to Date.new(2026, 7, 1) do
+          create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Reply due tomorrow", response_deadline: Date.new(2026, 7, 2))
+
+          get entity_documents_path(entity)
+
+          expect(response.body).to include("bg-warning-100")
+        end
+      end
+
+      it "shows the deadline without a color when it is further away" do
+        travel_to Date.new(2026, 7, 1) do
+          create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Reply due later", response_deadline: Date.new(2026, 7, 10))
+
+          get entity_documents_path(entity)
+
+          expect(response.body).not_to include("bg-danger-100")
+          expect(response.body).not_to include("bg-warning-100")
+        end
+      end
+
       it "shows a Reply button for documents awaiting a response from the current user" do
         awaiting = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply")
 
@@ -691,6 +722,31 @@ RSpec.describe "Documents", type: :request do
 
           expect(response.body).to include("Response deadline")
           expect(response.body).to include(I18n.l(Date.new(2026, 7, 1)))
+        end
+
+        it "shows the deadline in red when today is on or after the deadline" do
+          travel_to Date.new(2026, 7, 1) do
+            get entity_document_path(entity, document)
+
+            expect(response.body).to include("bg-danger-100")
+          end
+        end
+
+        it "shows the deadline in yellow when today is the day before the deadline" do
+          travel_to Date.new(2026, 6, 30) do
+            get entity_document_path(entity, document)
+
+            expect(response.body).to include("bg-warning-100")
+          end
+        end
+
+        it "shows the deadline without a color when it is further away" do
+          travel_to Date.new(2026, 6, 1) do
+            get entity_document_path(entity, document)
+
+            expect(response.body).not_to include("bg-danger-100")
+            expect(response.body).not_to include("bg-warning-100")
+          end
         end
       end
 

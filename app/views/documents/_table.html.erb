@@ -28,7 +28,13 @@
               <% if document.expects_response? %>
                 <%= render(Ui::BadgeComponent.new(color: :info)) { "Yes" } %>
                 <% if document.response_deadline.present? %>
-                  <span class="text-xs text-gray-500">Due <%= l(document.response_deadline) %></span>
+                  <% if document.deadline_overdue? %>
+                    <%= render(Ui::BadgeComponent.new(color: :danger)) { "Due #{l(document.response_deadline)}" } %>
+                  <% elsif document.deadline_due_tomorrow? %>
+                    <%= render(Ui::BadgeComponent.new(color: :warning)) { "Due #{l(document.response_deadline)}" } %>
+                  <% else %>
+                    <span class="text-xs text-gray-500">Due <%= l(document.response_deadline) %></span>
+                  <% end %>
                 <% end %>
               <% end %>
               <% if document.awaiting_response_from?(current_user) %>

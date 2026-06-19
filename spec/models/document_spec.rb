@@ -322,6 +322,70 @@ RSpec.describe Document, type: :model do
     end
   end
 
+  describe "#deadline_overdue?" do
+    it "is false when there is no response_deadline" do
+      document = build(:document, entity: entity, expects_response: false, response_deadline: nil)
+
+      expect(document.deadline_overdue?).to be false
+    end
+
+    it "is false when the deadline is in the future" do
+      travel_to Date.new(2026, 7, 1) do
+        document = build(:document, entity: entity, expects_response: true, response_deadline: Date.new(2026, 7, 2))
+
+        expect(document.deadline_overdue?).to be false
+      end
+    end
+
+    it "is true when the deadline is today" do
+      travel_to Date.new(2026, 7, 1) do
+        document = build(:document, entity: entity, expects_response: true, response_deadline: Date.new(2026, 7, 1))
+
+        expect(document.deadline_overdue?).to be true
+      end
+    end
+
+    it "is true when the deadline is in the past" do
+      travel_to Date.new(2026, 7, 2) do
+        document = build(:document, entity: entity, expects_response: true, response_deadline: Date.new(2026, 7, 1))
+
+        expect(document.deadline_overdue?).to be true
+      end
+    end
+  end
+
+  describe "#deadline_due_tomorrow?" do
+    it "is false when there is no response_deadline" do
+      document = build(:document, entity: entity, expects_response: false, response_deadline: nil)
+
+      expect(document.deadline_due_tomorrow?).to be false
+    end
+
+    it "is true when the deadline is tomorrow" do
+      travel_to Date.new(2026, 7, 1) do
+        document = build(:document, entity: entity, expects_response: true, response_deadline: Date.new(2026, 7, 2))
+
+        expect(document.deadline_due_tomorrow?).to be true
+      end
+    end
+
+    it "is false when the deadline is today" do
+      travel_to Date.new(2026, 7, 1) do
+        document = build(:document, entity: entity, expects_response: true, response_deadline: Date.new(2026, 7, 1))
+
+        expect(document.deadline_due_tomorrow?).to be false
+      end
+    end
+
+    it "is false when the deadline is more than a day away" do
+      travel_to Date.new(2026, 7, 1) do
+        document = build(:document, entity: entity, expects_response: true, response_deadline: Date.new(2026, 7, 3))
+
+        expect(document.deadline_due_tomorrow?).to be false
+      end
+    end
+  end
+
   # ── Scopes ────────────────────────────────────────────────────────────────
 
   describe ".authored_by" do

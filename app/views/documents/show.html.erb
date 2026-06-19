@@ -57,7 +57,15 @@
         <% dl.with_item(term: "Created by") { @document.created_by.email } %>
         <% dl.with_item(term: "Expects a response") { @document.expects_response? ? "Yes" : "No" } %>
         <% if @document.response_deadline.present? %>
-          <% dl.with_item(term: "Response deadline") { l(@document.response_deadline) } %>
+          <% dl.with_item(term: "Response deadline") do %>
+            <% if @document.deadline_overdue? %>
+              <%= render(Ui::BadgeComponent.new(color: :danger)) { l(@document.response_deadline) } %>
+            <% elsif @document.deadline_due_tomorrow? %>
+              <%= render(Ui::BadgeComponent.new(color: :warning)) { l(@document.response_deadline) } %>
+            <% else %>
+              <%= l(@document.response_deadline) %>
+            <% end %>
+          <% end %>
         <% end %>
       <% end %>
     </div>

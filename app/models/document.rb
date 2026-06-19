@@ -112,6 +112,14 @@ class Document < ApplicationRecord
     expects_response? && addressee_type == "User" && addressee_id == user.id
   end
 
+  def deadline_overdue?
+    response_deadline.present? && Date.current >= response_deadline
+  end
+
+  def deadline_due_tomorrow?
+    response_deadline.present? && Date.current == response_deadline - 1.day
+  end
+
   def current_step
     workflow_steps.ordered.find_by(status: "pending")
   end

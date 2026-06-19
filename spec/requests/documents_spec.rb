@@ -50,6 +50,22 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).to include("Needs a reply")
       end
 
+      it "shows the response deadline for documents that have one" do
+        create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Needs a reply by deadline", response_deadline: Date.new(2026, 7, 1))
+
+        get entity_documents_path(entity)
+
+        expect(response.body).to include("Due #{I18n.l(Date.new(2026, 7, 1))}")
+      end
+
+      it "does not show a deadline for documents without one" do
+        create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Needs a reply, no deadline")
+
+        get entity_documents_path(entity)
+
+        expect(response.body).not_to include("Due ")
+      end
+
       it "shows a Reply button for documents awaiting a response from the current user" do
         awaiting = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply")
 

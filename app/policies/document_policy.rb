@@ -53,29 +53,11 @@ class DocumentPolicy < ApplicationPolicy
     record.current_step&.actor == user && record.current_step&.role != "RED"
   end
 
+  def file?
+    show?
+  end
+
   class Scope < ApplicationPolicy::Scope
-    def resolve
-      scope.where(entity_id: unrestricted_entity_ids)
-           .or(scope.where(entity_id: restricted_entity_ids, department_id: accessible_department_ids))
-    end
-
-    private
-
-    def active_entity_users
-      EntityUser.active.where(user: user)
-    end
-
-    def unrestricted_entity_ids
-      active_entity_users.where(role: %w[owner admin]).select(:entity_id)
-    end
-
-    def restricted_entity_ids
-      active_entity_users.where(role: %w[member guest]).select(:entity_id)
-    end
-
-    def accessible_department_ids
-      EntityUserDepartment.where(entity_user_id: active_entity_users.where(role: %w[member guest]).select(:id))
-                           .select(:department_id)
-    end
+    include DepartmentScoped
   end
 end

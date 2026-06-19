@@ -19,7 +19,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen bg-gray-50 flex font-sans antialiased">
+  <body class="min-h-screen bg-gray-50 flex font-sans antialiased" data-controller="modal">
     <%= render Entities::SidebarComponent.new(current_entity: current_entity, current_user: current_user, current_entity_user: current_entity_user) %>
 
     <div class="flex-1 flex flex-col min-h-screen">
@@ -38,5 +38,7 @@
         <%= yield %>
       </main>
     </div>
+
+    <%= render Ui::ModalComponent.new %>
   </body>
 </html>

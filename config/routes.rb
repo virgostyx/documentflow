@@ -19,6 +19,11 @@ Rails.application.routes.draw do
     resources :contacts
     resources :circuit_templates, controller: "entities/circuit_templates"
     resources :departments, controller: "entities/departments"
+    resources :folders, controller: "entities/folders" do
+      member do
+        get :confirm_destroy
+      end
+    end
 
     resources :documents do
       resources :workflow_steps, only: %i[create update destroy] do
@@ -41,6 +46,7 @@ Rails.application.routes.draw do
       member do
         post :launch
         post :cancel
+        patch :file
       end
       collection do
         get :search

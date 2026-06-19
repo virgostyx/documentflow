@@ -13,9 +13,9 @@
     <tbody class="divide-y divide-gray-100">
       <% documents.each do |document| %>
         <tr class="hover:bg-gray-50 transition-colors cursor-pointer"
-            data-controller="row-link"
+            data-controller="row-link context-menu"
             data-row-link-url-value="<%= entity_document_path(current_entity, document) %>"
-            data-action="click->row-link#navigate">
+            data-action="click->row-link#navigate contextmenu->context-menu#open">
           <td class="px-4 py-3">
             <%= link_to document.reference_number, entity_document_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800", data: { turbo_frame: "_top" } %>
           </td>
@@ -41,6 +41,21 @@
                 <%= link_to "Reply", new_entity_document_path(current_entity, reply_to: document.id),
                       class: "inline-flex items-center rounded-md bg-primary-600 px-2 py-1 text-xs font-medium text-white hover:bg-primary-700",
                       data: { turbo_frame: "_top" } %>
+              <% end %>
+            </div>
+
+            <div data-context-menu-target="menu" class="hidden fixed z-50 w-56 rounded-md bg-white shadow-lg border border-gray-200 py-1">
+              <% (@folders_by_department&.[](document.department_id) || []).select(&:root?).each do |folder| %>
+                <%= button_to "File in #{folder.name}", file_entity_document_path(current_entity, document, folder_id: folder.id), method: :patch,
+                      data: { turbo_frame: "_top" }, class: "w-full text-left px-3 py-2 text-sm hover:bg-gray-50" %>
+                <% folder.children.each do |subfolder| %>
+                  <%= button_to "File in #{folder.name} / #{subfolder.name}", file_entity_document_path(current_entity, document, folder_id: subfolder.id), method: :patch,
+                        data: { turbo_frame: "_top" }, class: "w-full text-left pl-6 pr-3 py-2 text-sm hover:bg-gray-50" %>
+                <% end %>
+              <% end %>
+              <% if document.folder_id.present? %>
+                <%= button_to "Remove from folder", file_entity_document_path(current_entity, document, folder_id: nil), method: :patch,
+                      data: { turbo_frame: "_top" }, class: "w-full text-left px-3 py-2 text-sm text-danger-600 hover:bg-danger-50 border-t border-gray-100" %>
               <% end %>
             </div>
           </td>

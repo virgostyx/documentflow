@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_19_101557) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_19_173946) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -124,6 +124,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_101557) do
     t.date "document_date", null: false
     t.bigint "entity_id", null: false
     t.boolean "expects_response", default: false, null: false
+    t.bigint "folder_id"
     t.bigint "in_reply_to_id"
     t.boolean "is_frozen", default: false, null: false
     t.string "reference_number", null: false
@@ -138,6 +139,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_101557) do
     t.index ["department_id"], name: "index_documents_on_department_id"
     t.index ["entity_id", "reference_number"], name: "index_documents_on_entity_id_and_reference_number", unique: true
     t.index ["entity_id"], name: "index_documents_on_entity_id"
+    t.index ["folder_id"], name: "index_documents_on_folder_id"
     t.index ["in_reply_to_id"], name: "index_documents_on_in_reply_to_id"
     t.index ["sender_type", "sender_id"], name: "index_documents_on_sender_type_and_sender_id"
     t.index ["status"], name: "index_documents_on_status"
@@ -185,6 +187,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_101557) do
     t.index ["role"], name: "index_entity_users_on_role"
     t.index ["status"], name: "index_entity_users_on_status"
     t.index ["user_id"], name: "index_entity_users_on_user_id"
+  end
+
+  create_table "folders", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "department_id", null: false
+    t.bigint "entity_id", null: false
+    t.string "name", null: false
+    t.bigint "parent_id"
+    t.datetime "updated_at", null: false
+    t.index ["department_id", "parent_id", "name"], name: "index_folders_on_department_parent_name", unique: true
+    t.index ["department_id"], name: "index_folders_on_department_id"
+    t.index ["entity_id"], name: "index_folders_on_entity_id"
+    t.index ["parent_id"], name: "index_folders_on_parent_id"
   end
 
   create_table "shared_links", force: :cascade do |t|
@@ -242,12 +257,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_101557) do
   add_foreign_key "documents", "departments"
   add_foreign_key "documents", "documents", column: "in_reply_to_id"
   add_foreign_key "documents", "entities"
+  add_foreign_key "documents", "folders"
   add_foreign_key "documents", "users", column: "created_by_id"
   add_foreign_key "entity_user_departments", "departments"
   add_foreign_key "entity_user_departments", "entity_users"
   add_foreign_key "entity_users", "entities"
   add_foreign_key "entity_users", "users"
   add_foreign_key "entity_users", "users", column: "invited_by_id"
+  add_foreign_key "folders", "departments"
+  add_foreign_key "folders", "entities"
+  add_foreign_key "folders", "folders", column: "parent_id"
   add_foreign_key "shared_links", "documents"
   add_foreign_key "workflow_steps", "documents"
   add_foreign_key "workflow_steps", "users", column: "actor_id"

@@ -85,6 +85,36 @@ RSpec.describe DocumentPolicy, type: :policy do
     end
   end
 
+  describe "#file?" do
+    let(:department) { create(:department, entity: entity) }
+    let(:document) { create(:document, entity: entity, department: department) }
+
+    let(:department_member) do
+      create(:user).tap do |u|
+        eu = create(:entity_user, user: u, entity: entity, role: "member", status: "active")
+        create(:entity_user_department, entity_user: eu, department: department)
+      end
+    end
+
+    context "as outsider" do
+      let(:user) { outsider }
+      it { is_expected.not_to permit_action(:file) }
+    end
+
+    context "as a member with no department assignment" do
+      let(:user) { member }
+      it { is_expected.not_to permit_action(:file) }
+    end
+
+    context "as a member of the document's department" do
+      let(:user) { department_member }
+      it { is_expected.to permit_action(:file) }
+    end
+
+    context "as entity owner" do let(:user) { owner }; it { is_expected.to permit_action(:file) } end
+    context "as entity admin" do let(:user) { admin }; it { is_expected.to permit_action(:file) } end
+  end
+
   describe "#create?" do
     let(:document) { entity }
 

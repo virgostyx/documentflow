@@ -170,6 +170,86 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
   end
 
+  describe "Filing section" do
+    it "links to manage folders" do
+      expect(rendered).to have_link("Manage", href: entity_folders_path(entity))
+    end
+
+    it "links to the unfiled documents view" do
+      expect(rendered).to have_link("Unfiled", href: entity_documents_path(entity, folder_id: "unfiled"))
+    end
+
+    context "when on the unfiled documents page" do
+      let(:current_path) { entity_documents_path(entity, folder_id: "unfiled") }
+
+      it "highlights the Unfiled link" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "Unfiled")
+      end
+    end
+
+    context "as owner with departments and folders" do
+      let(:entity_user) { create(:entity_user, :owner, entity: entity, user: user) }
+      let(:department) { create(:department, entity: entity, name: "Finance") }
+      let(:folder) { create(:folder, entity: entity, department: department, name: "Contracts") }
+      let!(:subfolder) { create(:folder, entity: entity, department: department, parent: folder, name: "Drafts") }
+
+      subject(:rendered) do
+        with_request_url(current_path) do
+          render_inline(described_class.new(current_entity: entity, current_user: user, current_entity_user: entity_user))
+        end
+      end
+
+      it "shows the department name, the root folder and its subfolder" do
+        folder
+        subfolder
+
+        expect(rendered).to have_text("Finance")
+        expect(rendered).to have_link("Contracts", href: entity_documents_path(entity, folder_id: folder.id))
+        expect(rendered).to have_link("Drafts", href: entity_documents_path(entity, folder_id: subfolder.id))
+      end
+
+      it "shows the count of accessible documents filed in each folder" do
+        create(:document, entity: entity, department: department, folder: folder)
+        create(:document, entity: entity, department: department, folder: folder)
+
+        expect(rendered.css("a[href='#{entity_documents_path(entity, folder_id: folder.id)}']").first.text.squish).to eq("Contracts 2")
+      end
+
+      context "when on a given folder's filtered page" do
+        let(:current_path) { entity_documents_path(entity, folder_id: folder.id) }
+
+        it "highlights only that folder" do
+          expect(rendered).to have_css("a.bg-primary-100", text: "Contracts")
+          expect(rendered).not_to have_css("a.bg-primary-100", text: "Drafts")
+        end
+      end
+    end
+
+    context "as a member restricted to a single department" do
+      let(:department) { create(:department, entity: entity, name: "Finance") }
+      let(:other_department) { create(:department, entity: entity, name: "Sales") }
+      let(:entity_user) { create(:entity_user, entity: entity, user: user, role: "member") }
+
+      before do
+        create(:entity_user_department, entity_user: entity_user, department: department)
+        create(:folder, entity: entity, department: department, name: "Contracts")
+        create(:folder, entity: entity, department: other_department, name: "Leads")
+      end
+
+      subject(:rendered) do
+        with_request_url(current_path) do
+          render_inline(described_class.new(current_entity: entity, current_user: user, current_entity_user: entity_user))
+        end
+      end
+
+      it "only shows folders from the member's department" do
+        expect(rendered).to have_text("Contracts")
+        expect(rendered).not_to have_text("Sales")
+        expect(rendered).not_to have_text("Leads")
+      end
+    end
+  end
+
   describe "Contacts section" do
     it "links to the contacts overview" do
       expect(rendered).to have_link("Overview", href: entity_contacts_path(entity))

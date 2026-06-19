@@ -109,6 +109,27 @@ RSpec.describe Document, type: :model do
         expect(document).to be_valid
       end
     end
+
+    describe "folder scoped to the document's department" do
+      it "rejects a folder belonging to a different department" do
+        document.folder = create(:folder, entity: entity, department: create(:department, entity: entity))
+
+        expect(document).not_to be_valid
+        expect(document.errors[:folder]).to be_present
+      end
+
+      it "accepts a folder belonging to the same department" do
+        document.folder = create(:folder, entity: entity, department: document.department)
+
+        expect(document).to be_valid
+      end
+
+      it "accepts a blank folder" do
+        document.folder = nil
+
+        expect(document).to be_valid
+      end
+    end
   end
 
   # ── Callbacks ─────────────────────────────────────────────────────────────
@@ -588,6 +609,26 @@ RSpec.describe Document, type: :model do
       newer = create(:document, entity: entity, document_date: Date.new(2025, 6, 1))
 
       expect(Document.where(entity: entity).sorted("not_a_column", "asc")).to eq([ older, newer ])
+    end
+  end
+
+  describe ".in_folder" do
+    it "returns documents filed in the given folder" do
+      folder = create(:folder, entity: entity, department: document.department)
+      filed = create(:document, entity: entity, department: document.department, folder: folder)
+      create(:document, entity: entity, department: document.department)
+
+      expect(Document.where(entity: entity).in_folder(folder)).to contain_exactly(filed)
+    end
+  end
+
+  describe ".unfiled" do
+    it "returns documents with no folder" do
+      folder = create(:folder, entity: entity, department: document.department)
+      create(:document, entity: entity, department: document.department, folder: folder)
+      unfiled = create(:document, entity: entity, department: document.department)
+
+      expect(Document.where(entity: entity).unfiled).to contain_exactly(unfiled)
     end
   end
 end

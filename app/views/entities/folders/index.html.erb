@@ -1,0 +1,85 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: "Manage folders",
+    description: current_entity.name,
+    back_path: entity_documents_path(current_entity),
+    back_text: "Documents"
+  ) %>
+
+  <% if @departments.none? %>
+    <%= render Ui::CardComponent.new do %>
+      <p class="text-gray-600">No departments available.</p>
+    <% end %>
+  <% end %>
+
+  <% @departments.each do |department| %>
+    <div class="mb-6">
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header do %>
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-gray-900"><%= department.name %></span>
+            <% if policy(current_entity.folders.new(department: department)).create? %>
+              <%= link_to "Add folder", new_entity_folder_path(current_entity, department_id: department.id),
+                    class: "text-sm text-primary-600 hover:text-primary-700",
+                    data: { turbo_frame: "modal", action: "click->modal#open" } %>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% root_folders = department.folders.select(&:root?) %>
+        <% if root_folders.any? %>
+          <ul class="divide-y divide-gray-100">
+            <% root_folders.each do |folder| %>
+              <li class="py-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-900"><%= folder.name %></span>
+                  <div class="flex items-center gap-3 text-sm">
+                    <% if policy(current_entity.folders.new(department: department, parent: folder)).create? %>
+                      <%= link_to "Add subfolder", new_entity_folder_path(current_entity, department_id: department.id, parent_id: folder.id),
+                            class: "text-primary-600 hover:text-primary-700",
+                            data: { turbo_frame: "modal", action: "click->modal#open" } %>
+                    <% end %>
+                    <% if policy(folder).update? %>
+                      <%= link_to "Edit", edit_entity_folder_path(current_entity, folder),
+                            class: "text-gray-600 hover:text-gray-900",
+                            data: { turbo_frame: "modal", action: "click->modal#open" } %>
+                    <% end %>
+                    <% if policy(folder).destroy? %>
+                      <%= link_to "Delete", confirm_destroy_entity_folder_path(current_entity, folder),
+                            class: "text-danger-600 hover:text-danger-700",
+                            data: { turbo_frame: "modal", action: "click->modal#open" } %>
+                    <% end %>
+                  </div>
+                </div>
+
+                <% if folder.children.any? %>
+                  <ul class="mt-2 ml-6 divide-y divide-gray-50">
+                    <% folder.children.each do |subfolder| %>
+                      <li class="py-2 flex items-center justify-between">
+                        <span class="text-gray-700">↳ <%= subfolder.name %></span>
+                        <div class="flex items-center gap-3 text-sm">
+                          <% if policy(subfolder).update? %>
+                            <%= link_to "Edit", edit_entity_folder_path(current_entity, subfolder),
+                                  class: "text-gray-600 hover:text-gray-900",
+                                  data: { turbo_frame: "modal", action: "click->modal#open" } %>
+                          <% end %>
+                          <% if policy(subfolder).destroy? %>
+                            <%= link_to "Delete", confirm_destroy_entity_folder_path(current_entity, subfolder),
+                                  class: "text-danger-600 hover:text-danger-700",
+                                  data: { turbo_frame: "modal", action: "click->modal#open" } %>
+                          <% end %>
+                        </div>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-gray-600">No folders yet.</p>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

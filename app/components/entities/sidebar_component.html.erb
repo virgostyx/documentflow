@@ -94,6 +94,44 @@
       <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= info_count %><% end %>
     <% end %>
 
+    <div class="pt-3 pb-1 px-3 flex items-center justify-between">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Filing</p>
+      <%= link_to "Manage", entity_folders_path(current_entity), class: "text-xs text-primary-600 hover:text-primary-700" %>
+    </div>
+
+    <% nav_base = "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors" %>
+    <% nav_active = "#{nav_base} bg-primary-100 text-primary-700" %>
+    <% nav_inactive = "#{nav_base} text-gray-600 hover:bg-primary-50 hover:text-primary-700" %>
+
+    <%= link_to entity_documents_path(current_entity, folder_id: "unfiled"), class: (unfiled_active? ? nav_active : nav_inactive) + " justify-between" do %>
+      <span>Unfiled</span>
+      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= unfiled_count %><% end %>
+    <% end %>
+
+    <% accessible_departments.each do |department| %>
+      <div data-controller="filter-panel" class="mt-1">
+        <button type="button" data-action="filter-panel#toggle" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700">
+          <span><%= department.name %></span>
+        </button>
+
+        <div data-filter-panel-target="panel">
+          <% folders_for(department).each do |folder| %>
+            <%= link_to entity_documents_path(current_entity, folder_id: folder.id), class: (folder_active?(folder) ? nav_active : nav_inactive) + " justify-between" do %>
+              <span><%= folder.name %></span>
+              <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= document_count_for(folder) %><% end %>
+            <% end %>
+
+            <% folder.children.each do |subfolder| %>
+              <%= link_to entity_documents_path(current_entity, folder_id: subfolder.id), class: (folder_active?(subfolder) ? nav_active : nav_inactive) + " justify-between pl-8" do %>
+                <span><%= subfolder.name %></span>
+                <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= document_count_for(subfolder) %><% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
     <div class="pt-3 pb-1 px-3">
       <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Contacts</p>
     </div>

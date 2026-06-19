@@ -1,0 +1,8 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">
+      <%= @folder.parent_id.present? ? "Add subfolder" : "Add folder" %>
+    </h2>
+    <%= render "form", folder: @folder %>
+  </div>
+<% end %>

@@ -3,7 +3,8 @@
 class DocumentsController < ApplicationController
   include EntityScoped
 
-  before_action :set_document, only: %i[show edit update destroy launch cancel]
+  before_action :set_document, only: %i[show edit update destroy launch cancel file]
+  before_action :load_folders_by_department, only: %i[index mine received todo waiting info search]
 
   def index
     @list_scope = "all"
@@ -120,6 +121,17 @@ class DocumentsController < ApplicationController
     end
   end
 
+  def file
+    authorize @document, :file?
+
+    folder = Folder.find_by(id: params[:folder_id])
+    result = Documents::FileOrganizer.call(document: @document, folder: folder, current_user: current_user)
+
+    redirect_back fallback_location: entity_document_path(current_entity, @document),
+                   notice: result.success? ? result.message : nil,
+                   alert: result.success? ? nil : result.message
+  end
+
   private
 
   def set_document
@@ -156,7 +168,22 @@ class DocumentsController < ApplicationController
     documents = scope.includes(:sender, :addressee, :created_by)
     documents = documents.with_status(params[:status])
     documents = documents.where("subject ILIKE :q OR reference_number ILIKE :q", q: "%#{params[:q]}%") if params[:q].present?
+    documents = apply_folder_filter(documents)
     documents.sorted(params[:sort], params[:direction]).page(params[:page])
+  end
+
+  def apply_folder_filter(documents)
+    if params[:folder_id] == "unfiled"
+      documents.unfiled
+    elsif params[:folder_id].present?
+      documents.in_folder(params[:folder_id])
+    else
+      documents
+    end
+  end
+
+  def load_folders_by_department
+    @folders_by_department = policy_scope(Folder).where(entity: current_entity).includes(:children).group_by(&:department_id)
   end
 
   def document_params

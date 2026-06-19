@@ -1076,4 +1076,129 @@ RSpec.describe "Documents", type: :request do
       end
     end
   end
+
+  describe "PATCH /entities/:entity_id/documents/:id/file" do
+    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee) }
+    let(:folder) { create(:folder, entity: entity, department: department) }
+
+    before do
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
+      sign_in user
+    end
+
+    it "files the document into the given folder" do
+      patch file_entity_document_path(entity, document), params: { folder_id: folder.id }
+
+      expect(document.reload.folder).to eq(folder)
+      expect(response).to redirect_to(entity_document_path(entity, document))
+      expect(flash[:notice]).to be_present
+    end
+
+    it "removes the document from its folder when folder_id is blank" do
+      document.update!(folder: folder)
+
+      patch file_entity_document_path(entity, document), params: { folder_id: "" }
+
+      expect(document.reload.folder).to be_nil
+      expect(flash[:notice]).to be_present
+    end
+
+    it "rejects a folder from a different department" do
+      other_department = create(:department, entity: entity)
+      other_folder = create(:folder, entity: entity, department: other_department)
+
+      patch file_entity_document_path(entity, document), params: { folder_id: other_folder.id }
+
+      expect(document.reload.folder).to be_nil
+      expect(flash[:alert]).to be_present
+    end
+
+    context "as an outsider who cannot see the document" do
+      let(:outsider) { create(:user) }
+
+      before do
+        create(:entity_user, entity: entity, user: outsider, role: "member")
+        sign_in outsider
+      end
+
+      it "redirects with an authorization error" do
+        patch file_entity_document_path(entity, document), params: { folder_id: folder.id }
+
+        expect(document.reload.folder).to be_nil
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
+  describe "folder_id filtering" do
+    let!(:folder) { create(:folder, entity: entity, department: department) }
+    let!(:filed_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Filed doc", folder: folder) }
+    let!(:unfiled_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Unfiled doc") }
+
+    before do
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
+      sign_in user
+    end
+
+    it "filters the index to a given folder" do
+      get entity_documents_path(entity, folder_id: folder.id)
+
+      expect(response.body).to include("Filed doc")
+      expect(response.body).not_to include("Unfiled doc")
+    end
+
+    it "filters the index to unfiled documents" do
+      get entity_documents_path(entity, folder_id: "unfiled")
+
+      expect(response.body).to include("Unfiled doc")
+      expect(response.body).not_to include("Filed doc")
+    end
+
+    it "carries the folder_id through to the search and status filter forms so it survives a search" do
+      get entity_documents_path(entity, folder_id: folder.id)
+
+      expect(response.body).to include(%(name="folder_id" value="#{folder.id}"))
+    end
+  end
+
+  describe "right-click filing menu on the documents table" do
+    let!(:folder) { create(:folder, entity: entity, department: department, name: "Contracts") }
+    let!(:subfolder) { create(:folder, entity: entity, department: department, parent: folder, name: "Drafts") }
+    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee) }
+
+    before do
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
+      sign_in user
+    end
+
+    it "offers the document's accessible root folders and subfolders as filing actions" do
+      get entity_documents_path(entity)
+
+      expect(response.body).to include(file_entity_document_path(entity, document, folder_id: folder.id))
+      expect(response.body).to include(file_entity_document_path(entity, document, folder_id: subfolder.id))
+    end
+
+    it "does not offer folders from a department the user cannot access" do
+      other_department = create(:department, entity: entity)
+      other_folder = create(:folder, entity: entity, department: other_department, name: "Leads")
+      create(:document, entity: entity, department: other_department, sender: sender, addressee: addressee)
+
+      get entity_documents_path(entity)
+
+      expect(response.body).not_to include(file_entity_document_path(entity, document, folder_id: other_folder.id))
+    end
+
+    it "offers a remove-from-folder action only when the document is already filed" do
+      get entity_documents_path(entity)
+      expect(response.body).not_to include("Remove from folder")
+
+      document.update!(folder: folder)
+
+      get entity_documents_path(entity)
+      expect(response.body).to include("Remove from folder")
+    end
+  end
 end

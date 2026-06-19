@@ -23,6 +23,7 @@ class Document < ApplicationRecord
   belongs_to :sender, polymorphic: true
   belongs_to :addressee, polymorphic: true
   belongs_to :in_reply_to, class_name: "Document", optional: true
+  belongs_to :folder, optional: true
   has_many :replies, class_name: "Document", foreign_key: :in_reply_to_id, inverse_of: :in_reply_to, dependent: :nullify
   has_many :workflow_steps, dependent: :destroy
   has_many :shared_links, dependent: :destroy
@@ -41,6 +42,7 @@ class Document < ApplicationRecord
   validate :addressee_belongs_to_entity
   validate :department_belongs_to_entity
   validate :in_reply_to_belongs_to_entity
+  validate :folder_belongs_to_department
 
   # Scopes
   scope :authored_by, ->(user) { where(created_by: user) }
@@ -68,6 +70,8 @@ class Document < ApplicationRecord
     ).distinct
   }
   scope :with_status, ->(status) { status.present? ? where(status: status) : all }
+  scope :in_folder, ->(folder) { where(folder: folder) }
+  scope :unfiled, -> { where(folder_id: nil) }
   scope :sorted, ->(column, direction) {
     col = SORTABLE_COLUMNS.fetch(column.to_s, SORTABLE_COLUMNS[DEFAULT_SORT_COLUMN])
     dir = %w[asc desc].include?(direction.to_s) ? direction.to_s : DEFAULT_SORT_DIRECTION
@@ -180,5 +184,11 @@ class Document < ApplicationRecord
     return if entity.nil? || in_reply_to.nil? || in_reply_to.entity_id == entity_id
 
     errors.add(:in_reply_to, "must belong to the same entity")
+  end
+
+  def folder_belongs_to_department
+    return if folder.nil? || department.nil? || folder.department_id == department_id
+
+    errors.add(:folder, "must belong to the same department")
   end
 end

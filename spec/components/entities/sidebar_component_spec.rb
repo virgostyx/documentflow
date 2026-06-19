@@ -38,13 +38,13 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       expect(rendered).to have_link("Waiting", href: waiting_entity_documents_path(entity))
       expect(rendered).to have_link("Info", href: info_entity_documents_path(entity))
 
-      links = rendered.css("nav a").map { |a| a.text.strip }
+      links = rendered.css("nav a").map { |a| a.text.squish }
       overview_index = links.index("Overview")
-      inbox_index = links.index("My Inbox")
-      outbox_index = links.index("My Outbox")
-      todo_index = links.index("ToDo")
-      waiting_index = links.index("Waiting")
-      info_index = links.index("Info")
+      inbox_index = links.index { |text| text.start_with?("My Inbox") }
+      outbox_index = links.index { |text| text.start_with?("My Outbox") }
+      todo_index = links.index { |text| text.start_with?("ToDo") }
+      waiting_index = links.index { |text| text.start_with?("Waiting") }
+      info_index = links.index { |text| text.start_with?("Info") }
 
       expect(overview_index).to be < inbox_index
       expect(inbox_index).to be < outbox_index
@@ -114,6 +114,52 @@ RSpec.describe Entities::SidebarComponent, type: :component do
         expect(rendered).not_to have_css("a.bg-primary-100", text: "ToDo")
         expect(rendered).not_to have_css("a.bg-primary-100", text: "Waiting")
       end
+    end
+  end
+
+  describe "document count badges" do
+    let!(:entity_user) { create(:entity_user, :owner, entity: entity, user: user) }
+
+    def link_text(href)
+      rendered.css("a[href='#{href}']").first.text.squish
+    end
+
+    it "shows zero counts when the boxes are empty" do
+      expect(link_text(received_entity_documents_path(entity))).to eq("My Inbox 0")
+      expect(link_text(mine_entity_documents_path(entity))).to eq("My Outbox 0")
+      expect(link_text(todo_entity_documents_path(entity))).to eq("ToDo 0")
+      expect(link_text(waiting_entity_documents_path(entity))).to eq("Waiting 0")
+      expect(link_text(info_entity_documents_path(entity))).to eq("Info 0")
+    end
+
+    it "counts documents authored by the user as My Outbox" do
+      create(:document, entity: entity, created_by: user)
+
+      expect(link_text(mine_entity_documents_path(entity))).to eq("My Outbox 1")
+    end
+
+    it "counts documents addressed to the user as My Inbox" do
+      create(:document, entity: entity, addressee: user)
+
+      expect(link_text(received_entity_documents_path(entity))).to eq("My Inbox 1")
+    end
+
+    it "counts documents addressed to the user expecting a response as ToDo" do
+      create(:document, :expecting_response, entity: entity, addressee: user)
+
+      expect(link_text(todo_entity_documents_path(entity))).to eq("ToDo 1")
+    end
+
+    it "counts documents authored by the user expecting a response as Waiting" do
+      create(:document, :expecting_response, entity: entity, created_by: user)
+
+      expect(link_text(waiting_entity_documents_path(entity))).to eq("Waiting 1")
+    end
+
+    it "counts documents addressed to the user not expecting a response as Info" do
+      create(:document, entity: entity, addressee: user)
+
+      expect(link_text(info_entity_documents_path(entity))).to eq("Info 1")
     end
   end
 

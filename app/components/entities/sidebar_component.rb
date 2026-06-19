@@ -8,9 +8,33 @@ module Entities
       @current_entity_user = current_entity_user
     end
 
+    def received_count
+      documents_base_scope.received_by(current_user).count
+    end
+
+    def mine_count
+      documents_base_scope.authored_by(current_user).count
+    end
+
+    def todo_count
+      documents_base_scope.todo_for(current_user).count
+    end
+
+    def waiting_count
+      documents_base_scope.waiting_for(current_user).count
+    end
+
+    def info_count
+      documents_base_scope.info_for(current_user).count
+    end
+
     private
 
     attr_reader :current_entity, :current_user, :current_entity_user
+
+    def documents_base_scope
+      Pundit.policy_scope(current_user, Document).where(entity: current_entity)
+    end
 
     def unrestricted_access?
       current_entity_user&.owner? || current_entity_user&.admin?

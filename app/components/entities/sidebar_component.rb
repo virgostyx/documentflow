@@ -8,6 +8,10 @@ module Entities
       @current_entity_user = current_entity_user
     end
 
+    def overview_count
+      documents_base_scope.count
+    end
+
     def received_count
       documents_base_scope.received_by(current_user).count
     end

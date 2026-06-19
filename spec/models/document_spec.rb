@@ -15,6 +15,8 @@ RSpec.describe Document, type: :model do
     it { is_expected.to belong_to(:created_by).class_name("User") }
     it { is_expected.to belong_to(:sender) }
     it { is_expected.to belong_to(:addressee) }
+    it { is_expected.to belong_to(:in_reply_to).class_name("Document").optional }
+    it { is_expected.to have_many(:replies).class_name("Document") }
     it { is_expected.to have_one_attached(:main_file) }
     it { is_expected.to have_many_attached(:annexes) }
   end
@@ -82,6 +84,27 @@ RSpec.describe Document, type: :model do
 
       it "accepts a department belonging to the same entity" do
         document.department = create(:department, entity: entity)
+
+        expect(document).to be_valid
+      end
+    end
+
+    describe "in_reply_to scoped to the document's entity" do
+      it "rejects an in_reply_to document belonging to another entity" do
+        document.in_reply_to = create(:document, entity: create(:entity))
+
+        expect(document).not_to be_valid
+        expect(document.errors[:in_reply_to]).to be_present
+      end
+
+      it "accepts an in_reply_to document belonging to the same entity" do
+        document.in_reply_to = create(:document, entity: entity)
+
+        expect(document).to be_valid
+      end
+
+      it "accepts a blank in_reply_to" do
+        document.in_reply_to = nil
 
         expect(document).to be_valid
       end
@@ -202,6 +225,56 @@ RSpec.describe Document, type: :model do
     end
   end
 
+  describe "#awaiting_response_from?" do
+    it "returns true when the user is the addressee and a response is expected" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      document = create(:document, :expecting_response, entity: entity, addressee: user)
+
+      expect(document.awaiting_response_from?(user)).to be true
+    end
+
+    it "returns false when the user is the addressee but no response is expected" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      document = create(:document, entity: entity, addressee: user)
+
+      expect(document.awaiting_response_from?(user)).to be false
+    end
+
+    it "returns false when a response is expected but the user is not the addressee" do
+      user = create(:user)
+      document = create(:document, :expecting_response, entity: entity)
+
+      expect(document.awaiting_response_from?(user)).to be false
+    end
+
+    it "returns false when the addressee is a contact, not the given user" do
+      user = create(:user)
+      document = create(:document, :expecting_response, entity: entity, addressee: create(:contact, entity: entity))
+
+      expect(document.awaiting_response_from?(user)).to be false
+    end
+  end
+
+  describe "#thread" do
+    it "returns the full chain in chronological order, regardless of which document it's called on" do
+      a = create(:document, entity: entity, document_date: Date.new(2026, 1, 1))
+      b = create(:document, entity: entity, in_reply_to: a, document_date: Date.new(2026, 1, 5))
+      c = create(:document, entity: entity, in_reply_to: b, document_date: Date.new(2026, 1, 10))
+
+      expect(a.thread).to eq([ a, b, c ])
+      expect(b.thread).to eq([ a, b, c ])
+      expect(c.thread).to eq([ a, b, c ])
+    end
+
+    it "returns just itself when it has no replies and is not a reply" do
+      standalone = create(:document, entity: entity)
+
+      expect(standalone.thread).to eq([ standalone ])
+    end
+  end
+
   describe "#frozen?" do
     it "returns true once finalized" do
       document = create(:document, :finalized)
@@ -222,6 +295,30 @@ RSpec.describe Document, type: :model do
     it "can be set to true and persists" do
       document = create(:document, entity: entity, expects_response: true)
       expect(document.reload.expects_response).to be true
+    end
+  end
+
+  describe "#response_deadline" do
+    it "can be set when expects_response is true" do
+      document = create(:document, entity: entity, expects_response: true, response_deadline: Date.new(2026, 7, 1))
+
+      expect(document.reload.response_deadline).to eq(Date.new(2026, 7, 1))
+    end
+
+    it "is cleared when expects_response is false" do
+      document = build(:document, entity: entity, expects_response: false, response_deadline: Date.new(2026, 7, 1))
+
+      document.save!
+
+      expect(document.reload.response_deadline).to be_nil
+    end
+
+    it "is cleared when expects_response is toggled off on an existing document" do
+      document = create(:document, entity: entity, expects_response: true, response_deadline: Date.new(2026, 7, 1))
+
+      document.update!(expects_response: false)
+
+      expect(document.reload.response_deadline).to be_nil
     end
   end
 

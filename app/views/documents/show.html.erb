@@ -36,6 +36,15 @@
     </p>
   <% end %>
 
+  <% if @document_chain.size > 1 %>
+    <div class="mb-6">
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header { "Document chain" } %>
+        <%= render Documents::ThreadComponent.new(documents: @document_chain, current_document: @document) %>
+      <% end %>
+    </div>
+  <% end %>
+
   <%= render Ui::CardComponent.new do |card| %>
     <% card.with_header { render(Documents::DocumentStatusBadgeComponent.new(status: @document.status)) } %>
 
@@ -47,6 +56,9 @@
         <% dl.with_item(term: "Document date") { l(@document.document_date) } %>
         <% dl.with_item(term: "Created by") { @document.created_by.email } %>
         <% dl.with_item(term: "Expects a response") { @document.expects_response? ? "Yes" : "No" } %>
+        <% if @document.response_deadline.present? %>
+          <% dl.with_item(term: "Response deadline") { l(@document.response_deadline) } %>
+        <% end %>
       <% end %>
     </div>
   <% end %>

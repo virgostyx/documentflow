@@ -50,6 +50,21 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).to include("Needs a reply")
       end
 
+      it "shows a Reply button for documents awaiting a response from the current user" do
+        awaiting = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply")
+
+        get entity_documents_path(entity)
+
+        expect(response.body).to include("Reply")
+        expect(response.body).to include(new_entity_document_path(entity, reply_to: awaiting.id))
+      end
+
+      it "does not show a Reply button when the current user is not the one expected to respond" do
+        get entity_documents_path(entity)
+
+        expect(response.body).not_to include("Reply")
+      end
+
       it "filters by the search query" do
         other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Annual report")
 
@@ -362,6 +377,27 @@ RSpec.describe "Documents", type: :request do
       end
     end
 
+    context "when replying to a document awaiting the user's response" do
+      let!(:entity_user) { create(:entity_user, :admin, entity: entity, user: user) }
+      let!(:original) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Please confirm") }
+
+      before { sign_in user }
+
+      it "pre-fills the subject, sender and addressee for the reply" do
+        get new_entity_document_path(entity, reply_to: original.id)
+
+        expect(response.body).to include('value="Re: Please confirm"')
+        expect(response.body).to include(%(selected="selected" value="User-#{user.id}"))
+        expect(response.body).to include(%(selected="selected" value="Contact-#{sender.id}"))
+      end
+
+      it "carries the original document's id through as a hidden field" do
+        get new_entity_document_path(entity, reply_to: original.id)
+
+        expect(response.body).to include(%(value="#{original.id}" name="document[in_reply_to_id]" id="document_in_reply_to_id"))
+      end
+    end
+
     context "when the user is a guest" do
       before do
         create(:entity_user, :guest, entity: entity, user: user)
@@ -424,6 +460,20 @@ RSpec.describe "Documents", type: :request do
           expect(document.expects_response).to be true
         end
 
+        it "persists the response deadline when a response is expected" do
+          post entity_documents_path(entity), params: document_params.deep_merge(document: { expects_response: "1", response_deadline: "2026-07-01" })
+
+          document = entity.documents.find_by(subject: "New supplier agreement")
+          expect(document.response_deadline).to eq(Date.new(2026, 7, 1))
+        end
+
+        it "ignores a response deadline submitted without expects_response checked" do
+          post entity_documents_path(entity), params: document_params.deep_merge(document: { response_deadline: "2026-07-01" })
+
+          document = entity.documents.find_by(subject: "New supplier agreement")
+          expect(document.response_deadline).to be_nil
+        end
+
         context "with an internal user as sender" do
           let(:document_params) do
             {
@@ -442,6 +492,52 @@ RSpec.describe "Documents", type: :request do
 
             document = entity.documents.find_by(subject: "Internal memo")
             expect(document.sender).to eq(user)
+          end
+        end
+
+        context "as a reply to another document" do
+          let!(:original) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Please confirm") }
+          let(:document_params) do
+            {
+              document: {
+                subject: "Re: Please confirm",
+                document_date: Date.current,
+                department_id: department.id,
+                sender_token: "User-#{user.id}",
+                addressee_token: "Contact-#{sender.id}",
+                in_reply_to_id: original.id
+              }
+            }
+          end
+
+          it "links the new document to the one it replies to" do
+            post entity_documents_path(entity), params: document_params
+
+            reply = entity.documents.find_by(subject: "Re: Please confirm")
+            expect(reply.in_reply_to).to eq(original)
+            expect(original.reload.replies).to contain_exactly(reply)
+          end
+
+          context "when in_reply_to_id points to a document in another entity" do
+            let!(:other_entity_document) { create(:document) }
+            let(:document_params) do
+              {
+                document: {
+                  subject: "Sneaky reply",
+                  document_date: Date.current,
+                  department_id: department.id,
+                  sender_token: "User-#{user.id}",
+                  addressee_token: "Contact-#{sender.id}",
+                  in_reply_to_id: other_entity_document.id
+                }
+              }
+            end
+
+            it "does not create the document" do
+              expect {
+                post entity_documents_path(entity), params: document_params
+              }.not_to change(Document, :count)
+            end
           end
         end
       end
@@ -536,6 +632,30 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).to include("No")
       end
 
+      it "does not show a document chain section for a standalone document" do
+        get entity_document_path(entity, document)
+
+        expect(response.body).not_to include("Document chain")
+      end
+
+      context "when the document is part of a reply chain" do
+        let!(:reply) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, in_reply_to: document, subject: "Re: original") }
+
+        it "shows the document chain on the original document" do
+          get entity_document_path(entity, document)
+
+          expect(response.body).to include("Document chain")
+          expect(response.body).to include(reply.reference_number)
+        end
+
+        it "shows the document chain on the reply" do
+          get entity_document_path(entity, reply)
+
+          expect(response.body).to include("Document chain")
+          expect(response.body).to include(document.reference_number)
+        end
+      end
+
       context "when the document expects a response" do
         let!(:document) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee) }
 
@@ -545,6 +665,23 @@ RSpec.describe "Documents", type: :request do
           expect(response.body).to include("Expects a response")
           expect(response.body).to include("Yes")
         end
+      end
+
+      context "when the document has a response deadline" do
+        let!(:document) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, response_deadline: Date.new(2026, 7, 1)) }
+
+        it "shows the response deadline" do
+          get entity_document_path(entity, document)
+
+          expect(response.body).to include("Response deadline")
+          expect(response.body).to include(I18n.l(Date.new(2026, 7, 1)))
+        end
+      end
+
+      it "does not show a response deadline when none is set" do
+        get entity_document_path(entity, document)
+
+        expect(response.body).not_to include("Response deadline")
       end
 
       context "when the document has a validation circuit" do
@@ -721,6 +858,20 @@ RSpec.describe "Documents", type: :request do
         patch entity_document_path(entity, document), params: { document: { expects_response: "0" } }
 
         expect(document.reload.expects_response).to be false
+      end
+
+      it "sets the response deadline when a response is expected" do
+        patch entity_document_path(entity, document), params: { document: { expects_response: "1", response_deadline: "2026-07-01" } }
+
+        expect(document.reload.response_deadline).to eq(Date.new(2026, 7, 1))
+      end
+
+      it "clears the response deadline when expects_response is unchecked" do
+        document.update!(expects_response: true, response_deadline: Date.new(2026, 7, 1))
+
+        patch entity_document_path(entity, document), params: { document: { expects_response: "0" } }
+
+        expect(document.reload.response_deadline).to be_nil
       end
     end
   end

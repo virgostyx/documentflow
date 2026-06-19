@@ -22,6 +22,8 @@ class Document < ApplicationRecord
   belongs_to :created_by, class_name: "User"
   belongs_to :sender, polymorphic: true
   belongs_to :addressee, polymorphic: true
+  belongs_to :in_reply_to, class_name: "Document", optional: true
+  has_many :replies, class_name: "Document", foreign_key: :in_reply_to_id, inverse_of: :in_reply_to, dependent: :nullify
   has_many :workflow_steps, dependent: :destroy
   has_many :shared_links, dependent: :destroy
   has_many :cc_recipients, dependent: :destroy
@@ -38,6 +40,7 @@ class Document < ApplicationRecord
   validate :sender_belongs_to_entity
   validate :addressee_belongs_to_entity
   validate :department_belongs_to_entity
+  validate :in_reply_to_belongs_to_entity
 
   # Scopes
   scope :authored_by, ->(user) { where(created_by: user) }
@@ -73,6 +76,7 @@ class Document < ApplicationRecord
 
   # Callbacks
   before_validation :generate_reference_number, on: :create
+  before_validation :clear_response_deadline_unless_expecting_response
 
   # State machine
   aasm column: :status do
@@ -104,8 +108,26 @@ class Document < ApplicationRecord
     is_frozen
   end
 
+  def awaiting_response_from?(user)
+    expects_response? && addressee_type == "User" && addressee_id == user.id
+  end
+
   def current_step
     workflow_steps.ordered.find_by(status: "pending")
+  end
+
+  def thread
+    root.self_and_descendants.sort_by { |doc| [ doc.document_date, doc.created_at ] }
+  end
+
+  def root
+    doc = self
+    doc = doc.in_reply_to while doc.in_reply_to
+    doc
+  end
+
+  def self_and_descendants
+    [ self ] + replies.flat_map(&:self_and_descendants)
   end
 
   private
@@ -124,6 +146,10 @@ class Document < ApplicationRecord
     update_column(:is_frozen, true)
   end
 
+  def clear_response_deadline_unless_expecting_response
+    self.response_deadline = nil unless expects_response?
+  end
+
   def sender_belongs_to_entity
     return if entity.nil? || party_in_entity?(sender)
 
@@ -140,5 +166,11 @@ class Document < ApplicationRecord
     return if entity.nil? || department.nil? || department.entity_id == entity_id
 
     errors.add(:department, "must belong to the same entity")
+  end
+
+  def in_reply_to_belongs_to_entity
+    return if entity.nil? || in_reply_to.nil? || in_reply_to.entity_id == entity_id
+
+    errors.add(:in_reply_to, "must belong to the same entity")
   end
 end

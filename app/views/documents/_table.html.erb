@@ -24,9 +24,19 @@
           <td class="px-4 py-3 text-gray-500"><%= l(document.document_date) %></td>
           <td class="px-4 py-3"><%= render Documents::DocumentStatusBadgeComponent.new(status: document.status) %></td>
           <td class="px-4 py-3">
-            <% if document.expects_response? %>
-              <%= render(Ui::BadgeComponent.new(color: :info)) { "Yes" } %>
-            <% end %>
+            <div class="flex items-center gap-2">
+              <% if document.expects_response? %>
+                <%= render(Ui::BadgeComponent.new(color: :info)) { "Yes" } %>
+                <% if document.response_deadline.present? %>
+                  <span class="text-xs text-gray-500">Due <%= l(document.response_deadline) %></span>
+                <% end %>
+              <% end %>
+              <% if document.awaiting_response_from?(current_user) %>
+                <%= link_to "Reply", new_entity_document_path(current_entity, reply_to: document.id),
+                      class: "inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 hover:bg-primary-100",
+                      data: { turbo_frame: "_top" } %>
+              <% end %>
+            </div>
           </td>
         </tr>
       <% end %>

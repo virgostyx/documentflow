@@ -39,7 +39,7 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       expect(rendered).to have_link("Info", href: info_entity_documents_path(entity))
 
       links = rendered.css("nav a").map { |a| a.text.squish }
-      overview_index = links.index("Overview")
+      overview_index = links.index { |text| text.start_with?("Overview") }
       inbox_index = links.index { |text| text.start_with?("My Inbox") }
       outbox_index = links.index { |text| text.start_with?("My Outbox") }
       todo_index = links.index { |text| text.start_with?("ToDo") }
@@ -125,6 +125,7 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
 
     it "shows zero counts when the boxes are empty" do
+      expect(link_text(entity_documents_path(entity))).to eq("Overview 0")
       expect(link_text(received_entity_documents_path(entity))).to eq("My Inbox 0")
       expect(link_text(mine_entity_documents_path(entity))).to eq("My Outbox 0")
       expect(link_text(todo_entity_documents_path(entity))).to eq("ToDo 0")
@@ -136,6 +137,12 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       create(:document, entity: entity, created_by: user)
 
       expect(link_text(mine_entity_documents_path(entity))).to eq("My Outbox 1")
+    end
+
+    it "counts all accessible documents as Overview" do
+      create(:document, entity: entity, created_by: user)
+
+      expect(link_text(entity_documents_path(entity))).to eq("Overview 1")
     end
 
     it "counts documents addressed to the user as My Inbox" do

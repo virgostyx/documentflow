@@ -48,10 +48,14 @@ class DocumentsController < ApplicationController
 
   def show
     authorize @document
+    @document_chain = base_scope.where(id: @document.thread.map(&:id))
+                                 .includes(:sender, :addressee)
+                                 .sort_by { |doc| [ doc.document_date, doc.created_at ] }
   end
 
   def new
     @document = current_entity.documents.new
+    apply_reply_prefill if params[:reply_to].present?
     authorize @document
   end
 
@@ -126,6 +130,17 @@ class DocumentsController < ApplicationController
     policy_scope(Document).where(entity: current_entity)
   end
 
+  def apply_reply_prefill
+    original = base_scope.find_by(id: params[:reply_to])
+    return unless original
+
+    @document.subject = "Re: #{original.subject}"
+    @document.department_id = original.department_id
+    @document.sender_token = "User-#{current_user.id}"
+    @document.addressee_token = "#{original.sender_type}-#{original.sender_id}"
+    @document.in_reply_to_id = original.id
+  end
+
   def scoped_base_for(list_scope)
     case list_scope
     when "mine" then base_scope.authored_by(current_user)
@@ -145,6 +160,6 @@ class DocumentsController < ApplicationController
   end
 
   def document_params
-    params.require(:document).permit(:subject, :document_date, :department_id, :expects_response, :sender_token, :addressee_token)
+    params.require(:document).permit(:subject, :document_date, :department_id, :expects_response, :response_deadline, :sender_token, :addressee_token, :in_reply_to_id)
   end
 end

@@ -13,8 +13,7 @@ RSpec.describe "Document filing", type: :system, js: true do
 
   before do
     sign_in_via_form(owner)
-    expect(page).to have_current_path(dashboard_path)
-    visit entity_documents_path(entity)
+    expect(page).to have_current_path(entity_documents_path(entity))
   end
 
   it "creates a folder and a subfolder through the modal, files a document into the subfolder via right-click, then unfiles it" do

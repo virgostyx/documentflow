@@ -1,0 +1,36 @@
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Reference", "reference_number") %></th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Subject", "subject") %></th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sender</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lead</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Date", "document_date") %></th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% documents.each do |document| %>
+        <tr class="hover:bg-gray-50 transition-colors cursor-pointer"
+            data-controller="row-link" data-row-link-url-value="<%= entity_incoming_mail_path(current_entity, document) %>"
+            data-action="click->row-link#navigate">
+          <td class="px-4 py-3">
+            <%= link_to document.reference_number, entity_incoming_mail_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800", data: { turbo_frame: "_top" } %>
+          </td>
+          <td class="px-4 py-3 text-gray-900"><%= document.subject %></td>
+          <td class="px-4 py-3 text-gray-500"><%= document.sender&.display_name %></td>
+          <td class="px-4 py-3 text-gray-500"><%= document.lead_user&.display_name %></td>
+          <td class="px-4 py-3 text-gray-500"><%= l(document.document_date) %></td>
+          <td class="px-4 py-3">
+            <% if document.routed? %>
+              <%= render(Ui::BadgeComponent.new(color: :info)) { "Routed" } %>
+            <% else %>
+              <%= render(Ui::BadgeComponent.new(color: :gray)) { "Pending triage" } %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

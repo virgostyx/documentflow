@@ -1,0 +1,5 @@
+<p>Hello <%= @user.email %>,</p>
+
+<p>You have been assigned as the lead for incoming mail <strong><%= @document.reference_number %></strong> (<%= @document.subject %>).</p>
+
+<p><%= link_to "View the mail", @document_url %></p>

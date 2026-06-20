@@ -139,7 +139,7 @@ class DocumentsController < ApplicationController
   end
 
   def base_scope
-    policy_scope(Document).where(entity: current_entity)
+    policy_scope(Document).where(entity: current_entity).outgoing
   end
 
   def apply_reply_prefill

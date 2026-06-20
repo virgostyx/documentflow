@@ -1,0 +1,9 @@
+<p>Hello <%= @user.email %>,</p>
+
+<p>Action is required on incoming mail <strong><%= @document.reference_number %></strong> (<%= @document.subject %>).</p>
+
+<% if @document.routing_message.present? %>
+  <p><em><%= @document.routing_message %></em></p>
+<% end %>
+
+<p><%= link_to "View the mail", @document_url %></p>

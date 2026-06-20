@@ -1,0 +1,12 @@
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: "Register incoming mail",
+    description: current_entity.name,
+    back_path: inbox_entity_incoming_mails_path(current_entity),
+    back_text: "Incoming mail"
+  ) %>
+
+  <%= render Ui::CardComponent.new do %>
+    <%= render "form", document: @document %>
+  <% end %>
+</div>

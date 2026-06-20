@@ -1,0 +1,37 @@
+<%= form_with model: document, url: route_entity_incoming_mail_path(current_entity, document), method: :patch,
+              builder: FloatingLabelsRails::FormBuilder, local: true, data: { turbo_frame: "_top" } do |f| %>
+  <% if document.errors.any? %>
+    <div class="mb-4 rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+      <%= document.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= f.floating_select :action_user_id, department_member_options(document.department),
+        { selected: document.action_user_id, include_blank: "Select an assignee for action..." },
+        { label: "Assign for action", required: true } %>
+
+  <%= f.floating_text_area :routing_message, label: "Message (optional)", placeholder: " " %>
+
+  <div class="mt-4">
+    <%= f.label :info_user_ids, "Info recipients (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.select :info_user_ids, department_member_options(document.department), { selected: document.info_user_ids },
+          multiple: true, class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+  </div>
+
+  <div class="mt-4" data-controller="checkbox-toggle">
+    <div class="flex items-center gap-2">
+      <%= f.check_box :expects_response, class: "h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded",
+            data: { action: "checkbox-toggle#sync", checkbox_toggle_target: "checkbox" } %>
+      <%= f.label :expects_response, "This mail expects a response", class: "text-sm text-gray-700" %>
+    </div>
+
+    <div class="mt-3 <%= "hidden" unless document.expects_response? %>" data-checkbox-toggle-target="panel">
+      <%= f.floating_date_field :response_deadline, label: "Response deadline", placeholder: " " %>
+    </div>
+  </div>
+
+  <div class="mt-6 flex justify-end gap-3">
+    <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Cancel" } %>
+    <%= render(Ui::ButtonComponent.new) { "Route mail" } %>
+  </div>
+<% end %>

@@ -14,6 +14,10 @@ class NotificationJob < ApplicationJob
       NotificationMailer.action_required(user, document).deliver_now
     when :rejection_alert
       NotificationMailer.rejection_alert(user, document, reason).deliver_now
+    when :mail_lead_assigned
+      NotificationMailer.mail_lead_assigned(user, document).deliver_now
+    when :mail_action_assigned
+      NotificationMailer.mail_action_assigned(user, document).deliver_now
     end
   end
 end

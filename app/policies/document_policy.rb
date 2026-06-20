@@ -57,6 +57,12 @@ class DocumentPolicy < ApplicationPolicy
     show?
   end
 
+  def route?
+    return false if record.outgoing? || record.routed?
+
+    record.lead_user == user || entity_admin? || entity_owner?
+  end
+
   class Scope < ApplicationPolicy::Scope
     include DepartmentScoped
   end

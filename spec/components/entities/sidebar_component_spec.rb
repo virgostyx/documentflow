@@ -170,6 +170,69 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
   end
 
+  describe "Incoming Mail section" do
+    it "links to the Incoming Inbox and Pending Triage views" do
+      expect(rendered).to have_link("Incoming Inbox", href: inbox_entity_incoming_mails_path(entity))
+      expect(rendered).to have_link("Pending Triage", href: pending_triage_entity_incoming_mails_path(entity))
+    end
+
+    context "when on the incoming inbox page" do
+      let(:current_path) { inbox_entity_incoming_mails_path(entity) }
+
+      it "highlights only Incoming Inbox" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "Incoming Inbox")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "Pending Triage")
+      end
+    end
+
+    context "when on the pending triage page" do
+      let(:current_path) { pending_triage_entity_incoming_mails_path(entity) }
+
+      it "highlights only Pending Triage" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "Pending Triage")
+        expect(rendered).not_to have_css("a.bg-primary-100", text: "Incoming Inbox")
+      end
+    end
+
+    describe "count badges" do
+      let!(:entity_user) { create(:entity_user, :owner, entity: entity, user: user) }
+
+      def link_text(href)
+        rendered.css("a[href='#{href}']").first.text.squish
+      end
+
+      it "shows zero counts when there is no incoming mail" do
+        expect(link_text(inbox_entity_incoming_mails_path(entity))).to eq("Incoming Inbox 0")
+        expect(link_text(pending_triage_entity_incoming_mails_path(entity))).to eq("Pending Triage 0")
+      end
+
+      it "counts incoming mail addressed to the user as Incoming Inbox" do
+        create(:document, :incoming, entity: entity, lead_user: user, addressee: user)
+
+        expect(link_text(inbox_entity_incoming_mails_path(entity))).to eq("Incoming Inbox 1")
+      end
+
+      it "counts incoming mail awaiting the user's triage as Pending Triage" do
+        create(:document, :incoming, entity: entity, lead_user: user, addressee: user)
+
+        expect(link_text(pending_triage_entity_incoming_mails_path(entity))).to eq("Pending Triage 1")
+      end
+
+      it "does not count routed mail as Pending Triage" do
+        create(:document, :incoming, entity: entity, lead_user: user, addressee: user, routed_at: Time.current)
+
+        expect(link_text(pending_triage_entity_incoming_mails_path(entity))).to eq("Pending Triage 0")
+      end
+
+      it "does not count outgoing documents in either badge" do
+        create(:document, entity: entity, addressee: user)
+
+        expect(link_text(inbox_entity_incoming_mails_path(entity))).to eq("Incoming Inbox 0")
+        expect(link_text(pending_triage_entity_incoming_mails_path(entity))).to eq("Pending Triage 0")
+      end
+    end
+  end
+
   describe "Filing section" do
     it "links to manage folders" do
       expect(rendered).to have_link("Manage", href: entity_folders_path(entity))
@@ -190,6 +253,7 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     context "as owner with departments and folders" do
       let(:entity_user) { create(:entity_user, :owner, entity: entity, user: user) }
       let(:department) { create(:department, entity: entity, name: "Finance") }
+      let!(:other_department) { create(:department, entity: entity, name: "Operations") }
       let(:folder) { create(:folder, entity: entity, department: department, name: "Contracts") }
       let!(:subfolder) { create(:folder, entity: entity, department: department, parent: folder, name: "Drafts") }
 
@@ -206,6 +270,10 @@ RSpec.describe Entities::SidebarComponent, type: :component do
         expect(rendered).to have_text("Finance")
         expect(rendered).to have_link("Contracts", href: entity_documents_path(entity, folder_id: folder.id))
         expect(rendered).to have_link("Drafts", href: entity_documents_path(entity, folder_id: subfolder.id))
+      end
+
+      it "styles the department name in bold since there is more than one accessible department" do
+        expect(rendered).to have_css("span.font-bold", text: "Finance")
       end
 
       it "shows the count of accessible documents filed in each folder" do
@@ -246,6 +314,10 @@ RSpec.describe Entities::SidebarComponent, type: :component do
         expect(rendered).to have_text("Contracts")
         expect(rendered).not_to have_text("Sales")
         expect(rendered).not_to have_text("Leads")
+      end
+
+      it "does not show the department name since the member only has access to one department" do
+        expect(rendered).not_to have_css("button", text: "Finance")
       end
     end
   end

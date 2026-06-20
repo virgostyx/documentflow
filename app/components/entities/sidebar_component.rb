@@ -32,10 +32,24 @@ module Entities
       documents_base_scope.info_for(current_user).count
     end
 
-    def accessible_departments
-      return Department.none unless current_entity_user
+    def incoming_inbox_count
+      incoming_mails_base_scope.received_by(current_user).count
+    end
 
-      unrestricted_access? ? current_entity.departments : current_entity_user.departments
+    def pending_triage_count
+      incoming_mails_base_scope.pending_triage_for(current_user).count
+    end
+
+    def accessible_departments
+      @accessible_departments ||= if current_entity_user.nil?
+        Department.none
+      else
+        unrestricted_access? ? current_entity.departments : current_entity_user.departments
+      end
+    end
+
+    def multiple_departments?
+      accessible_departments.count > 1
     end
 
     def folders_for(department)
@@ -63,7 +77,11 @@ module Entities
     attr_reader :current_entity, :current_user, :current_entity_user
 
     def documents_base_scope
-      Pundit.policy_scope(current_user, Document).where(entity: current_entity)
+      Pundit.policy_scope(current_user, Document).where(entity: current_entity).outgoing
+    end
+
+    def incoming_mails_base_scope
+      Pundit.policy_scope(current_user, Document).where(entity: current_entity).incoming
     end
 
     def unrestricted_access?

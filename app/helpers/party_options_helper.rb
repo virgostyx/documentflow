@@ -27,6 +27,16 @@ module PartyOptionsHelper
     entity.users.merge(EntityUser.active).order(:first_name, :last_name)
   end
 
+  # Returns [label, id] pairs for the active members of a department, for use
+  # as Lead / action-assignee / info-recipient pickers on incoming mail.
+  def department_member_options(department)
+    return [] if department.nil?
+
+    department.entity_users.merge(EntityUser.active).includes(:user)
+              .filter_map { |entity_user| entity_user.user && [ entity_user.user.display_name, entity_user.user.id ] }
+              .sort_by(&:first)
+  end
+
   # Renders a small "Internal"/"External" badge for a party (User or Contact).
   def party_badge(party)
     return if party.nil?

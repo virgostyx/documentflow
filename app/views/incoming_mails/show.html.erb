@@ -1,0 +1,76 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: @document.reference_number,
+    description: @document.subject,
+    back_path: inbox_entity_incoming_mails_path(current_entity),
+    back_text: "Incoming mail"
+  ) %>
+
+  <div class="flex justify-end gap-3 mb-4">
+    <% if policy(@document).route? %>
+      <%= link_to "Route this mail", route_form_entity_incoming_mail_path(current_entity, @document),
+            class: "inline-flex items-center rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700",
+            data: { turbo_frame: "modal", action: "click->modal#open" } %>
+    <% end %>
+  </div>
+
+  <%= render Ui::CardComponent.new do |card| %>
+    <% card.with_header { "Mail details" } %>
+
+    <%= render Ui::DefinitionListComponent.new do |dl| %>
+      <% dl.with_item(term: "Reference number") { @document.reference_number } %>
+      <% dl.with_item(term: "Document date") { l(@document.document_date) } %>
+      <% dl.with_item(term: "Sender") { @document.sender&.display_name } %>
+      <% dl.with_item(term: "Registered by") { @document.created_by.email } %>
+      <% dl.with_item(term: "Lead") { @document.lead_user&.display_name } %>
+    <% end %>
+  <% end %>
+
+  <div class="mt-6">
+    <%= render Ui::CardComponent.new do |card| %>
+      <% card.with_header { "Main document" } %>
+      <%= render Documents::MainFileComponent.new(document: @document, current_user: current_user) %>
+    <% end %>
+  </div>
+
+  <div class="mt-6">
+    <%= render Ui::CardComponent.new do |card| %>
+      <% card.with_header { "Annexes" } %>
+      <%= render Documents::AnnexListComponent.new(document: @document, current_user: current_user) %>
+    <% end %>
+  </div>
+
+  <% if @document.routed? %>
+    <div class="mt-6">
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header { "Routing" } %>
+
+        <%= render Ui::DefinitionListComponent.new do |dl| %>
+          <% dl.with_item(term: "Assigned for action to") { @document.addressee&.display_name } %>
+          <% if @document.routing_message.present? %>
+            <% dl.with_item(term: "Message") { @document.routing_message } %>
+          <% end %>
+          <% dl.with_item(term: "Expects a response") { @document.expects_response? ? "Yes" : "No" } %>
+          <% if @document.response_deadline.present? %>
+            <% dl.with_item(term: "Response deadline") do %>
+              <% if @document.deadline_overdue? %>
+                <%= render(Ui::BadgeComponent.new(color: :danger)) { l(@document.response_deadline) } %>
+              <% elsif @document.deadline_due_tomorrow? %>
+                <%= render(Ui::BadgeComponent.new(color: :warning)) { l(@document.response_deadline) } %>
+              <% else %>
+                <%= l(@document.response_deadline) %>
+              <% end %>
+            <% end %>
+          <% end %>
+          <% if @document.cc_recipients.any? %>
+            <% dl.with_item(term: "Info") { @document.cc_recipients.map { |cc| cc.party&.display_name }.join(", ") } %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="mt-6 text-sm text-gray-500">
+      This mail is awaiting triage from its lead.
+    </div>
+  <% end %>
+</div>

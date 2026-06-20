@@ -250,6 +250,48 @@ RSpec.describe DocumentPolicy, type: :policy do
     end
   end
 
+  describe "#route?" do
+    let(:department) { create(:department, entity: entity) }
+    let(:lead) do
+      create(:user).tap do |u|
+        eu = create(:entity_user, user: u, entity: entity, role: "member", status: "active")
+        create(:entity_user_department, entity_user: eu, department: department)
+      end
+    end
+
+    context "when the document has not been routed yet" do
+      let(:document) { create(:document, :incoming, entity: entity, department: department, lead_user: lead, addressee: lead) }
+
+      context "as the lead" do let(:user) { lead }; it { is_expected.to permit_action(:route) } end
+      context "as entity owner" do let(:user) { owner }; it { is_expected.to permit_action(:route) } end
+      context "as entity admin" do let(:user) { admin }; it { is_expected.to permit_action(:route) } end
+      context "as another department member" do
+        let(:user) do
+          create(:user).tap do |u|
+            eu = create(:entity_user, user: u, entity: entity, role: "member", status: "active")
+            create(:entity_user_department, entity_user: eu, department: department)
+          end
+        end
+        it { is_expected.not_to permit_action(:route) }
+      end
+    end
+
+    context "when the document has already been routed" do
+      let(:document) do
+        create(:document, :incoming, entity: entity, department: department, lead_user: lead, addressee: lead, routed_at: Time.current)
+      end
+
+      context "as the lead" do let(:user) { lead }; it { is_expected.not_to permit_action(:route) } end
+      context "as entity owner" do let(:user) { owner }; it { is_expected.not_to permit_action(:route) } end
+    end
+
+    context "when the document is outgoing" do
+      let(:document) { create(:document, entity: entity, department: department, created_by: lead) }
+
+      context "as entity owner" do let(:user) { owner }; it { is_expected.not_to permit_action(:route) } end
+    end
+  end
+
   describe "Scope" do
     let(:other_entity) { create(:entity) }
     let!(:document_in_entity)       { create(:document, entity: entity) }

@@ -22,5 +22,21 @@ RSpec.describe NotificationJob do
 
       described_class.new.perform(user.id, "rejection_alert", document.id, reason: "Pièce manquante")
     end
+
+    it "delivers a mail_lead_assigned notification" do
+      expect(NotificationMailer).to receive(:mail_lead_assigned)
+        .with(user, document)
+        .and_return(instance_double(ActionMailer::MessageDelivery, deliver_now: true))
+
+      described_class.new.perform(user.id, "mail_lead_assigned", document.id)
+    end
+
+    it "delivers a mail_action_assigned notification" do
+      expect(NotificationMailer).to receive(:mail_action_assigned)
+        .with(user, document)
+        .and_return(instance_double(ActionMailer::MessageDelivery, deliver_now: true))
+
+      described_class.new.perform(user.id, "mail_action_assigned", document.id)
+    end
   end
 end

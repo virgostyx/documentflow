@@ -72,6 +72,45 @@ RSpec.describe PartyOptionsHelper, type: :helper do
     end
   end
 
+  describe "#department_member_options" do
+    it "returns [label, id] pairs for active members of the department, sorted by name" do
+      department = create(:department, entity: entity)
+      bob = create(:user, first_name: "Bob", last_name: "Smith")
+      alice = create(:user, first_name: "Alice", last_name: "Martin")
+      [ bob, alice ].each do |user|
+        eu = create(:entity_user, entity: entity, user: user, status: "active")
+        create(:entity_user_department, entity_user: eu, department: department)
+      end
+
+      expect(helper.department_member_options(department)).to eq(
+        [ [ "Alice Martin", alice.id ], [ "Bob Smith", bob.id ] ]
+      )
+    end
+
+    it "excludes members of a different department" do
+      department = create(:department, entity: entity)
+      other_department = create(:department, entity: entity)
+      other_user = create(:user)
+      eu = create(:entity_user, entity: entity, user: other_user, status: "active")
+      create(:entity_user_department, entity_user: eu, department: other_department)
+
+      expect(helper.department_member_options(department)).to be_empty
+    end
+
+    it "excludes non-active entity memberships" do
+      department = create(:department, entity: entity)
+      pending_user = create(:user)
+      eu = create(:entity_user, entity: entity, user: pending_user, status: "pending")
+      create(:entity_user_department, entity_user: eu, department: department)
+
+      expect(helper.department_member_options(department)).to be_empty
+    end
+
+    it "returns an empty array for a blank department" do
+      expect(helper.department_member_options(nil)).to eq([])
+    end
+  end
+
   describe "#party_badge" do
     it "renders an Internal badge for a user" do
       user = build(:user)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_19_173946) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_20_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -121,14 +121,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_173946) do
     t.datetime "created_at", null: false
     t.bigint "created_by_id", null: false
     t.bigint "department_id", null: false
+    t.string "direction", default: "outgoing", null: false
     t.date "document_date", null: false
     t.bigint "entity_id", null: false
     t.boolean "expects_response", default: false, null: false
     t.bigint "folder_id"
     t.bigint "in_reply_to_id"
     t.boolean "is_frozen", default: false, null: false
+    t.bigint "lead_user_id"
     t.string "reference_number", null: false
     t.date "response_deadline"
+    t.datetime "routed_at"
+    t.text "routing_message"
     t.bigint "sender_id", null: false
     t.string "sender_type", null: false
     t.string "status", default: "draft", null: false
@@ -141,6 +145,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_173946) do
     t.index ["entity_id"], name: "index_documents_on_entity_id"
     t.index ["folder_id"], name: "index_documents_on_folder_id"
     t.index ["in_reply_to_id"], name: "index_documents_on_in_reply_to_id"
+    t.index ["lead_user_id"], name: "index_documents_on_lead_user_id"
     t.index ["sender_type", "sender_id"], name: "index_documents_on_sender_type_and_sender_id"
     t.index ["status"], name: "index_documents_on_status"
   end
@@ -259,6 +264,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_173946) do
   add_foreign_key "documents", "entities"
   add_foreign_key "documents", "folders"
   add_foreign_key "documents", "users", column: "created_by_id"
+  add_foreign_key "documents", "users", column: "lead_user_id"
   add_foreign_key "entity_user_departments", "departments"
   add_foreign_key "entity_user_departments", "entity_users"
   add_foreign_key "entity_users", "entities"

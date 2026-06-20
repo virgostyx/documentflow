@@ -5,6 +5,7 @@ class Document < ApplicationRecord
   include PartyAssignable
 
   STATUSES = %w[draft in_progress signed finalized cancelled].freeze
+  DIRECTIONS = %w[outgoing incoming].freeze
 
   SORTABLE_COLUMNS = {
     "reference_number" => "documents.reference_number",
@@ -24,6 +25,7 @@ class Document < ApplicationRecord
   belongs_to :addressee, polymorphic: true
   belongs_to :in_reply_to, class_name: "Document", optional: true
   belongs_to :folder, optional: true
+  belongs_to :lead_user, class_name: "User", optional: true
   has_many :replies, class_name: "Document", foreign_key: :in_reply_to_id, inverse_of: :in_reply_to, dependent: :nullify
   has_many :workflow_steps, dependent: :destroy
   has_many :shared_links, dependent: :destroy
@@ -34,15 +36,20 @@ class Document < ApplicationRecord
 
   party_assignable :sender, :addressee
 
+  # Not persisted; only used to redisplay the incoming mail routing form after a validation failure.
+  attr_accessor :action_user_id, :info_user_ids
+
   # Validations
   validates :subject, presence: true, length: { maximum: 255 }
   validates :document_date, presence: true
   validates :status, presence: true, inclusion: { in: STATUSES }
+  validates :direction, presence: true, inclusion: { in: DIRECTIONS }
   validate :sender_belongs_to_entity
   validate :addressee_belongs_to_entity
   validate :department_belongs_to_entity
   validate :in_reply_to_belongs_to_entity
   validate :folder_belongs_to_department
+  validate :lead_user_belongs_to_entity
 
   # Scopes
   scope :authored_by, ->(user) { where(created_by: user) }
@@ -69,6 +76,9 @@ class Document < ApplicationRecord
       user_id: user.id
     ).distinct
   }
+  scope :incoming, -> { where(direction: "incoming") }
+  scope :outgoing, -> { where(direction: "outgoing") }
+  scope :pending_triage_for, ->(user) { incoming.where(lead_user_id: user.id, routed_at: nil) }
   scope :with_status, ->(status) { status.present? ? where(status: status) : all }
   scope :in_folder, ->(folder) { where(folder: folder) }
   scope :unfiled, -> { where(folder_id: nil) }
@@ -114,6 +124,18 @@ class Document < ApplicationRecord
 
   def awaiting_response_from?(user)
     expects_response? && addressee_type == "User" && addressee_id == user.id
+  end
+
+  def routed?
+    routed_at.present?
+  end
+
+  def incoming?
+    direction == "incoming"
+  end
+
+  def outgoing?
+    direction == "outgoing"
   end
 
   def deadline_overdue?
@@ -190,5 +212,11 @@ class Document < ApplicationRecord
     return if folder.nil? || department.nil? || folder.department_id == department_id
 
     errors.add(:folder, "must belong to the same department")
+  end
+
+  def lead_user_belongs_to_entity
+    return if entity.nil? || lead_user.nil? || EntityUser.active.exists?(entity_id: entity_id, user_id: lead_user_id)
+
+    errors.add(:lead_user, "must belong to the same entity")
   end
 end

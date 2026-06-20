@@ -44,6 +44,49 @@ RSpec.describe Document, type: :model do
       end
     end
 
+    describe "direction" do
+      it "defaults to outgoing" do
+        expect(Document.new.direction).to eq("outgoing")
+      end
+
+      %w[outgoing incoming].each do |direction|
+        it "accepts #{direction}" do
+          document.direction = direction
+          expect(document).to be_valid
+        end
+      end
+
+      it "rejects an unknown direction" do
+        document.direction = "lateral"
+        expect(document).not_to be_valid
+        expect(document.errors[:direction]).to be_present
+      end
+    end
+
+    describe "lead_user scoped to the document's entity" do
+      it "rejects a lead_user not belonging to the entity" do
+        document.lead_user = create(:user)
+
+        expect(document).not_to be_valid
+        expect(document.errors[:lead_user]).to be_present
+      end
+
+      it "accepts a lead_user who is an active member of the entity" do
+        user = create(:user)
+        create(:entity_user, entity: entity, user: user, status: "active")
+
+        document.lead_user = user
+
+        expect(document).to be_valid
+      end
+
+      it "accepts a blank lead_user" do
+        document.lead_user = nil
+
+        expect(document).to be_valid
+      end
+    end
+
     describe "sender and addressee scoped to the document's entity" do
       it "rejects a sender from another entity" do
         document.sender = create(:contact, entity: create(:entity))
@@ -629,6 +672,71 @@ RSpec.describe Document, type: :model do
       unfiled = create(:document, entity: entity, department: document.department)
 
       expect(Document.where(entity: entity).unfiled).to contain_exactly(unfiled)
+    end
+  end
+
+  describe ".incoming and .outgoing" do
+    it "splits documents by direction" do
+      incoming = create(:document, :incoming, entity: entity)
+      outgoing = create(:document, entity: entity)
+
+      expect(Document.where(entity: entity).incoming).to contain_exactly(incoming)
+      expect(Document.where(entity: entity).outgoing).to contain_exactly(outgoing)
+    end
+  end
+
+  describe ".pending_triage_for" do
+    it "returns incoming documents where the user is the lead and routing hasn't happened yet" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      pending = create(:document, :incoming, entity: entity, lead_user: lead)
+
+      expect(Document.where(entity: entity).pending_triage_for(lead)).to contain_exactly(pending)
+    end
+
+    it "excludes documents that have already been routed" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      create(:document, :incoming, entity: entity, lead_user: lead, routed_at: Time.current)
+
+      expect(Document.where(entity: entity).pending_triage_for(lead)).to be_empty
+    end
+
+    it "excludes outgoing documents" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      create(:document, entity: entity, addressee: lead)
+
+      expect(Document.where(entity: entity).pending_triage_for(lead)).to be_empty
+    end
+
+    it "excludes incoming documents where the user is not the lead" do
+      lead = create(:user)
+      other = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      create(:entity_user, entity: entity, user: other, status: "active")
+      create(:document, :incoming, entity: entity, lead_user: other, addressee: other)
+
+      expect(Document.where(entity: entity).pending_triage_for(lead)).to be_empty
+    end
+  end
+
+  describe "#routed?" do
+    it "is false when routed_at is blank" do
+      expect(build(:document, entity: entity, routed_at: nil).routed?).to be false
+    end
+
+    it "is true when routed_at is set" do
+      expect(build(:document, entity: entity, routed_at: Time.current).routed?).to be true
+    end
+  end
+
+  describe "#incoming? and #outgoing?" do
+    it "reflects the direction column" do
+      expect(build(:document, entity: entity, direction: "incoming")).to be_incoming
+      expect(build(:document, entity: entity, direction: "incoming")).not_to be_outgoing
+      expect(build(:document, entity: entity, direction: "outgoing")).to be_outgoing
+      expect(build(:document, entity: entity, direction: "outgoing")).not_to be_incoming
     end
   end
 end

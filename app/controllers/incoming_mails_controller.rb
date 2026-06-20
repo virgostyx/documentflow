@@ -79,7 +79,7 @@ class IncomingMailsController < ApplicationController
   end
 
   def document_params
-    params.require(:document).permit(:subject, :document_date, :department_id, :sender_token, :lead_user_id)
+    params.require(:document).permit(:subject, :document_date, :department_id, :sender_token, :lead_user_id, :main_file, annexes: [])
   end
 
   def routing_params

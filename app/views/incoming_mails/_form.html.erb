@@ -1,4 +1,4 @@
-<%= form_with model: [ current_entity, document ], url: entity_incoming_mails_path(current_entity), builder: FloatingLabelsRails::FormBuilder, local: true do |f| %>
+<%= form_with model: [ current_entity, document ], url: entity_incoming_mails_path(current_entity), builder: FloatingLabelsRails::FormBuilder, local: true, multipart: true do |f| %>
   <% if document.errors.any? %>
     <div class="mb-4 rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
       <%= document.errors.full_messages.to_sentence %>
@@ -27,6 +27,18 @@
   <%= f.floating_select :lead_user_id, department_member_options(Department.find_by(id: default_department_id)),
         { selected: document.lead_user_id, include_blank: "Select who this mail is assigned to..." },
         { label: "Assign to", required: true } %>
+
+  <div class="mt-4">
+    <%= f.label :main_file, "Main document", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.file_field :main_file,
+          class: "block text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
+  </div>
+
+  <div class="mt-4">
+    <%= f.label :annexes, "Annexes (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.file_field :annexes, multiple: true,
+          class: "block text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
+  </div>
 
   <div class="mt-6 flex justify-end gap-3">
     <%= render(Ui::ButtonComponent.new(href: inbox_entity_incoming_mails_path(current_entity), variant: :secondary)) { "Cancel" } %>

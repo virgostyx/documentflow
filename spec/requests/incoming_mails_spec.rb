@@ -71,6 +71,32 @@ RSpec.describe "Incoming mails", type: :request do
         expect(response).to have_http_status(:unprocessable_content)
       end
     end
+
+    context "with a main file and annexes" do
+      let(:main_file) { fixture_file_upload("sample.pdf", "application/pdf") }
+      let(:annex) { fixture_file_upload("sample.pdf", "application/pdf") }
+      let(:params) do
+        {
+          document: {
+            subject: "Tax notice",
+            document_date: Date.current,
+            department_id: department.id,
+            sender_token: "Contact-#{sender.id}",
+            lead_user_id: lead.id,
+            main_file: main_file,
+            annexes: [ annex ]
+          }
+        }
+      end
+
+      it "attaches the main file and annexes" do
+        post entity_incoming_mails_path(entity), params: params
+
+        document = entity.documents.incoming.last
+        expect(document.main_file).to be_attached
+        expect(document.annexes).to be_one
+      end
+    end
   end
 
   describe "GET /entities/:entity_id/incoming_mails/:id" do

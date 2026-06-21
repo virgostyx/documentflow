@@ -1,0 +1,40 @@
+- generic [active] [ref=e64]:
+  - banner [ref=e65]:
+    - generic [ref=e66]:
+      - link "DocumentFlow" [ref=e67] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e68]
+        - generic [ref=e70]: DocumentFlow
+      - button "M marcus.chen@acme-mfg.example" [ref=e72]:
+        - generic [ref=e73]: M
+        - generic [ref=e74]: marcus.chen@acme-mfg.example
+        - img [ref=e75]
+  - alert [ref=e78]:
+    - img [ref=e80]
+    - paragraph [ref=e82]: Signed in successfully.
+    - button [ref=e83]:
+      - img [ref=e84]
+  - main [ref=e87]:
+    - generic [ref=e88]:
+      - generic [ref=e89]:
+        - heading "Dashboard" [level=1] [ref=e91]
+        - paragraph [ref=e92]: Welcome, marcus.chen@acme-mfg.example.
+      - link "New entity" [ref=e94] [cursor=pointer]:
+        - /url: /entities/new
+      - generic [ref=e95]:
+        - link "Acme Manufacturing Ltd ENT-BO0SKL Owner 5 members" [ref=e96] [cursor=pointer]:
+          - /url: /entities/1
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - heading "Acme Manufacturing Ltd" [level=3] [ref=e99]
+              - paragraph [ref=e100]: ENT-BO0SKL
+            - generic [ref=e101]: Owner
+          - paragraph [ref=e102]: 5 members
+        - link "Northbridge Consulting Group ENT-44B2ZB Guest 4 members" [ref=e103] [cursor=pointer]:
+          - /url: /entities/2
+          - generic [ref=e104]:
+            - generic [ref=e105]:
+              - heading "Northbridge Consulting Group" [level=3] [ref=e106]
+              - paragraph [ref=e107]: ENT-44B2ZB
+            - generic [ref=e108]: Guest
+          - paragraph [ref=e109]: 4 members

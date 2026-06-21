@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_20_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_21_090001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -115,9 +115,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_20_090000) do
     t.index ["entity_id"], name: "index_departments_on_entity_id"
   end
 
+  create_table "document_file_versions", force: :cascade do |t|
+    t.text "comment"
+    t.datetime "created_at", null: false
+    t.bigint "document_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.integer "version_number", null: false
+    t.index ["document_id", "version_number"], name: "index_document_file_versions_on_document_id_and_version_number", unique: true
+    t.index ["document_id"], name: "index_document_file_versions_on_document_id"
+    t.index ["user_id"], name: "index_document_file_versions_on_user_id"
+  end
+
   create_table "documents", force: :cascade do |t|
     t.bigint "addressee_id", null: false
     t.string "addressee_type", null: false
+    t.datetime "checked_out_at"
+    t.bigint "checked_out_by_id"
     t.datetime "created_at", null: false
     t.bigint "created_by_id", null: false
     t.bigint "department_id", null: false
@@ -139,6 +153,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_20_090000) do
     t.string "subject", null: false
     t.datetime "updated_at", null: false
     t.index ["addressee_type", "addressee_id"], name: "index_documents_on_addressee_type_and_addressee_id"
+    t.index ["checked_out_by_id"], name: "index_documents_on_checked_out_by_id"
     t.index ["created_by_id"], name: "index_documents_on_created_by_id"
     t.index ["department_id"], name: "index_documents_on_department_id"
     t.index ["entity_id", "reference_number"], name: "index_documents_on_entity_id_and_reference_number", unique: true
@@ -259,10 +274,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_20_090000) do
   add_foreign_key "circuit_templates", "entities"
   add_foreign_key "contacts", "entities"
   add_foreign_key "departments", "entities"
+  add_foreign_key "document_file_versions", "documents"
+  add_foreign_key "document_file_versions", "users"
   add_foreign_key "documents", "departments"
   add_foreign_key "documents", "documents", column: "in_reply_to_id"
   add_foreign_key "documents", "entities"
   add_foreign_key "documents", "folders"
+  add_foreign_key "documents", "users", column: "checked_out_by_id"
   add_foreign_key "documents", "users", column: "created_by_id"
   add_foreign_key "documents", "users", column: "lead_user_id"
   add_foreign_key "entity_user_departments", "departments"

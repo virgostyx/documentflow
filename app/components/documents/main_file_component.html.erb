@@ -7,6 +7,12 @@
   <p class="text-sm text-gray-500">No main document attached yet.</p>
 <% end %>
 
+<% if checked_out? %>
+  <div class="mt-2">
+    <%= render(Ui::BadgeComponent.new(color: :warning)) { "Checked out by #{document.checked_out_by.email}" } %>
+  </div>
+<% end %>
+
 <% if show_actions? %>
   <div class="mt-4 flex flex-wrap items-center gap-3">
     <%= form_with url: entity_document_main_file_path(document.entity, document), method: :post, local: true,
@@ -24,3 +30,25 @@
     <% end %>
   </div>
 <% end %>
+
+<div class="mt-4 flex flex-wrap items-center gap-3">
+  <% if show_check_out_button? %>
+    <%= render(Ui::ButtonComponent.new(
+      href: entity_document_checkout_path(document.entity, document), variant: :secondary, method: :post
+    )) { "Check out" } %>
+  <% end %>
+
+  <% if show_check_in_button? %>
+    <%= render(Ui::ButtonComponent.new(
+      href: confirm_check_in_entity_document_checkout_path(document.entity, document),
+      variant: :primary, data: { turbo_frame: "modal", action: "click->modal#open" }
+    )) { "Check in" } %>
+  <% end %>
+
+  <% if show_cancel_check_out_button? %>
+    <%= render(Ui::ButtonComponent.new(
+      href: confirm_cancel_entity_document_checkout_path(document.entity, document),
+      variant: :secondary, data: { turbo_frame: "modal", action: "click->modal#open" }
+    )) { "Cancel checkout" } %>
+  <% end %>
+</div>

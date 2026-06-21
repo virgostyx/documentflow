@@ -18,6 +18,10 @@ class NotificationJob < ApplicationJob
       NotificationMailer.mail_lead_assigned(user, document).deliver_now
     when :mail_action_assigned
       NotificationMailer.mail_action_assigned(user, document).deliver_now
+    when :checked_out
+      NotificationMailer.checked_out(user, document).deliver_now
+    when :checked_in
+      NotificationMailer.checked_in(user, document).deliver_now
     end
   end
 end

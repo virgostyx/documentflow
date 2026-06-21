@@ -127,5 +127,31 @@ RSpec.describe Workflow::ApproveStepOrganizer do
         expect(document.frozen?).to be true
       end
     end
+
+    context "when the document is checked out by another user" do
+      let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
+
+      before { document.update!(checked_out_by: create(:user), checked_out_at: Time.current) }
+
+      it "fails and does not approve the step" do
+        result = described_class.call(step: visa_step, current_user: visa_step.actor)
+
+        expect(result).not_to be_success
+        expect(visa_step.reload).to be_pending
+      end
+    end
+
+    context "when the document is checked out by the approving actor" do
+      let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
+
+      before { document.update!(checked_out_by: visa_step.actor, checked_out_at: Time.current) }
+
+      it "still succeeds" do
+        result = described_class.call(step: visa_step, current_user: visa_step.actor)
+
+        expect(result).to be_success
+        expect(visa_step.reload).to be_approved
+      end
+    end
   end
 end

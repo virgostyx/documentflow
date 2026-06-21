@@ -1,0 +1,14 @@
+<ul class="divide-y divide-gray-100">
+  <% versions.each do |version| %>
+    <li class="flex items-center justify-between py-2 text-sm">
+      <div>
+        <span class="text-gray-900 font-medium">Version <%= version.version_number %></span>
+        <span class="text-gray-500"> &middot; <%= version.user.email %> &middot; <%= l(version.created_at, format: :short) %></span>
+        <% if version.comment.present? %>
+          <p class="text-gray-600"><%= version.comment %></p>
+        <% end %>
+      </div>
+      <%= link_to "Download", rails_blob_path(version.file, disposition: "attachment"), class: "text-primary-600 hover:text-primary-700 font-medium" %>
+    </li>
+  <% end %>
+</ul>

@@ -1,0 +1,17 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Release checkout</h2>
+
+    <p class="text-gray-700">
+      Release this checkout without checking in a new version? Any edits made outside the application will be lost.
+    </p>
+
+    <div class="mt-6 flex justify-end gap-3">
+      <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Cancel" } %>
+      <%= button_to "Release checkout", entity_document_checkout_path(current_entity, @document), method: :delete,
+            data: { turbo_frame: "_top" },
+            class: "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors " \
+                   "focus:outline-none focus:ring-2 focus:ring-offset-2 bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500" %>
+    </div>
+  </div>
+<% end %>

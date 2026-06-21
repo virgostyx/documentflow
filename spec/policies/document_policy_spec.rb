@@ -175,6 +175,81 @@ RSpec.describe DocumentPolicy, type: :policy do
     end
   end
 
+  describe "#check_out?" do
+    context "when the document is a draft and not checked out" do
+      let(:document) { create(:document, entity: entity, created_by: member) }
+
+      context "as its author"     do let(:user) { member }; it { is_expected.to permit_action(:check_out) } end
+      context "as entity owner"   do let(:user) { owner };  it { is_expected.to permit_action(:check_out) } end
+      context "as another member" do let(:user) { create(:user).tap { |u| create(:entity_user, user: u, entity: entity, role: "member", status: "active") } }; it { is_expected.not_to permit_action(:check_out) } end
+    end
+
+    context "when the document is in_progress" do
+      let(:document) do
+        document = create(:document, :in_progress, entity: entity, created_by: member)
+        create(:workflow_step, document: document, role: "VISA", order: 1, status: "pending", actor: admin)
+        document
+      end
+
+      context "as the current step actor" do let(:user) { admin };  it { is_expected.to permit_action(:check_out) } end
+      context "as the document author"    do let(:user) { member }; it { is_expected.not_to permit_action(:check_out) } end
+    end
+
+    context "when the document is already checked out by someone else" do
+      let(:document) { create(:document, entity: entity, created_by: member, checked_out_by: admin, checked_out_at: Time.current) }
+
+      context "as its author" do let(:user) { member }; it { is_expected.not_to permit_action(:check_out) } end
+    end
+
+    context "when the document is finalized" do
+      let(:document) { create(:document, :finalized, entity: entity, created_by: owner) }
+
+      context "as entity owner" do let(:user) { owner }; it { is_expected.not_to permit_action(:check_out) } end
+    end
+  end
+
+  describe "#check_in?" do
+    context "when checked out by the current user" do
+      let(:document) { create(:document, entity: entity, created_by: member, checked_out_by: member, checked_out_at: Time.current) }
+
+      context "as the checking-out user" do let(:user) { member }; it { is_expected.to permit_action(:check_in) } end
+    end
+
+    context "when checked out by someone else" do
+      let(:document) { create(:document, entity: entity, created_by: member, checked_out_by: admin, checked_out_at: Time.current) }
+
+      context "as another user with update rights" do let(:user) { member }; it { is_expected.not_to permit_action(:check_in) } end
+    end
+
+    context "when not checked out at all" do
+      let(:document) { create(:document, entity: entity, created_by: member) }
+
+      context "as its author" do let(:user) { member }; it { is_expected.not_to permit_action(:check_in) } end
+    end
+  end
+
+  describe "#cancel_check_out?" do
+    context "when checked out by the current user" do
+      let(:document) { create(:document, entity: entity, created_by: member, checked_out_by: member, checked_out_at: Time.current) }
+
+      context "as the checking-out user" do let(:user) { member }; it { is_expected.to permit_action(:cancel_check_out) } end
+    end
+
+    context "when checked out by someone else" do
+      let(:document) { create(:document, entity: entity, created_by: member, checked_out_by: member, checked_out_at: Time.current) }
+
+      context "as entity owner"   do let(:user) { owner }; it { is_expected.to permit_action(:cancel_check_out) } end
+      context "as entity admin"   do let(:user) { admin }; it { is_expected.to permit_action(:cancel_check_out) } end
+      context "as an unrelated member" do let(:user) { create(:user).tap { |u| create(:entity_user, user: u, entity: entity, role: "member", status: "active") } }; it { is_expected.not_to permit_action(:cancel_check_out) } end
+    end
+
+    context "when not checked out at all" do
+      let(:document) { create(:document, entity: entity, created_by: member) }
+
+      context "as entity owner" do let(:user) { owner }; it { is_expected.not_to permit_action(:cancel_check_out) } end
+    end
+  end
+
   describe "#destroy?" do
     let(:document) { create(:document, entity: entity, created_by: member) }
 

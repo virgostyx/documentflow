@@ -1,0 +1,25 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Check in new version</h2>
+
+    <%= form_with url: entity_document_checkout_path(current_entity, @document), method: :patch,
+                  local: true, multipart: true, data: { turbo_frame: "_top" } do |f| %>
+      <div>
+        <%= label_tag "document_file_version[file]", "File", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= file_field_tag "document_file_version[file]", required: true,
+              class: "block text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
+      </div>
+
+      <div class="mt-4">
+        <%= label_tag "document_file_version[comment]", "Comment (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= text_area_tag "document_file_version[comment]", nil, rows: 3,
+              class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-3">
+        <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Cancel" } %>
+        <%= render(Ui::ButtonComponent.new) { "Check in" } %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -19,6 +19,8 @@ RSpec.describe Document, type: :model do
     it { is_expected.to have_many(:replies).class_name("Document") }
     it { is_expected.to have_one_attached(:main_file) }
     it { is_expected.to have_many_attached(:annexes) }
+    it { is_expected.to belong_to(:checked_out_by).class_name("User").optional }
+    it { is_expected.to have_many(:document_file_versions) }
   end
 
   # ── Validations ───────────────────────────────────────────────────────────
@@ -348,6 +350,41 @@ RSpec.describe Document, type: :model do
     it "returns false before finalization" do
       document.save!
       expect(document.frozen?).to be false
+    end
+  end
+
+  describe "#checked_out? and #checked_out_by? and #locked_for?" do
+    let(:user) { create(:user) }
+    let(:other_user) { create(:user) }
+
+    it "is not checked out by default" do
+      document.save!
+      expect(document.checked_out?).to be false
+    end
+
+    it "is checked out once checked_out_by is set" do
+      document.save!
+      document.update!(checked_out_by: user, checked_out_at: Time.current)
+      expect(document.checked_out?).to be true
+    end
+
+    it "#checked_out_by? is true for the checking-out user" do
+      document.save!
+      document.update!(checked_out_by: user, checked_out_at: Time.current)
+      expect(document.checked_out_by?(user)).to be true
+      expect(document.checked_out_by?(other_user)).to be false
+    end
+
+    it "#locked_for? is false when not checked out" do
+      document.save!
+      expect(document.locked_for?(user)).to be false
+    end
+
+    it "#locked_for? is false for the checking-out user, true for anyone else" do
+      document.save!
+      document.update!(checked_out_by: user, checked_out_at: Time.current)
+      expect(document.locked_for?(user)).to be false
+      expect(document.locked_for?(other_user)).to be true
     end
   end
 

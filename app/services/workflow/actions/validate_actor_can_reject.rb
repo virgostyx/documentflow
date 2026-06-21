@@ -21,6 +21,10 @@ module Workflow
         if step.red?
           next fail_with!(ctx, "The drafter cannot reject a step", :validation_error)
         end
+
+        if ctx.document.checked_out? && !ctx.document.checked_out_by?(ctx.current_user)
+          next fail_with!(ctx, "This document is checked out by another user and cannot be rejected right now", :validation_error)
+        end
       end
     end
   end

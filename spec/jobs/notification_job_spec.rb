@@ -38,5 +38,21 @@ RSpec.describe NotificationJob do
 
       described_class.new.perform(user.id, "mail_action_assigned", document.id)
     end
+
+    it "delivers a checked_out notification" do
+      expect(NotificationMailer).to receive(:checked_out)
+        .with(user, document)
+        .and_return(instance_double(ActionMailer::MessageDelivery, deliver_now: true))
+
+      described_class.new.perform(user.id, "checked_out", document.id)
+    end
+
+    it "delivers a checked_in notification" do
+      expect(NotificationMailer).to receive(:checked_in)
+        .with(user, document)
+        .and_return(instance_double(ActionMailer::MessageDelivery, deliver_now: true))
+
+      described_class.new.perform(user.id, "checked_in", document.id)
+    end
   end
 end

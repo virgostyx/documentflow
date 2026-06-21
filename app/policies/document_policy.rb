@@ -57,6 +57,22 @@ class DocumentPolicy < ApplicationPolicy
     show?
   end
 
+  def check_out?
+    return false if record.is_frozen? || record.checked_out?
+
+    update?
+  end
+
+  def check_in?
+    record.checked_out_by?(user) && update?
+  end
+
+  def cancel_check_out?
+    return false unless record.checked_out?
+
+    record.checked_out_by?(user) || entity_admin? || entity_owner?
+  end
+
   def route?
     return false if record.outgoing? || record.routed?
 

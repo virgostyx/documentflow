@@ -17,6 +17,10 @@ module Workflow
         unless step.actor == ctx.current_user
           next fail_with!(ctx, "You are not the actor assigned to this step", :permission_error)
         end
+
+        if ctx.document.checked_out? && !ctx.document.checked_out_by?(ctx.current_user)
+          next fail_with!(ctx, "This document is checked out by another user and cannot be approved right now", :validation_error)
+        end
       end
     end
   end

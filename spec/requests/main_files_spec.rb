@@ -73,6 +73,22 @@ RSpec.describe "MainFiles", type: :request do
         expect(document.reload.main_file).not_to be_attached
       end
     end
+
+    context "when the document is checked out by another user" do
+      before do
+        create(:entity_user, entity: entity, user: user, status: "active")
+        sign_in user
+        document.update!(checked_out_by: create(:user), checked_out_at: Time.current)
+      end
+
+      it "does not attach the main document" do
+        post entity_document_main_file_path(entity, document), params: { document: { main_file: file } }
+
+        expect(response).to redirect_to(entity_document_path(entity, document))
+        expect(flash[:alert]).to be_present
+        expect(document.reload.main_file).not_to be_attached
+      end
+    end
   end
 
   describe "DELETE /entities/:entity_id/documents/:document_id/main_file" do
@@ -107,6 +123,22 @@ RSpec.describe "MainFiles", type: :request do
         delete entity_document_main_file_path(entity, document)
 
         expect(response).to redirect_to(root_path)
+        expect(document.reload.main_file).to be_attached
+      end
+    end
+
+    context "when the document is checked out by another user" do
+      before do
+        create(:entity_user, entity: entity, user: user, status: "active")
+        sign_in user
+        document.update!(checked_out_by: create(:user), checked_out_at: Time.current)
+      end
+
+      it "does not remove the main document" do
+        delete entity_document_main_file_path(entity, document)
+
+        expect(response).to redirect_to(entity_document_path(entity, document))
+        expect(flash[:alert]).to be_present
         expect(document.reload.main_file).to be_attached
       end
     end

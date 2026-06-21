@@ -34,6 +34,22 @@ class NotificationMailer < ApplicationMailer
     mail(to: user.email, subject: "Action required on incoming mail: #{document.reference_number}")
   end
 
+  def checked_out(user, document)
+    @user = user
+    @document = document
+    @document_url = entity_document_url(document.entity, document)
+
+    mail(to: user.email, subject: "Document checked out: #{document.reference_number}")
+  end
+
+  def checked_in(user, document)
+    @user = user
+    @document = document
+    @document_url = entity_document_url(document.entity, document)
+
+    mail(to: user.email, subject: "New document version checked in: #{document.reference_number}")
+  end
+
   def cc_notification(recipient_email, recipient_name, document)
     @recipient_name = recipient_name
     @document = document

@@ -71,5 +71,27 @@ RSpec.describe Workflow::RejectStepOrganizer do
         expect(document.reload.current_step).to eq(visa_step)
       end
     end
+
+    context "when the document is checked out by another user" do
+      before { document.update!(checked_out_by: create(:user), checked_out_at: Time.current) }
+
+      it "fails and does not change the step's status" do
+        result = described_class.call(step: visa_step, current_user: visa_step.actor, reason: "Pièce manquante")
+
+        expect(result).not_to be_success
+        expect(visa_step.reload).to be_pending
+      end
+    end
+
+    context "when the document is checked out by the rejecting actor" do
+      before { document.update!(checked_out_by: visa_step.actor, checked_out_at: Time.current) }
+
+      it "still succeeds" do
+        result = described_class.call(step: visa_step, current_user: visa_step.actor, reason: "Pièce manquante")
+
+        expect(result).to be_success
+        expect(visa_step.reload).to be_rejected
+      end
+    end
   end
 end

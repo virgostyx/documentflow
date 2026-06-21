@@ -78,6 +78,15 @@
     <% end %>
   </div>
 
+  <% if @document.document_file_versions.any? %>
+    <div class="mt-6">
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header { "Version history" } %>
+        <%= render Documents::FileVersionListComponent.new(document: @document) %>
+      <% end %>
+    </div>
+  <% end %>
+
   <div class="mt-6">
     <%= render Ui::CardComponent.new do |card| %>
       <% card.with_header { "Annexes" } %>

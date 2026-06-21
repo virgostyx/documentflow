@@ -1,0 +1,5 @@
+<p>Hello <%= @user.email %>,</p>
+
+<p>A new version of document <strong><%= @document.reference_number %></strong> (<%= @document.subject %>) has been checked in.</p>
+
+<p><%= link_to "View the document", @document_url %></p>

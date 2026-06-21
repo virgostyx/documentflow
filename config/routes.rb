@@ -42,6 +42,10 @@ Rails.application.routes.draw do
       resources :cc_recipients, only: %i[create destroy]
       resource :main_file, only: %i[create destroy]
       resources :annexes, only: %i[create destroy]
+      resource :checkout, only: %i[create update destroy], controller: "document_checkouts" do
+        get :confirm_check_in, on: :member
+        get :confirm_cancel, on: :member
+      end
 
       member do
         post :launch

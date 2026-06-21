@@ -72,6 +72,27 @@ module Entities
       request.query_parameters["folder_id"] == "unfiled"
     end
 
+    def documents_section_active?
+      request.path.start_with?(entity_documents_path(current_entity)) && !filing_section_active?
+    end
+
+    def incoming_mail_section_active?
+      request.path.start_with?(entity_incoming_mails_path(current_entity))
+    end
+
+    def filing_section_active?
+      request.path.start_with?(entity_folders_path(current_entity)) ||
+        (request.path == entity_documents_path(current_entity) && request.query_parameters["folder_id"].present?)
+    end
+
+    def contacts_section_active?
+      request.path.start_with?(entity_contacts_path(current_entity))
+    end
+
+    def settings_section_active?
+      request.path.start_with?(entity_settings_path(current_entity))
+    end
+
     private
 
     attr_reader :current_entity, :current_user, :current_entity_user

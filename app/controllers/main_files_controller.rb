@@ -8,7 +8,9 @@ class MainFilesController < ApplicationController
   def create
     authorize @document, :update?
 
-    if params.dig(:document, :main_file).present?
+    if @document.locked_for?(current_user)
+      redirect_to document_path, alert: "This document is checked out by another user."
+    elsif params.dig(:document, :main_file).present?
       @document.main_file.attach(params.dig(:document, :main_file))
       redirect_to document_path, notice: "Main document uploaded successfully."
     else
@@ -19,8 +21,12 @@ class MainFilesController < ApplicationController
   def destroy
     authorize @document, :update?
 
-    @document.main_file.purge
-    redirect_to document_path, notice: "Main document removed successfully."
+    if @document.locked_for?(current_user)
+      redirect_to document_path, alert: "This document is checked out by another user."
+    else
+      @document.main_file.purge
+      redirect_to document_path, notice: "Main document removed successfully."
+    end
   end
 
   private

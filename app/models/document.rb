@@ -26,11 +26,13 @@ class Document < ApplicationRecord
   belongs_to :in_reply_to, class_name: "Document", optional: true
   belongs_to :folder, optional: true
   belongs_to :lead_user, class_name: "User", optional: true
+  belongs_to :checked_out_by, class_name: "User", optional: true
   has_many :replies, class_name: "Document", foreign_key: :in_reply_to_id, inverse_of: :in_reply_to, dependent: :nullify
   has_many :workflow_steps, dependent: :destroy
   has_many :shared_links, dependent: :destroy
   has_many :cc_recipients, dependent: :destroy
   has_many :audit_logs, as: :auditable, dependent: :destroy
+  has_many :document_file_versions, dependent: :destroy
   has_one_attached :main_file
   has_many_attached :annexes
 
@@ -148,6 +150,18 @@ class Document < ApplicationRecord
 
   def current_step
     workflow_steps.ordered.find_by(status: "pending")
+  end
+
+  def checked_out?
+    checked_out_by_id.present?
+  end
+
+  def checked_out_by?(user)
+    checked_out_by_id == user&.id
+  end
+
+  def locked_for?(user)
+    checked_out? && !checked_out_by?(user)
   end
 
   def thread

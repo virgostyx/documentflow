@@ -4,6 +4,7 @@ module Documents
   class MainFileComponent < ViewComponent::Base
     def initialize(document:, current_user:)
       @document = document
+      @current_user = current_user
       @policy = Pundit.policy!(current_user, document)
     end
 
@@ -12,11 +13,31 @@ module Documents
     end
 
     def show_actions?
-      @policy.update?
+      @policy.update? && !checked_out_by_other?
+    end
+
+    def checked_out?
+      document.checked_out?
+    end
+
+    def checked_out_by_other?
+      document.locked_for?(current_user)
+    end
+
+    def show_check_out_button?
+      @policy.check_out?
+    end
+
+    def show_check_in_button?
+      @policy.check_in?
+    end
+
+    def show_cancel_check_out_button?
+      @policy.cancel_check_out?
     end
 
     private
 
-    attr_reader :document
+    attr_reader :document, :current_user
   end
 end

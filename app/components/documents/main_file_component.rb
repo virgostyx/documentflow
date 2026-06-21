@@ -25,7 +25,11 @@ module Documents
     end
 
     def show_check_out_button?
-      @policy.check_out?
+      attached? && @policy.check_out?
+    end
+
+    def main_file_download_url
+      Rails.application.routes.url_helpers.rails_blob_path(document.main_file, disposition: "attachment", only_path: true)
     end
 
     def show_check_in_button?

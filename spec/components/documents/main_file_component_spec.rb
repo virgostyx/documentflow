@@ -74,6 +74,22 @@ RSpec.describe Documents::MainFileComponent, type: :component do
     it "shows a check-out control" do
       expect(subject).to have_link("Check out")
     end
+
+    it "wires the check-out control to open the file download in a new tab" do
+      link = subject.css("a").find { |a| a.text.strip == "Check out" }
+
+      expect(link["data-controller"]).to eq("checkout")
+      expect(link["data-action"]).to include("click->checkout#openDownload")
+      expect(link["data-checkout-download-url-value"]).to eq(
+        Rails.application.routes.url_helpers.rails_blob_path(document.main_file, disposition: "attachment", only_path: true)
+      )
+    end
+  end
+
+  context "when the document has no main file attached" do
+    it "does not show a check-out control" do
+      expect(subject).not_to have_link("Check out")
+    end
   end
 
   context "when checked out by the current user" do

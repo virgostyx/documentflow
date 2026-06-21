@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Edit classification node</h2>
+    <%= render "form", classification_node: @classification_node %>
+  </div>
+<% end %>

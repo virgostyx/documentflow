@@ -1077,9 +1077,9 @@ RSpec.describe "Documents", type: :request do
     end
   end
 
-  describe "PATCH /entities/:entity_id/documents/:id/file" do
+  describe "PATCH /entities/:entity_id/documents/:id/classify" do
     let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee) }
-    let(:folder) { create(:folder, entity: entity, department: department) }
+    let(:node) { create(:classification_node, entity: entity, code: "1", name: "Contracts") }
 
     before do
       eu = create(:entity_user, entity: entity, user: user)
@@ -1087,30 +1087,41 @@ RSpec.describe "Documents", type: :request do
       sign_in user
     end
 
-    it "files the document into the given folder" do
-      patch file_entity_document_path(entity, document), params: { folder_id: folder.id }
+    it "classifies the document under the given node" do
+      patch classify_entity_document_path(entity, document), params: { classification_node_id: node.id }
 
-      expect(document.reload.folder).to eq(folder)
+      expect(document.reload.classification_node).to eq(node)
       expect(response).to redirect_to(entity_document_path(entity, document))
       expect(flash[:notice]).to be_present
     end
 
-    it "removes the document from its folder when folder_id is blank" do
-      document.update!(folder: folder)
+    it "removes the document's classification when classification_node_id is blank" do
+      document.update!(classification_node: node)
 
-      patch file_entity_document_path(entity, document), params: { folder_id: "" }
+      patch classify_entity_document_path(entity, document), params: { classification_node_id: "" }
 
-      expect(document.reload.folder).to be_nil
+      expect(document.reload.classification_node).to be_nil
       expect(flash[:notice]).to be_present
     end
 
-    it "rejects a folder from a different department" do
+    it "classifies the document under a node regardless of the document's department" do
       other_department = create(:department, entity: entity)
-      other_folder = create(:folder, entity: entity, department: other_department)
+      document_in_other_department = create(:document, entity: entity, department: other_department, sender: sender, addressee: addressee)
+      create(:entity_user_department, entity_user: EntityUser.find_by(entity: entity, user: user), department: other_department)
 
-      patch file_entity_document_path(entity, document), params: { folder_id: other_folder.id }
+      patch classify_entity_document_path(entity, document_in_other_department), params: { classification_node_id: node.id }
 
-      expect(document.reload.folder).to be_nil
+      expect(document_in_other_department.reload.classification_node).to eq(node)
+      expect(flash[:notice]).to be_present
+    end
+
+    it "rejects a classification_node_id from a different entity" do
+      other_entity = create(:entity)
+      foreign_node = create(:classification_node, entity: other_entity, code: "1", name: "Other entity root")
+
+      patch classify_entity_document_path(entity, document), params: { classification_node_id: foreign_node.id }
+
+      expect(document.reload.classification_node).to be_nil
       expect(flash[:alert]).to be_present
     end
 
@@ -1123,18 +1134,18 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "redirects with an authorization error" do
-        patch file_entity_document_path(entity, document), params: { folder_id: folder.id }
+        patch classify_entity_document_path(entity, document), params: { classification_node_id: node.id }
 
-        expect(document.reload.folder).to be_nil
+        expect(document.reload.classification_node).to be_nil
         expect(response).to redirect_to(root_path)
       end
     end
   end
 
-  describe "folder_id filtering" do
-    let!(:folder) { create(:folder, entity: entity, department: department) }
-    let!(:filed_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Filed doc", folder: folder) }
-    let!(:unfiled_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Unfiled doc") }
+  describe "classification_node_id filtering" do
+    let!(:node) { create(:classification_node, entity: entity, code: "1", name: "Contracts") }
+    let!(:classified_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Classified doc", classification_node: node) }
+    let!(:unclassified_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Unclassified doc") }
 
     before do
       eu = create(:entity_user, entity: entity, user: user)
@@ -1142,30 +1153,28 @@ RSpec.describe "Documents", type: :request do
       sign_in user
     end
 
-    it "filters the index to a given folder" do
-      get entity_documents_path(entity, folder_id: folder.id)
+    it "filters the index to a given classification node" do
+      get entity_documents_path(entity, classification_node_id: node.id)
 
-      expect(response.body).to include("Filed doc")
-      expect(response.body).not_to include("Unfiled doc")
+      expect(response.body).to include("Classified doc")
+      expect(response.body).not_to include("Unclassified doc")
     end
 
-    it "filters the index to unfiled documents" do
-      get entity_documents_path(entity, folder_id: "unfiled")
+    it "filters the index to unclassified documents" do
+      get entity_documents_path(entity, classification_node_id: "unclassified")
 
-      expect(response.body).to include("Unfiled doc")
-      expect(response.body).not_to include("Filed doc")
+      expect(response.body).to include("Unclassified doc")
+      expect(response.body).not_to include("Classified doc")
     end
 
-    it "carries the folder_id through to the search and status filter forms so it survives a search" do
-      get entity_documents_path(entity, folder_id: folder.id)
+    it "carries the classification_node_id through to the search and status filter forms so it survives a search" do
+      get entity_documents_path(entity, classification_node_id: node.id)
 
-      expect(response.body).to include(%(name="folder_id" value="#{folder.id}"))
+      expect(response.body).to include(%(name="classification_node_id" value="#{node.id}"))
     end
   end
 
-  describe "right-click filing menu on the documents table" do
-    let!(:folder) { create(:folder, entity: entity, department: department, name: "Contracts") }
-    let!(:subfolder) { create(:folder, entity: entity, department: department, parent: folder, name: "Drafts") }
+  describe "right-click classify menu on the documents table" do
     let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee) }
 
     before do
@@ -1174,31 +1183,10 @@ RSpec.describe "Documents", type: :request do
       sign_in user
     end
 
-    it "offers the document's accessible root folders and subfolders as filing actions" do
+    it "offers a Classify... trigger that opens the picker modal for the document" do
       get entity_documents_path(entity)
 
-      expect(response.body).to include(file_entity_document_path(entity, document, folder_id: folder.id))
-      expect(response.body).to include(file_entity_document_path(entity, document, folder_id: subfolder.id))
-    end
-
-    it "does not offer folders from a department the user cannot access" do
-      other_department = create(:department, entity: entity)
-      other_folder = create(:folder, entity: entity, department: other_department, name: "Leads")
-      create(:document, entity: entity, department: other_department, sender: sender, addressee: addressee)
-
-      get entity_documents_path(entity)
-
-      expect(response.body).not_to include(file_entity_document_path(entity, document, folder_id: other_folder.id))
-    end
-
-    it "offers a remove-from-folder action only when the document is already filed" do
-      get entity_documents_path(entity)
-      expect(response.body).not_to include("Remove from folder")
-
-      document.update!(folder: folder)
-
-      get entity_documents_path(entity)
-      expect(response.body).to include("Remove from folder")
+      expect(response.body).to include(classify_form_entity_document_path(entity, document))
     end
   end
 end

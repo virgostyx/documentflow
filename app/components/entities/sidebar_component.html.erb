@@ -138,47 +138,29 @@
     <% nav_active = "#{nav_base} bg-primary-100 text-primary-700" %>
     <% nav_inactive = "#{nav_base} text-gray-600 hover:bg-primary-50 hover:text-primary-700" %>
 
-    <div class="shrink-0 space-y-0.5 mt-3" data-controller="sidebar-section" data-sidebar-section-key-value="filing" data-sidebar-section-active-value="<%= filing_section_active? %>">
+    <div class="shrink-0 space-y-0.5 mt-3" data-controller="sidebar-section" data-sidebar-section-key-value="classification" data-sidebar-section-active-value="<%= classification_section_active? %>">
     <div class="pb-1 px-3 flex items-center justify-between">
       <button type="button" data-action="sidebar-section#toggle" class="flex items-center gap-1">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Filing</p>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Classification</p>
         <svg data-sidebar-section-target="chevron" class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-150" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
         </svg>
       </button>
-      <%= link_to "Manage", entity_folders_path(current_entity), class: "text-xs text-primary-600 hover:text-primary-700" %>
+      <%= link_to "Manage", entity_classification_nodes_path(current_entity), class: "text-xs text-primary-600 hover:text-primary-700" %>
     </div>
 
     <div data-sidebar-section-target="panel" class="space-y-0.5">
-    <%= link_to entity_documents_path(current_entity, folder_id: "unfiled"), class: (unfiled_active? ? nav_active : nav_inactive) + " justify-between" do %>
-      <span>Unfiled</span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= unfiled_count %><% end %>
+    <%= link_to entity_documents_path(current_entity, classification_node_id: "unclassified"), class: (unclassified_active? ? nav_active : nav_inactive) + " justify-between" do %>
+      <span>Unclassified</span>
+      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= unclassified_count %><% end %>
     <% end %>
 
-    <% accessible_departments.each do |department| %>
-      <div class="mt-1" <%= 'data-controller="filter-panel"'.html_safe if multiple_departments? %>>
-        <% if multiple_departments? %>
-          <button type="button" data-action="filter-panel#toggle" class="w-full flex items-center justify-between px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-primary-700">
-            <span class="font-bold"><%= department.name %></span>
-          </button>
-        <% end %>
-
-        <div <%= 'data-filter-panel-target="panel"'.html_safe if multiple_departments? %>>
-          <% folders_for(department).each do |folder| %>
-            <%= link_to entity_documents_path(current_entity, folder_id: folder.id), class: (folder_active?(folder) ? nav_active : nav_inactive) + " justify-between" do %>
-              <span><%= folder.name %></span>
-              <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= document_count_for(folder) %><% end %>
-            <% end %>
-
-            <% folder.children.each do |subfolder| %>
-              <%= link_to entity_documents_path(current_entity, folder_id: subfolder.id), class: (folder_active?(subfolder) ? nav_active : nav_inactive) + " justify-between pl-8" do %>
-                <span><%= subfolder.name %></span>
-                <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= document_count_for(subfolder) %><% end %>
-              <% end %>
-            <% end %>
-          <% end %>
-        </div>
-      </div>
+    <% classification_roots.each do |node| %>
+      <%= render Entities::ClassificationNodeRowComponent.new(
+            node: node, mode: :sidebar, current_entity: current_entity,
+            active_node_id: request.query_parameters["classification_node_id"],
+            document_counts: classification_document_counts
+          ) %>
     <% end %>
     </div>
     </div>

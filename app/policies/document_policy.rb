@@ -53,7 +53,7 @@ class DocumentPolicy < ApplicationPolicy
     record.current_step&.actor == user && record.current_step&.role != "RED"
   end
 
-  def file?
+  def classify?
     show?
   end
 

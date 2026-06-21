@@ -233,29 +233,27 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
   end
 
-  describe "Filing section" do
-    it "links to manage folders" do
-      expect(rendered).to have_link("Manage", href: entity_folders_path(entity))
+  describe "Classification section" do
+    it "links to manage classification nodes" do
+      expect(rendered).to have_link("Manage", href: entity_classification_nodes_path(entity))
     end
 
-    it "links to the unfiled documents view" do
-      expect(rendered).to have_link("Unfiled", href: entity_documents_path(entity, folder_id: "unfiled"))
+    it "links to the unclassified documents view" do
+      expect(rendered).to have_link("Unclassified", href: entity_documents_path(entity, classification_node_id: "unclassified"))
     end
 
-    context "when on the unfiled documents page" do
-      let(:current_path) { entity_documents_path(entity, folder_id: "unfiled") }
+    context "when on the unclassified documents page" do
+      let(:current_path) { entity_documents_path(entity, classification_node_id: "unclassified") }
 
-      it "highlights the Unfiled link" do
-        expect(rendered).to have_css("a.bg-primary-100", text: "Unfiled")
+      it "highlights the Unclassified link" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "Unclassified")
       end
     end
 
-    context "as owner with departments and folders" do
+    context "as owner with classification nodes" do
       let(:entity_user) { create(:entity_user, :owner, entity: entity, user: user) }
-      let(:department) { create(:department, entity: entity, name: "Finance") }
-      let!(:other_department) { create(:department, entity: entity, name: "Operations") }
-      let(:folder) { create(:folder, entity: entity, department: department, name: "Contracts") }
-      let!(:subfolder) { create(:folder, entity: entity, department: department, parent: folder, name: "Drafts") }
+      let(:root) { create(:classification_node, entity: entity, code: "1", name: "Contracts") }
+      let!(:child) { create(:classification_node, entity: entity, parent: root, code: "1.1", name: "Drafts") }
 
       subject(:rendered) do
         with_request_url(current_path) do
@@ -263,45 +261,37 @@ RSpec.describe Entities::SidebarComponent, type: :component do
         end
       end
 
-      it "shows the department name, the root folder and its subfolder" do
-        folder
-        subfolder
+      it "shows the root node and its child" do
+        root
+        child
 
-        expect(rendered).to have_text("Finance")
-        expect(rendered).to have_link("Contracts", href: entity_documents_path(entity, folder_id: folder.id))
-        expect(rendered).to have_link("Drafts", href: entity_documents_path(entity, folder_id: subfolder.id))
+        expect(rendered).to have_link("Contracts", href: entity_documents_path(entity, classification_node_id: root.id))
+        expect(rendered).to have_link("Drafts", href: entity_documents_path(entity, classification_node_id: child.id))
       end
 
-      it "styles the department name in bold since there is more than one accessible department" do
-        expect(rendered).to have_css("span.font-bold", text: "Finance")
+      it "shows the count of accessible documents classified under each node" do
+        department = create(:department, entity: entity)
+        create(:document, entity: entity, department: department, classification_node: root)
+        create(:document, entity: entity, department: department, classification_node: root)
+
+        expect(rendered.css("a[href='#{entity_documents_path(entity, classification_node_id: root.id)}']").first.text.squish).to eq("1 Contracts 2")
       end
 
-      it "shows the count of accessible documents filed in each folder" do
-        create(:document, entity: entity, department: department, folder: folder)
-        create(:document, entity: entity, department: department, folder: folder)
+      context "when on a given node's filtered page" do
+        let(:current_path) { entity_documents_path(entity, classification_node_id: root.id) }
 
-        expect(rendered.css("a[href='#{entity_documents_path(entity, folder_id: folder.id)}']").first.text.squish).to eq("Contracts 2")
-      end
-
-      context "when on a given folder's filtered page" do
-        let(:current_path) { entity_documents_path(entity, folder_id: folder.id) }
-
-        it "highlights only that folder" do
+        it "highlights only that node" do
           expect(rendered).to have_css("a.bg-primary-100", text: "Contracts")
           expect(rendered).not_to have_css("a.bg-primary-100", text: "Drafts")
         end
       end
     end
 
-    context "as a member restricted to a single department" do
-      let(:department) { create(:department, entity: entity, name: "Finance") }
-      let(:other_department) { create(:department, entity: entity, name: "Sales") }
+    context "as a regular member" do
       let(:entity_user) { create(:entity_user, entity: entity, user: user, role: "member") }
 
       before do
-        create(:entity_user_department, entity_user: entity_user, department: department)
-        create(:folder, entity: entity, department: department, name: "Contracts")
-        create(:folder, entity: entity, department: other_department, name: "Leads")
+        create(:classification_node, entity: entity, code: "1", name: "Contracts")
       end
 
       subject(:rendered) do
@@ -310,14 +300,8 @@ RSpec.describe Entities::SidebarComponent, type: :component do
         end
       end
 
-      it "only shows folders from the member's department" do
+      it "still shows the entity-wide classification nodes since filing is free for any staff member" do
         expect(rendered).to have_text("Contracts")
-        expect(rendered).not_to have_text("Sales")
-        expect(rendered).not_to have_text("Leads")
-      end
-
-      it "does not show the department name since the member only has access to one department" do
-        expect(rendered).not_to have_css("button", text: "Finance")
       end
     end
   end

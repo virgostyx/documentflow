@@ -45,18 +45,9 @@
             </div>
 
             <div data-context-menu-target="menu" class="hidden fixed z-50 w-56 rounded-md bg-white shadow-lg border border-gray-200 py-1">
-              <% (@folders_by_department&.[](document.department_id) || []).select(&:root?).each do |folder| %>
-                <%= button_to "File in #{folder.name}", file_entity_document_path(current_entity, document, folder_id: folder.id), method: :patch,
-                      data: { turbo_frame: "_top" }, class: "w-full text-left px-3 py-2 text-sm hover:bg-gray-50" %>
-                <% folder.children.each do |subfolder| %>
-                  <%= button_to "File in #{folder.name} / #{subfolder.name}", file_entity_document_path(current_entity, document, folder_id: subfolder.id), method: :patch,
-                        data: { turbo_frame: "_top" }, class: "w-full text-left pl-6 pr-3 py-2 text-sm hover:bg-gray-50" %>
-                <% end %>
-              <% end %>
-              <% if document.folder_id.present? %>
-                <%= button_to "Remove from folder", file_entity_document_path(current_entity, document, folder_id: nil), method: :patch,
-                      data: { turbo_frame: "_top" }, class: "w-full text-left px-3 py-2 text-sm text-danger-600 hover:bg-danger-50 border-t border-gray-100" %>
-              <% end %>
+              <%= link_to "Classify...", classify_form_entity_document_path(current_entity, document),
+                    data: { turbo_frame: "modal", action: "click->modal#open" },
+                    class: "block w-full text-left px-3 py-2 text-sm hover:bg-gray-50" %>
             </div>
           </td>
         </tr>

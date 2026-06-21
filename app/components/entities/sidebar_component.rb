@@ -40,49 +40,41 @@ module Entities
       incoming_mails_base_scope.pending_triage_for(current_user).count
     end
 
-    def accessible_departments
-      @accessible_departments ||= if current_entity_user.nil?
-        Department.none
-      else
-        unrestricted_access? ? current_entity.departments : current_entity_user.departments
-      end
+    def classification_roots
+      ClassificationNode.sort_by_code(current_entity.classification_nodes.where(parent_id: nil).includes(children: { children: :children }))
     end
 
-    def multiple_departments?
-      accessible_departments.count > 1
+    def unclassified_count
+      documents_base_scope.unclassified.count
     end
 
-    def folders_for(department)
-      department.folders.includes(:children).select(&:root?)
+    def document_count_for(node)
+      classification_document_counts[node.id] || 0
     end
 
-    def unfiled_count
-      documents_base_scope.unfiled.count
+    def node_active?(node)
+      request.query_parameters["classification_node_id"].to_s == node.id.to_s
     end
 
-    def document_count_for(folder)
-      folder_document_counts[folder.id] || 0
+    def unclassified_active?
+      request.query_parameters["classification_node_id"] == "unclassified"
     end
 
-    def folder_active?(folder)
-      request.query_parameters["folder_id"].to_s == folder.id.to_s
-    end
-
-    def unfiled_active?
-      request.query_parameters["folder_id"] == "unfiled"
+    def can_manage_classification?
+      unrestricted_access?
     end
 
     def documents_section_active?
-      request.path.start_with?(entity_documents_path(current_entity)) && !filing_section_active?
+      request.path.start_with?(entity_documents_path(current_entity)) && !classification_section_active?
     end
 
     def incoming_mail_section_active?
       request.path.start_with?(entity_incoming_mails_path(current_entity))
     end
 
-    def filing_section_active?
-      request.path.start_with?(entity_folders_path(current_entity)) ||
-        (request.path == entity_documents_path(current_entity) && request.query_parameters["folder_id"].present?)
+    def classification_section_active?
+      request.path.start_with?(entity_classification_nodes_path(current_entity)) ||
+        (request.path == entity_documents_path(current_entity) && request.query_parameters["classification_node_id"].present?)
     end
 
     def contacts_section_active?
@@ -113,8 +105,8 @@ module Entities
       current_entity_user&.departments || Department.none
     end
 
-    def folder_document_counts
-      @folder_document_counts ||= documents_base_scope.where.not(folder_id: nil).group(:folder_id).count
+    def classification_document_counts
+      @classification_document_counts ||= documents_base_scope.where.not(classification_node_id: nil).group(:classification_node_id).count
     end
   end
 end

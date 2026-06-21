@@ -9,7 +9,7 @@ class Entity < ApplicationRecord
   has_many :contacts, dependent: :destroy
   has_many :documents, dependent: :destroy
   has_many :departments, dependent: :destroy
-  has_many :folders, dependent: :destroy
+  has_many :classification_nodes, dependent: :destroy
   has_many :circuit_templates, dependent: :destroy
   has_one_attached :logo
 

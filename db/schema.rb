@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_21_090001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_21_130400) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -92,6 +92,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_090001) do
     t.index ["entity_id"], name: "index_circuit_templates_on_entity_id"
   end
 
+  create_table "classification_nodes", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.integer "depth", null: false
+    t.bigint "entity_id", null: false
+    t.string "name", null: false
+    t.bigint "parent_id"
+    t.datetime "updated_at", null: false
+    t.index ["entity_id", "code"], name: "index_classification_nodes_on_entity_and_code", unique: true
+    t.index ["entity_id", "parent_id", "name"], name: "index_classification_nodes_on_entity_parent_name", unique: true
+    t.index ["entity_id"], name: "index_classification_nodes_on_entity_id"
+    t.index ["parent_id"], name: "index_classification_nodes_on_parent_id"
+  end
+
   create_table "contacts", force: :cascade do |t|
     t.string "company"
     t.datetime "created_at", null: false
@@ -132,6 +146,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_090001) do
     t.string "addressee_type", null: false
     t.datetime "checked_out_at"
     t.bigint "checked_out_by_id"
+    t.bigint "classification_node_id"
     t.datetime "created_at", null: false
     t.bigint "created_by_id", null: false
     t.bigint "department_id", null: false
@@ -139,7 +154,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_090001) do
     t.date "document_date", null: false
     t.bigint "entity_id", null: false
     t.boolean "expects_response", default: false, null: false
-    t.bigint "folder_id"
     t.bigint "in_reply_to_id"
     t.boolean "is_frozen", default: false, null: false
     t.bigint "lead_user_id"
@@ -154,11 +168,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_090001) do
     t.datetime "updated_at", null: false
     t.index ["addressee_type", "addressee_id"], name: "index_documents_on_addressee_type_and_addressee_id"
     t.index ["checked_out_by_id"], name: "index_documents_on_checked_out_by_id"
+    t.index ["classification_node_id"], name: "index_documents_on_classification_node_id"
     t.index ["created_by_id"], name: "index_documents_on_created_by_id"
     t.index ["department_id"], name: "index_documents_on_department_id"
     t.index ["entity_id", "reference_number"], name: "index_documents_on_entity_id_and_reference_number", unique: true
     t.index ["entity_id"], name: "index_documents_on_entity_id"
-    t.index ["folder_id"], name: "index_documents_on_folder_id"
     t.index ["in_reply_to_id"], name: "index_documents_on_in_reply_to_id"
     t.index ["lead_user_id"], name: "index_documents_on_lead_user_id"
     t.index ["sender_type", "sender_id"], name: "index_documents_on_sender_type_and_sender_id"
@@ -207,19 +221,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_090001) do
     t.index ["role"], name: "index_entity_users_on_role"
     t.index ["status"], name: "index_entity_users_on_status"
     t.index ["user_id"], name: "index_entity_users_on_user_id"
-  end
-
-  create_table "folders", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "department_id", null: false
-    t.bigint "entity_id", null: false
-    t.string "name", null: false
-    t.bigint "parent_id"
-    t.datetime "updated_at", null: false
-    t.index ["department_id", "parent_id", "name"], name: "index_folders_on_department_parent_name", unique: true
-    t.index ["department_id"], name: "index_folders_on_department_id"
-    t.index ["entity_id"], name: "index_folders_on_entity_id"
-    t.index ["parent_id"], name: "index_folders_on_parent_id"
   end
 
   create_table "shared_links", force: :cascade do |t|
@@ -272,14 +273,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_090001) do
   add_foreign_key "circuit_template_steps", "circuit_templates"
   add_foreign_key "circuit_template_steps", "users", column: "actor_id"
   add_foreign_key "circuit_templates", "entities"
+  add_foreign_key "classification_nodes", "classification_nodes", column: "parent_id"
+  add_foreign_key "classification_nodes", "entities"
   add_foreign_key "contacts", "entities"
   add_foreign_key "departments", "entities"
   add_foreign_key "document_file_versions", "documents"
   add_foreign_key "document_file_versions", "users"
+  add_foreign_key "documents", "classification_nodes"
   add_foreign_key "documents", "departments"
   add_foreign_key "documents", "documents", column: "in_reply_to_id"
   add_foreign_key "documents", "entities"
-  add_foreign_key "documents", "folders"
   add_foreign_key "documents", "users", column: "checked_out_by_id"
   add_foreign_key "documents", "users", column: "created_by_id"
   add_foreign_key "documents", "users", column: "lead_user_id"
@@ -288,9 +291,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_090001) do
   add_foreign_key "entity_users", "entities"
   add_foreign_key "entity_users", "users"
   add_foreign_key "entity_users", "users", column: "invited_by_id"
-  add_foreign_key "folders", "departments"
-  add_foreign_key "folders", "entities"
-  add_foreign_key "folders", "folders", column: "parent_id"
   add_foreign_key "shared_links", "documents"
   add_foreign_key "workflow_steps", "documents"
   add_foreign_key "workflow_steps", "users", column: "actor_id"

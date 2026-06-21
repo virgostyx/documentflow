@@ -1,0 +1,8 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">
+      <%= @classification_node.parent_id.present? ? "Add child node" : "Add root node" %>
+    </h2>
+    <%= render "form", classification_node: @classification_node %>
+  </div>
+<% end %>

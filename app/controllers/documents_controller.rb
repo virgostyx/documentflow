@@ -3,8 +3,8 @@
 class DocumentsController < ApplicationController
   include EntityScoped
 
-  before_action :set_document, only: %i[show edit update destroy launch cancel file]
-  before_action :load_folders_by_department, only: %i[index mine received todo waiting info search]
+  before_action :set_document, only: %i[show edit update destroy launch cancel classify_form classify]
+  before_action :load_classification_tree, only: %i[index mine received todo waiting info search classify_form]
 
   def index
     @list_scope = "all"
@@ -121,11 +121,19 @@ class DocumentsController < ApplicationController
     end
   end
 
-  def file
-    authorize @document, :file?
+  def classify_form
+    authorize @document, :classify?
+  end
 
-    folder = Folder.find_by(id: params[:folder_id])
-    result = Documents::FileOrganizer.call(document: @document, folder: folder, current_user: current_user)
+  def classify
+    authorize @document, :classify?
+
+    if params[:classification_node_id].present?
+      node = current_entity.classification_nodes.find_by(id: params[:classification_node_id])
+      return redirect_back fallback_location: entity_document_path(current_entity, @document), alert: "That classification node could not be found." if node.nil?
+    end
+
+    result = Documents::ClassificationOrganizer.call(document: @document, classification_node: node, current_user: current_user)
 
     redirect_back fallback_location: entity_document_path(current_entity, @document),
                    notice: result.success? ? result.message : nil,
@@ -168,22 +176,24 @@ class DocumentsController < ApplicationController
     documents = scope.includes(:sender, :addressee, :created_by)
     documents = documents.with_status(params[:status])
     documents = documents.where("subject ILIKE :q OR reference_number ILIKE :q", q: "%#{params[:q]}%") if params[:q].present?
-    documents = apply_folder_filter(documents)
+    documents = apply_classification_filter(documents)
     documents.sorted(params[:sort], params[:direction]).page(params[:page])
   end
 
-  def apply_folder_filter(documents)
-    if params[:folder_id] == "unfiled"
-      documents.unfiled
-    elsif params[:folder_id].present?
-      documents.in_folder(params[:folder_id])
+  def apply_classification_filter(documents)
+    if params[:classification_node_id] == "unclassified"
+      documents.unclassified
+    elsif params[:classification_node_id].present?
+      documents.in_classification_node(params[:classification_node_id])
     else
       documents
     end
   end
 
-  def load_folders_by_department
-    @folders_by_department = policy_scope(Folder).where(entity: current_entity).includes(:children).group_by(&:department_id)
+  def load_classification_tree
+    @classification_roots = ClassificationNode.sort_by_code(
+      current_entity.classification_nodes.where(parent_id: nil).includes(children: { children: :children })
+    )
   end
 
   def document_params

@@ -24,7 +24,7 @@ class Document < ApplicationRecord
   belongs_to :sender, polymorphic: true
   belongs_to :addressee, polymorphic: true
   belongs_to :in_reply_to, class_name: "Document", optional: true
-  belongs_to :folder, optional: true
+  belongs_to :classification_node, optional: true
   belongs_to :lead_user, class_name: "User", optional: true
   belongs_to :checked_out_by, class_name: "User", optional: true
   has_many :replies, class_name: "Document", foreign_key: :in_reply_to_id, inverse_of: :in_reply_to, dependent: :nullify
@@ -50,7 +50,7 @@ class Document < ApplicationRecord
   validate :addressee_belongs_to_entity
   validate :department_belongs_to_entity
   validate :in_reply_to_belongs_to_entity
-  validate :folder_belongs_to_department
+  validate :classification_node_belongs_to_entity
   validate :lead_user_belongs_to_entity
 
   # Scopes
@@ -82,8 +82,8 @@ class Document < ApplicationRecord
   scope :outgoing, -> { where(direction: "outgoing") }
   scope :pending_triage_for, ->(user) { incoming.where(lead_user_id: user.id, routed_at: nil) }
   scope :with_status, ->(status) { status.present? ? where(status: status) : all }
-  scope :in_folder, ->(folder) { where(folder: folder) }
-  scope :unfiled, -> { where(folder_id: nil) }
+  scope :in_classification_node, ->(node) { where(classification_node: node) }
+  scope :unclassified, -> { where(classification_node_id: nil) }
   scope :sorted, ->(column, direction) {
     col = SORTABLE_COLUMNS.fetch(column.to_s, SORTABLE_COLUMNS[DEFAULT_SORT_COLUMN])
     dir = %w[asc desc].include?(direction.to_s) ? direction.to_s : DEFAULT_SORT_DIRECTION
@@ -222,10 +222,10 @@ class Document < ApplicationRecord
     errors.add(:in_reply_to, "must belong to the same entity")
   end
 
-  def folder_belongs_to_department
-    return if folder.nil? || department.nil? || folder.department_id == department_id
+  def classification_node_belongs_to_entity
+    return if classification_node.nil? || classification_node.entity_id == entity_id
 
-    errors.add(:folder, "must belong to the same department")
+    errors.add(:classification_node, "must belong to the same entity")
   end
 
   def lead_user_belongs_to_entity

@@ -19,7 +19,7 @@ Rails.application.routes.draw do
     resources :contacts
     resources :circuit_templates, controller: "entities/circuit_templates"
     resources :departments, controller: "entities/departments"
-    resources :folders, controller: "entities/folders" do
+    resources :classification_nodes, controller: "entities/classification_nodes" do
       member do
         get :confirm_destroy
       end
@@ -50,7 +50,8 @@ Rails.application.routes.draw do
       member do
         post :launch
         post :cancel
-        patch :file
+        get :classify_form
+        patch :classify
       end
       collection do
         get :search

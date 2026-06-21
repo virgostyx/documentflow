@@ -1,0 +1,23 @@
+<%= form_with model: [ current_entity, classification_node ], builder: FloatingLabelsRails::FormBuilder, local: true, data: { turbo_frame: "_top" } do |f| %>
+  <% if classification_node.errors.any? %>
+    <div class="mb-4 rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+      <%= classification_node.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= f.hidden_field :parent_id %>
+
+  <% if classification_node.parent.present? %>
+    <p class="text-sm text-gray-500 mb-3">
+      Adding under: <span class="font-mono"><%= classification_node.parent.code %></span> — <%= classification_node.parent.name %>
+    </p>
+  <% end %>
+
+  <%= f.floating_text_field :code, label: "Code (e.g. 1.2.3)", required: true, autofocus: true, placeholder: " " %>
+  <%= f.floating_text_field :name, label: "Name", required: true, placeholder: " " %>
+
+  <div class="mt-6 flex justify-end gap-3">
+    <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Cancel" } %>
+    <%= render(Ui::ButtonComponent.new) { classification_node.persisted? ? "Save changes" : "Create node" } %>
+  </div>
+<% end %>

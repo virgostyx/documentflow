@@ -7,6 +7,7 @@ export default class extends Controller {
   connect() {
     if (this.activeValue) {
       this._setOpen(true)
+      if (this.hasKeyValue) localStorage.setItem(this._storageKey, true)
       return
     }
 

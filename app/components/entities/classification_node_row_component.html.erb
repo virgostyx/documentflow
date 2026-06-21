@@ -1,0 +1,42 @@
+<div class="<%= indent_class %>">
+  <% case mode %>
+  <% when :sidebar %>
+    <%= link_to entity_documents_path(current_entity, classification_node_id: node.id),
+          class: "flex items-center justify-between gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors " +
+                 (active? ? "bg-primary-100 text-primary-700" : "text-gray-600 hover:bg-primary-50 hover:text-primary-700") do %>
+      <span><span class="font-mono text-xs text-gray-400"><%= node.code %></span> <%= node.name %></span>
+      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= document_count %><% end %>
+    <% end %>
+  <% when :management %>
+    <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+      <span class="text-gray-900"><span class="font-mono text-gray-500"><%= node.code %></span> — <%= node.name %></span>
+      <div class="flex items-center gap-3 text-sm">
+        <% if add_child_allowed? %>
+          <%= link_to "Add child", new_entity_classification_node_path(current_entity, parent_id: node.id),
+                class: "text-primary-600 hover:text-primary-700", data: { turbo_frame: "modal", action: "click->modal#open" } %>
+        <% end %>
+        <% if can_manage %>
+          <%= link_to "Edit", edit_entity_classification_node_path(current_entity, node),
+                class: "text-gray-600 hover:text-gray-900", data: { turbo_frame: "modal", action: "click->modal#open" } %>
+          <%= link_to "Delete", confirm_destroy_entity_classification_node_path(current_entity, node),
+                class: "text-danger-600 hover:text-danger-700", data: { turbo_frame: "modal", action: "click->modal#open" } %>
+        <% end %>
+      </div>
+    </div>
+  <% when :picker %>
+    <div data-classification-picker-target="row" data-searchable-text="<%= searchable_text %>"
+         class="flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50">
+      <span class="text-sm text-gray-900"><span class="font-mono text-gray-500"><%= node.code %></span> — <%= node.name %></span>
+      <% if classified_here? %>
+        <span class="text-xs font-medium text-gray-400">Classified here</span>
+      <% else %>
+        <%= button_to "Classify here", classify_entity_document_path(current_entity, document, classification_node_id: node.id), method: :patch,
+              data: { turbo_frame: "_top" }, class: "text-xs font-medium text-primary-600 hover:text-primary-700" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% sorted_children.each do |child| %>
+    <%= render Entities::ClassificationNodeRowComponent.new(**child_attrs(child)) %>
+  <% end %>
+</div>

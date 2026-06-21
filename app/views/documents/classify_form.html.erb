@@ -1,0 +1,26 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6" data-controller="classification-picker">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Classify "<%= @document.subject %>"</h2>
+
+    <input type="text" placeholder="Search by code or name..."
+           class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-4"
+           data-classification-picker-target="search" data-action="input->classification-picker#filter">
+
+    <div class="max-h-96 overflow-y-auto space-y-0.5">
+      <% if @document.classification_node_id.present? %>
+        <%= button_to "Remove classification", classify_entity_document_path(current_entity, @document, classification_node_id: nil), method: :patch,
+              data: { turbo_frame: "_top" }, class: "w-full text-left px-3 py-2 text-sm text-danger-600 hover:bg-danger-50 rounded-md mb-2" %>
+      <% end %>
+
+      <% @classification_roots.each do |node| %>
+        <%= render Entities::ClassificationNodeRowComponent.new(node: node, mode: :picker, current_entity: current_entity, document: @document) %>
+      <% end %>
+
+      <p data-classification-picker-target="empty" class="hidden text-sm text-gray-500 px-3 py-2">No matching classification found.</p>
+    </div>
+
+    <div class="mt-4 flex justify-end">
+      <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Close" } %>
+    </div>
+  </div>
+<% end %>

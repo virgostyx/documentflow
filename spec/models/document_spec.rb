@@ -155,22 +155,22 @@ RSpec.describe Document, type: :model do
       end
     end
 
-    describe "folder scoped to the document's department" do
-      it "rejects a folder belonging to a different department" do
-        document.folder = create(:folder, entity: entity, department: create(:department, entity: entity))
+    describe "classification_node scoped to the document's entity" do
+      it "rejects a classification_node belonging to a different entity" do
+        document.classification_node = create(:classification_node, entity: create(:entity), code: "1", name: "Root")
 
         expect(document).not_to be_valid
-        expect(document.errors[:folder]).to be_present
+        expect(document.errors[:classification_node]).to be_present
       end
 
-      it "accepts a folder belonging to the same department" do
-        document.folder = create(:folder, entity: entity, department: document.department)
+      it "accepts a classification_node belonging to the same entity" do
+        document.classification_node = create(:classification_node, entity: entity, code: "1", name: "Root")
 
         expect(document).to be_valid
       end
 
-      it "accepts a blank folder" do
-        document.folder = nil
+      it "accepts a blank classification_node" do
+        document.classification_node = nil
 
         expect(document).to be_valid
       end
@@ -692,23 +692,23 @@ RSpec.describe Document, type: :model do
     end
   end
 
-  describe ".in_folder" do
-    it "returns documents filed in the given folder" do
-      folder = create(:folder, entity: entity, department: document.department)
-      filed = create(:document, entity: entity, department: document.department, folder: folder)
+  describe ".in_classification_node" do
+    it "returns documents classified under the given node" do
+      node = create(:classification_node, entity: entity, code: "1", name: "Root")
+      classified = create(:document, entity: entity, department: document.department, classification_node: node)
       create(:document, entity: entity, department: document.department)
 
-      expect(Document.where(entity: entity).in_folder(folder)).to contain_exactly(filed)
+      expect(Document.where(entity: entity).in_classification_node(node)).to contain_exactly(classified)
     end
   end
 
-  describe ".unfiled" do
-    it "returns documents with no folder" do
-      folder = create(:folder, entity: entity, department: document.department)
-      create(:document, entity: entity, department: document.department, folder: folder)
-      unfiled = create(:document, entity: entity, department: document.department)
+  describe ".unclassified" do
+    it "returns documents with no classification_node" do
+      node = create(:classification_node, entity: entity, code: "1", name: "Root")
+      create(:document, entity: entity, department: document.department, classification_node: node)
+      unclassified = create(:document, entity: entity, department: document.department)
 
-      expect(Document.where(entity: entity).unfiled).to contain_exactly(unfiled)
+      expect(Document.where(entity: entity).unclassified).to contain_exactly(unclassified)
     end
   end
 

@@ -85,7 +85,7 @@ RSpec.describe DocumentPolicy, type: :policy do
     end
   end
 
-  describe "#file?" do
+  describe "#classify?" do
     let(:department) { create(:department, entity: entity) }
     let(:document) { create(:document, entity: entity, department: department) }
 
@@ -98,21 +98,21 @@ RSpec.describe DocumentPolicy, type: :policy do
 
     context "as outsider" do
       let(:user) { outsider }
-      it { is_expected.not_to permit_action(:file) }
+      it { is_expected.not_to permit_action(:classify) }
     end
 
     context "as a member with no department assignment" do
       let(:user) { member }
-      it { is_expected.not_to permit_action(:file) }
+      it { is_expected.not_to permit_action(:classify) }
     end
 
     context "as a member of the document's department" do
       let(:user) { department_member }
-      it { is_expected.to permit_action(:file) }
+      it { is_expected.to permit_action(:classify) }
     end
 
-    context "as entity owner" do let(:user) { owner }; it { is_expected.to permit_action(:file) } end
-    context "as entity admin" do let(:user) { admin }; it { is_expected.to permit_action(:file) } end
+    context "as entity owner" do let(:user) { owner }; it { is_expected.to permit_action(:classify) } end
+    context "as entity admin" do let(:user) { admin }; it { is_expected.to permit_action(:classify) } end
   end
 
   describe "#create?" do

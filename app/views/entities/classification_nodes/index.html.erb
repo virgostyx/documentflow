@@ -1,0 +1,33 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: "Classification plan",
+    description: current_entity.name,
+    back_path: entity_documents_path(current_entity),
+    back_text: "Documents"
+  ) %>
+
+  <% can_manage = policy(current_entity.classification_nodes.new).create? %>
+
+  <%= render Ui::CardComponent.new do |card| %>
+    <% card.with_header do %>
+      <div class="flex items-center justify-between">
+        <span class="font-medium text-gray-900">Root nodes</span>
+        <% if can_manage %>
+          <%= link_to "Add root node", new_entity_classification_node_path(current_entity),
+                class: "text-sm text-primary-600 hover:text-primary-700",
+                data: { turbo_frame: "modal", action: "click->modal#open" } %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @roots.any? %>
+      <div class="divide-y divide-gray-100">
+        <% @roots.each do |node| %>
+          <%= render Entities::ClassificationNodeRowComponent.new(node: node, mode: :management, current_entity: current_entity, can_manage: can_manage) %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-600">No classification nodes yet.</p>
+    <% end %>
+  <% end %>
+</div>

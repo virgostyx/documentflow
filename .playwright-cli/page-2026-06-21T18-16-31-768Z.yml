@@ -1,0 +1,161 @@
+- generic [active] [ref=e1679]:
+  - complementary [ref=e1680]:
+    - link "DocumentFlow" [ref=e1681] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e1682]
+      - generic [ref=e1684]: DocumentFlow
+    - generic [ref=e1685]:
+      - paragraph [ref=e1686]: Acme Manufacturing Ltd
+      - paragraph [ref=e1687]: ENT-BO0SKL
+      - generic [ref=e1689]: All departments
+      - link "Switch entity" [ref=e1690] [cursor=pointer]:
+        - /url: /entities
+    - navigation [ref=e1691]:
+      - generic [ref=e1692]:
+        - button "Documents" [ref=e1693]:
+          - paragraph [ref=e1694]: Documents
+          - img [ref=e1695]
+        - generic [ref=e1697]:
+          - link "Overview 8" [ref=e1698] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - generic [ref=e1699]:
+              - img [ref=e1700]
+              - text: Overview
+            - generic [ref=e1702]: "8"
+          - link "My Inbox 0" [ref=e1703] [cursor=pointer]:
+            - /url: /entities/1/documents/received
+            - generic [ref=e1704]:
+              - img [ref=e1705]
+              - text: My Inbox
+            - generic [ref=e1707]: "0"
+          - link "My Outbox 2" [ref=e1708] [cursor=pointer]:
+            - /url: /entities/1/documents/mine
+            - generic [ref=e1709]:
+              - img [ref=e1710]
+              - text: My Outbox
+            - generic [ref=e1712]: "2"
+          - link "ToDo 0" [ref=e1713] [cursor=pointer]:
+            - /url: /entities/1/documents/todo
+            - generic [ref=e1714]:
+              - img [ref=e1715]
+              - text: ToDo
+            - generic [ref=e1717]: "0"
+          - link "Waiting 1" [ref=e1718] [cursor=pointer]:
+            - /url: /entities/1/documents/waiting
+            - generic [ref=e1719]:
+              - img [ref=e1720]
+              - text: Waiting
+            - generic [ref=e1722]: "1"
+          - link "Info 1" [ref=e1723] [cursor=pointer]:
+            - /url: /entities/1/documents/info
+            - generic [ref=e1724]:
+              - img [ref=e1725]
+              - text: Info
+            - generic [ref=e1728]: "1"
+      - generic [ref=e1729]:
+        - button "Incoming Mail" [ref=e1730]:
+          - paragraph [ref=e1731]: Incoming Mail
+          - img [ref=e1732]
+        - generic [ref=e1734]:
+          - link "Incoming Inbox 0" [ref=e1735] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/inbox
+            - generic [ref=e1736]:
+              - img [ref=e1737]
+              - text: Incoming Inbox
+            - generic [ref=e1739]: "0"
+          - link "Pending Triage 0" [ref=e1740] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/pending_triage
+            - generic [ref=e1741]:
+              - img [ref=e1742]
+              - text: Pending Triage
+            - generic [ref=e1745]: "0"
+      - generic [ref=e1746]:
+        - generic [ref=e1747]:
+          - button "Classification" [ref=e1748]:
+            - paragraph [ref=e1749]: Classification
+            - img [ref=e1750]
+          - link "Manage" [ref=e1752] [cursor=pointer]:
+            - /url: /entities/1/classification_nodes
+        - generic [ref=e1753]:
+          - link "Unclassified 7" [ref=e1754] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=unclassified
+            - generic [ref=e1755]: Unclassified
+            - generic [ref=e1756]: "7"
+          - link "1 Finances 0" [ref=e1758] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=1
+            - generic [ref=e1759]: 1 Finances
+            - generic [ref=e1760]: "0"
+          - link "2 Operations 0" [ref=e1762] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=2
+            - generic [ref=e1763]: 2 Operations
+            - generic [ref=e1764]: "0"
+          - generic [ref=e1765]:
+            - link "3 Contracts 0" [ref=e1766] [cursor=pointer]:
+              - /url: /entities/1/documents?classification_node_id=3
+              - generic [ref=e1767]: 3 Contracts
+              - generic [ref=e1768]: "0"
+            - link "3.1 Drafts 1" [ref=e1770] [cursor=pointer]:
+              - /url: /entities/1/documents?classification_node_id=4
+              - generic [ref=e1771]: 3.1 Drafts
+              - generic [ref=e1772]: "1"
+      - button "Contacts" [ref=e1774]:
+        - paragraph [ref=e1775]: Contacts
+        - img [ref=e1776]
+      - button "Settings" [ref=e1779]:
+        - paragraph [ref=e1780]: Settings
+        - img [ref=e1781]
+    - generic [ref=e1783]:
+      - generic [ref=e1784]:
+        - generic [ref=e1785]: M
+        - paragraph [ref=e1787]: marcus.chen@acme-mfg.example
+      - link "Sign out" [ref=e1788] [cursor=pointer]:
+        - /url: /users/sign_out
+        - img [ref=e1789]
+        - text: Sign out
+  - generic [ref=e1791]:
+    - banner [ref=e1792]:
+      - navigation "Breadcrumb" [ref=e1794]:
+        - list [ref=e1795]:
+          - listitem [ref=e1796]:
+            - link "Documents" [ref=e1797] [cursor=pointer]:
+              - /url: /entities/1/documents
+          - listitem [ref=e1798]:
+            - img [ref=e1799]
+            - generic [ref=e1801]: Overview
+      - link "New document" [ref=e1803] [cursor=pointer]:
+        - /url: /entities/1/documents/new
+    - main [ref=e1804]:
+      - generic [ref=e1805]:
+        - searchbox "Search documents..." [ref=e1807]
+        - button "Filters" [ref=e1809]:
+          - img [ref=e1810]
+          - text: Filters
+          - img [ref=e1812]
+      - table [ref=e1816]:
+        - rowgroup [ref=e1817]:
+          - row "Reference Subject Sender → Addressee Date ▼ Status Response expected" [ref=e1818]:
+            - columnheader "Reference" [ref=e1819]:
+              - link "Reference" [ref=e1820] [cursor=pointer]:
+                - /url: /entities/1/documents?classification_node_id=4&direction=asc&sort=reference_number
+            - columnheader "Subject" [ref=e1821]:
+              - link "Subject" [ref=e1822] [cursor=pointer]:
+                - /url: /entities/1/documents?classification_node_id=4&direction=asc&sort=subject
+            - columnheader "Sender → Addressee" [ref=e1823]
+            - columnheader "Date ▼" [ref=e1824]:
+              - link "Date ▼" [ref=e1825] [cursor=pointer]:
+                - /url: /entities/1/documents?classification_node_id=4&direction=asc&sort=document_date
+            - columnheader "Status" [ref=e1826]:
+              - link "Status" [ref=e1827] [cursor=pointer]:
+                - /url: /entities/1/documents?classification_node_id=4&direction=asc&sort=status
+            - columnheader "Response expected" [ref=e1828]
+        - rowgroup [ref=e1829]:
+          - row "2026/00003 Non-Disclosure Agreement - Hayes & Co Distribution Sophia Rodriguez → Robert Hayes 20/06/2026 Signed" [ref=e1830] [cursor=pointer]:
+            - cell "2026/00003" [ref=e1831]:
+              - link "2026/00003" [ref=e1832]:
+                - /url: /entities/1/documents/3
+            - cell "Non-Disclosure Agreement - Hayes & Co Distribution" [ref=e1833]
+            - cell "Sophia Rodriguez → Robert Hayes" [ref=e1834]
+            - cell "20/06/2026" [ref=e1835]
+            - cell "Signed" [ref=e1836]:
+              - generic [ref=e1837]: Signed
+            - cell [ref=e1838]

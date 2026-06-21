@@ -1,0 +1,158 @@
+- generic [active] [ref=e465]:
+  - complementary [ref=e466]:
+    - link "DocumentFlow" [ref=e467] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e468]
+      - generic [ref=e470]: DocumentFlow
+    - generic [ref=e471]:
+      - paragraph [ref=e472]: Acme Manufacturing Ltd
+      - paragraph [ref=e473]: ENT-BO0SKL
+      - generic [ref=e475]: All departments
+      - link "Switch entity" [ref=e476] [cursor=pointer]:
+        - /url: /entities
+    - navigation [ref=e477]:
+      - generic [ref=e478]:
+        - button "Documents" [ref=e479]:
+          - paragraph [ref=e480]: Documents
+          - img [ref=e481]
+        - generic [ref=e483]:
+          - link "Overview 8" [ref=e484] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - generic [ref=e485]:
+              - img [ref=e486]
+              - text: Overview
+            - generic [ref=e488]: "8"
+          - link "My Inbox 0" [ref=e489] [cursor=pointer]:
+            - /url: /entities/1/documents/received
+            - generic [ref=e490]:
+              - img [ref=e491]
+              - text: My Inbox
+            - generic [ref=e493]: "0"
+          - link "My Outbox 2" [ref=e494] [cursor=pointer]:
+            - /url: /entities/1/documents/mine
+            - generic [ref=e495]:
+              - img [ref=e496]
+              - text: My Outbox
+            - generic [ref=e498]: "2"
+          - link "ToDo 0" [ref=e499] [cursor=pointer]:
+            - /url: /entities/1/documents/todo
+            - generic [ref=e500]:
+              - img [ref=e501]
+              - text: ToDo
+            - generic [ref=e503]: "0"
+          - link "Waiting 1" [ref=e504] [cursor=pointer]:
+            - /url: /entities/1/documents/waiting
+            - generic [ref=e505]:
+              - img [ref=e506]
+              - text: Waiting
+            - generic [ref=e508]: "1"
+          - link "Info 1" [ref=e509] [cursor=pointer]:
+            - /url: /entities/1/documents/info
+            - generic [ref=e510]:
+              - img [ref=e511]
+              - text: Info
+            - generic [ref=e514]: "1"
+      - generic [ref=e515]:
+        - button "Incoming Mail" [ref=e516]:
+          - paragraph [ref=e517]: Incoming Mail
+          - img [ref=e518]
+        - generic [ref=e520]:
+          - link "Incoming Inbox 0" [ref=e521] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/inbox
+            - generic [ref=e522]:
+              - img [ref=e523]
+              - text: Incoming Inbox
+            - generic [ref=e525]: "0"
+          - link "Pending Triage 0" [ref=e526] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/pending_triage
+            - generic [ref=e527]:
+              - img [ref=e528]
+              - text: Pending Triage
+            - generic [ref=e531]: "0"
+      - generic [ref=e532]:
+        - generic [ref=e533]:
+          - button "Classification" [ref=e534]:
+            - paragraph [ref=e535]: Classification
+            - img [ref=e536]
+          - link "Manage" [ref=e538] [cursor=pointer]:
+            - /url: /entities/1/classification_nodes
+        - generic [ref=e539]:
+          - link "Unclassified 8" [ref=e540] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=unclassified
+            - generic [ref=e541]: Unclassified
+            - generic [ref=e542]: "8"
+          - link "1 Finances 0" [ref=e544] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=1
+            - generic [ref=e545]: 1 Finances
+            - generic [ref=e546]: "0"
+          - link "2 Operations 0" [ref=e548] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=2
+            - generic [ref=e549]: 2 Operations
+            - generic [ref=e550]: "0"
+          - link "3 Contracts 0" [ref=e552] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=3
+            - generic [ref=e553]: 3 Contracts
+            - generic [ref=e554]: "0"
+      - button "Contacts" [ref=e556]:
+        - paragraph [ref=e557]: Contacts
+        - img [ref=e558]
+      - button "Settings" [ref=e561]:
+        - paragraph [ref=e562]: Settings
+        - img [ref=e563]
+    - generic [ref=e565]:
+      - generic [ref=e566]:
+        - generic [ref=e567]: M
+        - paragraph [ref=e569]: marcus.chen@acme-mfg.example
+      - link "Sign out" [ref=e570] [cursor=pointer]:
+        - /url: /users/sign_out
+        - img [ref=e571]
+        - text: Sign out
+  - generic [ref=e573]:
+    - banner [ref=e574]
+    - alert [ref=e576]:
+      - img [ref=e578]
+      - paragraph [ref=e580]: Classification node created successfully.
+      - button [ref=e581]:
+        - img [ref=e582]
+    - main [ref=e585]:
+      - generic [ref=e586]:
+        - generic [ref=e587]:
+          - link "Documents" [ref=e588] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - img [ref=e589]
+            - text: Documents
+          - heading "Classification plan" [level=1] [ref=e592]
+          - paragraph [ref=e593]: Acme Manufacturing Ltd
+        - generic [ref=e594]:
+          - generic [ref=e596]:
+            - generic [ref=e597]: Root nodes
+            - link "Add root node" [ref=e598] [cursor=pointer]:
+              - /url: /entities/1/classification_nodes/new
+          - generic [ref=e600]:
+            - generic [ref=e602]:
+              - generic [ref=e603]: 1 — Finances
+              - generic [ref=e604]:
+                - link "Add child" [ref=e605] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/new?parent_id=1
+                - link "Edit" [ref=e606] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/1/edit
+                - link "Delete" [ref=e607] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/1/confirm_destroy
+            - generic [ref=e609]:
+              - generic [ref=e610]: 2 — Operations
+              - generic [ref=e611]:
+                - link "Add child" [ref=e612] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/new?parent_id=2
+                - link "Edit" [ref=e613] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/2/edit
+                - link "Delete" [ref=e614] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/2/confirm_destroy
+            - generic [ref=e616]:
+              - generic [ref=e617]: 3 — Contracts
+              - generic [ref=e618]:
+                - link "Add child" [ref=e619] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/new?parent_id=3
+                - link "Edit" [ref=e620] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/3/edit
+                - link "Delete" [ref=e621] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/3/confirm_destroy

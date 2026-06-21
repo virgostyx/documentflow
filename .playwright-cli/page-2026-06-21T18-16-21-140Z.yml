@@ -1,0 +1,223 @@
+- generic [active] [ref=e1461]:
+  - complementary [ref=e1462]:
+    - link "DocumentFlow" [ref=e1463] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e1464]
+      - generic [ref=e1466]: DocumentFlow
+    - generic [ref=e1467]:
+      - paragraph [ref=e1468]: Acme Manufacturing Ltd
+      - paragraph [ref=e1469]: ENT-BO0SKL
+      - generic [ref=e1471]: All departments
+      - link "Switch entity" [ref=e1472] [cursor=pointer]:
+        - /url: /entities
+    - navigation [ref=e1473]:
+      - generic [ref=e1474]:
+        - button "Documents" [ref=e1475]:
+          - paragraph [ref=e1476]: Documents
+          - img [ref=e1477]
+        - generic [ref=e1479]:
+          - link "Overview 8" [ref=e1480] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - generic [ref=e1481]:
+              - img [ref=e1482]
+              - text: Overview
+            - generic [ref=e1484]: "8"
+          - link "My Inbox 0" [ref=e1485] [cursor=pointer]:
+            - /url: /entities/1/documents/received
+            - generic [ref=e1486]:
+              - img [ref=e1487]
+              - text: My Inbox
+            - generic [ref=e1489]: "0"
+          - link "My Outbox 2" [ref=e1490] [cursor=pointer]:
+            - /url: /entities/1/documents/mine
+            - generic [ref=e1491]:
+              - img [ref=e1492]
+              - text: My Outbox
+            - generic [ref=e1494]: "2"
+          - link "ToDo 0" [ref=e1495] [cursor=pointer]:
+            - /url: /entities/1/documents/todo
+            - generic [ref=e1496]:
+              - img [ref=e1497]
+              - text: ToDo
+            - generic [ref=e1499]: "0"
+          - link "Waiting 1" [ref=e1500] [cursor=pointer]:
+            - /url: /entities/1/documents/waiting
+            - generic [ref=e1501]:
+              - img [ref=e1502]
+              - text: Waiting
+            - generic [ref=e1504]: "1"
+          - link "Info 1" [ref=e1505] [cursor=pointer]:
+            - /url: /entities/1/documents/info
+            - generic [ref=e1506]:
+              - img [ref=e1507]
+              - text: Info
+            - generic [ref=e1510]: "1"
+      - generic [ref=e1511]:
+        - button "Incoming Mail" [ref=e1512]:
+          - paragraph [ref=e1513]: Incoming Mail
+          - img [ref=e1514]
+        - generic [ref=e1516]:
+          - link "Incoming Inbox 0" [ref=e1517] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/inbox
+            - generic [ref=e1518]:
+              - img [ref=e1519]
+              - text: Incoming Inbox
+            - generic [ref=e1521]: "0"
+          - link "Pending Triage 0" [ref=e1522] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/pending_triage
+            - generic [ref=e1523]:
+              - img [ref=e1524]
+              - text: Pending Triage
+            - generic [ref=e1527]: "0"
+      - generic [ref=e1528]:
+        - generic [ref=e1529]:
+          - button "Classification" [ref=e1530]:
+            - paragraph [ref=e1531]: Classification
+            - img [ref=e1532]
+          - link "Manage" [ref=e1534] [cursor=pointer]:
+            - /url: /entities/1/classification_nodes
+        - generic [ref=e1535]:
+          - link "Unclassified 7" [ref=e1536] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=unclassified
+            - generic [ref=e1537]: Unclassified
+            - generic [ref=e1538]: "7"
+          - link "1 Finances 0" [ref=e1540] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=1
+            - generic [ref=e1541]: 1 Finances
+            - generic [ref=e1542]: "0"
+          - link "2 Operations 0" [ref=e1544] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=2
+            - generic [ref=e1545]: 2 Operations
+            - generic [ref=e1546]: "0"
+          - generic [ref=e1547]:
+            - link "3 Contracts 0" [ref=e1548] [cursor=pointer]:
+              - /url: /entities/1/documents?classification_node_id=3
+              - generic [ref=e1549]: 3 Contracts
+              - generic [ref=e1550]: "0"
+            - link "3.1 Drafts 1" [ref=e1552] [cursor=pointer]:
+              - /url: /entities/1/documents?classification_node_id=4
+              - generic [ref=e1553]: 3.1 Drafts
+              - generic [ref=e1554]: "1"
+      - button "Contacts" [ref=e1556]:
+        - paragraph [ref=e1557]: Contacts
+        - img [ref=e1558]
+      - button "Settings" [ref=e1561]:
+        - paragraph [ref=e1562]: Settings
+        - img [ref=e1563]
+    - generic [ref=e1565]:
+      - generic [ref=e1566]:
+        - generic [ref=e1567]: M
+        - paragraph [ref=e1569]: marcus.chen@acme-mfg.example
+      - link "Sign out" [ref=e1570] [cursor=pointer]:
+        - /url: /users/sign_out
+        - img [ref=e1571]
+        - text: Sign out
+  - generic [ref=e1573]:
+    - banner [ref=e1574]:
+      - navigation "Breadcrumb" [ref=e1576]:
+        - list [ref=e1577]:
+          - listitem [ref=e1578]:
+            - link "Documents" [ref=e1579] [cursor=pointer]:
+              - /url: /entities/1/documents
+          - listitem [ref=e1580]:
+            - img [ref=e1581]
+            - generic [ref=e1583]: Overview
+      - link "New document" [ref=e1585] [cursor=pointer]:
+        - /url: /entities/1/documents/new
+    - main [ref=e1586]:
+      - generic [ref=e1587]:
+        - searchbox "Search documents..." [ref=e1589]
+        - button "Filters" [ref=e1591]:
+          - img [ref=e1592]
+          - text: Filters
+          - img [ref=e1594]
+      - table [ref=e1598]:
+        - rowgroup [ref=e1599]:
+          - row "Reference Subject Sender → Addressee Date ▼ Status Response expected" [ref=e1600]:
+            - columnheader "Reference" [ref=e1601]:
+              - link "Reference" [ref=e1602] [cursor=pointer]:
+                - /url: /entities/1/documents?classification_node_id=unclassified&direction=asc&sort=reference_number
+            - columnheader "Subject" [ref=e1603]:
+              - link "Subject" [ref=e1604] [cursor=pointer]:
+                - /url: /entities/1/documents?classification_node_id=unclassified&direction=asc&sort=subject
+            - columnheader "Sender → Addressee" [ref=e1605]
+            - columnheader "Date ▼" [ref=e1606]:
+              - link "Date ▼" [ref=e1607] [cursor=pointer]:
+                - /url: /entities/1/documents?classification_node_id=unclassified&direction=asc&sort=document_date
+            - columnheader "Status" [ref=e1608]:
+              - link "Status" [ref=e1609] [cursor=pointer]:
+                - /url: /entities/1/documents?classification_node_id=unclassified&direction=asc&sort=status
+            - columnheader "Response expected" [ref=e1610]
+        - rowgroup [ref=e1611]:
+          - row "2026/00008 test check-out/check-in James Whitfield → Sophia Rodriguez 21/06/2026 In Progress" [ref=e1612] [cursor=pointer]:
+            - cell "2026/00008" [ref=e1613]:
+              - link "2026/00008" [ref=e1614]:
+                - /url: /entities/1/documents/22
+            - cell "test check-out/check-in" [ref=e1615]
+            - cell "James Whitfield → Sophia Rodriguez" [ref=e1616]
+            - cell "21/06/2026" [ref=e1617]
+            - cell "In Progress" [ref=e1618]:
+              - generic [ref=e1619]: In Progress
+            - cell [ref=e1620]
+          - row "2026/00007 Updated Pricing Sheet - Martinez Supply Chain James Whitfield → Linda Martinez 20/06/2026 In Progress Yes" [ref=e1621] [cursor=pointer]:
+            - cell "2026/00007" [ref=e1622]:
+              - link "2026/00007" [ref=e1623]:
+                - /url: /entities/1/documents/7
+            - cell "Updated Pricing Sheet - Martinez Supply Chain" [ref=e1624]
+            - cell "James Whitfield → Linda Martinez" [ref=e1625]
+            - cell "20/06/2026" [ref=e1626]
+            - cell "In Progress" [ref=e1627]:
+              - generic [ref=e1628]: In Progress
+            - cell "Yes" [ref=e1629]:
+              - generic [ref=e1631]: "Yes"
+          - row "2026/00006 Quote Request - Need Confirmation from Operations Marcus Chen → James Whitfield 20/06/2026 In Progress Yes" [ref=e1632] [cursor=pointer]:
+            - cell "2026/00006" [ref=e1633]:
+              - link "2026/00006" [ref=e1634]:
+                - /url: /entities/1/documents/6
+            - cell "Quote Request - Need Confirmation from Operations" [ref=e1635]
+            - cell "Marcus Chen → James Whitfield" [ref=e1636]
+            - cell "20/06/2026" [ref=e1637]
+            - cell "In Progress" [ref=e1638]:
+              - generic [ref=e1639]: In Progress
+            - cell "Yes" [ref=e1640]:
+              - generic [ref=e1642]: "Yes"
+          - row "2026/00005 Equipment Lease Proposal (Cancelled) Sophia Rodriguez → Linda Martinez 20/06/2026 Cancelled" [ref=e1643] [cursor=pointer]:
+            - cell "2026/00005" [ref=e1644]:
+              - link "2026/00005" [ref=e1645]:
+                - /url: /entities/1/documents/5
+            - cell "Equipment Lease Proposal (Cancelled)" [ref=e1646]
+            - cell "Sophia Rodriguez → Linda Martinez" [ref=e1647]
+            - cell "20/06/2026" [ref=e1648]
+            - cell "Cancelled" [ref=e1649]:
+              - generic [ref=e1650]: Cancelled
+            - cell [ref=e1651]
+          - row "2026/00004 Annual Compliance Report 2025 Marcus Chen → James Whitfield 20/06/2026 Finalized" [ref=e1652] [cursor=pointer]:
+            - cell "2026/00004" [ref=e1653]:
+              - link "2026/00004" [ref=e1654]:
+                - /url: /entities/1/documents/4
+            - cell "Annual Compliance Report 2025" [ref=e1655]
+            - cell "Marcus Chen → James Whitfield" [ref=e1656]
+            - cell "20/06/2026" [ref=e1657]
+            - cell "Finalized" [ref=e1658]:
+              - generic [ref=e1659]: Finalized
+            - cell [ref=e1660]
+          - 'row "2026/00002 Purchase Order #2026-014 - Martinez Supply Chain James Whitfield → Linda Martinez 20/06/2026 In Progress" [ref=e1661] [cursor=pointer]':
+            - cell "2026/00002" [ref=e1662]:
+              - link "2026/00002" [ref=e1663]:
+                - /url: /entities/1/documents/2
+            - 'cell "Purchase Order #2026-014 - Martinez Supply Chain" [ref=e1664]'
+            - cell "James Whitfield → Linda Martinez" [ref=e1665]
+            - cell "20/06/2026" [ref=e1666]
+            - cell "In Progress" [ref=e1667]:
+              - generic [ref=e1668]: In Progress
+            - cell [ref=e1669]
+          - row "2026/00001 Service Agreement Renewal - Hayes & Co Distribution Sophia Rodriguez → Robert Hayes 20/06/2026 Draft" [ref=e1670] [cursor=pointer]:
+            - cell "2026/00001" [ref=e1671]:
+              - link "2026/00001" [ref=e1672]:
+                - /url: /entities/1/documents/1
+            - cell "Service Agreement Renewal - Hayes & Co Distribution" [ref=e1673]
+            - cell "Sophia Rodriguez → Robert Hayes" [ref=e1674]
+            - cell "20/06/2026" [ref=e1675]
+            - cell "Draft" [ref=e1676]:
+              - generic [ref=e1677]: Draft
+            - cell [ref=e1678]

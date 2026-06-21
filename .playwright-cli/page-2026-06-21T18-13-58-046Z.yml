@@ -1,0 +1,155 @@
+- generic [ref=e317]:
+  - complementary [ref=e318]:
+    - link "DocumentFlow" [ref=e319] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e320]
+      - generic [ref=e322]: DocumentFlow
+    - generic [ref=e323]:
+      - paragraph [ref=e324]: Acme Manufacturing Ltd
+      - paragraph [ref=e325]: ENT-BO0SKL
+      - generic [ref=e327]: All departments
+      - link "Switch entity" [ref=e328] [cursor=pointer]:
+        - /url: /entities
+    - navigation [ref=e329]:
+      - generic [ref=e330]:
+        - button "Documents" [ref=e331]:
+          - paragraph [ref=e332]: Documents
+          - img [ref=e333]
+        - generic [ref=e335]:
+          - link "Overview 8" [ref=e336] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - generic [ref=e337]:
+              - img [ref=e338]
+              - text: Overview
+            - generic [ref=e340]: "8"
+          - link "My Inbox 0" [ref=e341] [cursor=pointer]:
+            - /url: /entities/1/documents/received
+            - generic [ref=e342]:
+              - img [ref=e343]
+              - text: My Inbox
+            - generic [ref=e345]: "0"
+          - link "My Outbox 2" [ref=e346] [cursor=pointer]:
+            - /url: /entities/1/documents/mine
+            - generic [ref=e347]:
+              - img [ref=e348]
+              - text: My Outbox
+            - generic [ref=e350]: "2"
+          - link "ToDo 0" [ref=e351] [cursor=pointer]:
+            - /url: /entities/1/documents/todo
+            - generic [ref=e352]:
+              - img [ref=e353]
+              - text: ToDo
+            - generic [ref=e355]: "0"
+          - link "Waiting 1" [ref=e356] [cursor=pointer]:
+            - /url: /entities/1/documents/waiting
+            - generic [ref=e357]:
+              - img [ref=e358]
+              - text: Waiting
+            - generic [ref=e360]: "1"
+          - link "Info 1" [ref=e361] [cursor=pointer]:
+            - /url: /entities/1/documents/info
+            - generic [ref=e362]:
+              - img [ref=e363]
+              - text: Info
+            - generic [ref=e366]: "1"
+      - generic [ref=e367]:
+        - button "Incoming Mail" [ref=e368]:
+          - paragraph [ref=e369]: Incoming Mail
+          - img [ref=e370]
+        - generic [ref=e372]:
+          - link "Incoming Inbox 0" [ref=e373] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/inbox
+            - generic [ref=e374]:
+              - img [ref=e375]
+              - text: Incoming Inbox
+            - generic [ref=e377]: "0"
+          - link "Pending Triage 0" [ref=e378] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/pending_triage
+            - generic [ref=e379]:
+              - img [ref=e380]
+              - text: Pending Triage
+            - generic [ref=e383]: "0"
+      - generic [ref=e384]:
+        - generic [ref=e385]:
+          - button "Classification" [ref=e386]:
+            - paragraph [ref=e387]: Classification
+            - img [ref=e388]
+          - link "Manage" [ref=e390] [cursor=pointer]:
+            - /url: /entities/1/classification_nodes
+        - generic [ref=e391]:
+          - link "Unclassified 8" [ref=e392] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=unclassified
+            - generic [ref=e393]: Unclassified
+            - generic [ref=e394]: "8"
+          - link "1 Finances 0" [ref=e396] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=1
+            - generic [ref=e397]: 1 Finances
+            - generic [ref=e398]: "0"
+          - link "2 Operations 0" [ref=e400] [cursor=pointer]:
+            - /url: /entities/1/documents?classification_node_id=2
+            - generic [ref=e401]: 2 Operations
+            - generic [ref=e402]: "0"
+      - button "Contacts" [ref=e404]:
+        - paragraph [ref=e405]: Contacts
+        - img [ref=e406]
+      - button "Settings" [ref=e409]:
+        - paragraph [ref=e410]: Settings
+        - img [ref=e411]
+    - generic [ref=e413]:
+      - generic [ref=e414]:
+        - generic [ref=e415]: M
+        - paragraph [ref=e417]: marcus.chen@acme-mfg.example
+      - link "Sign out" [ref=e418] [cursor=pointer]:
+        - /url: /users/sign_out
+        - img [ref=e419]
+        - text: Sign out
+  - generic [ref=e421]:
+    - banner [ref=e422]
+    - main [ref=e423]:
+      - generic [ref=e424]:
+        - generic [ref=e425]:
+          - link "Documents" [ref=e426] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - img [ref=e427]
+            - text: Documents
+          - heading "Classification plan" [level=1] [ref=e430]
+          - paragraph [ref=e431]: Acme Manufacturing Ltd
+        - generic [ref=e432]:
+          - generic [ref=e434]:
+            - generic [ref=e435]: Root nodes
+            - link "Add root node" [ref=e436] [cursor=pointer]:
+              - /url: /entities/1/classification_nodes/new
+          - generic [ref=e438]:
+            - generic [ref=e440]:
+              - generic [ref=e441]: 1 — Finances
+              - generic [ref=e442]:
+                - link "Add child" [ref=e443] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/new?parent_id=1
+                - link "Edit" [ref=e444] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/1/edit
+                - link "Delete" [ref=e445] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/1/confirm_destroy
+            - generic [ref=e447]:
+              - generic [ref=e448]: 2 — Operations
+              - generic [ref=e449]:
+                - link "Add child" [ref=e450] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/new?parent_id=2
+                - link "Edit" [ref=e451] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/2/edit
+                - link "Delete" [ref=e452] [cursor=pointer]:
+                  - /url: /entities/1/classification_nodes/2/confirm_destroy
+  - dialog [ref=e453]:
+    - generic [ref=e455]:
+      - heading "Add root node" [level=2] [ref=e456]
+      - generic [ref=e457]:
+        - generic [ref=e458]:
+          - textbox "Code (e.g. 1.2.3) *" [active] [ref=e459]:
+            - /placeholder: " "
+          - generic: Code (e.g. 1.2.3) *
+        - generic [ref=e460]:
+          - textbox "Name *" [ref=e461]:
+            - /placeholder: " "
+          - generic: Name *
+        - generic [ref=e462]:
+          - button "Cancel" [ref=e463]
+          - button "Create node" [ref=e464]

@@ -40,8 +40,14 @@ Rails.application.routes.draw do
       end
       resources :shared_links, only: %i[create destroy]
       resources :cc_recipients, only: %i[create destroy]
-      resource :main_file, only: %i[create destroy]
-      resources :annexes, only: %i[create destroy]
+      resource :main_file, only: %i[create destroy] do
+        get :preview
+      end
+      resources :annexes, only: %i[create destroy] do
+        member do
+          get :preview
+        end
+      end
       resource :checkout, only: %i[create update destroy], controller: "document_checkouts" do
         get :confirm_check_in, on: :member
         get :confirm_cancel, on: :member

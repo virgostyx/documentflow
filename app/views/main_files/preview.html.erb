@@ -1,0 +1,3 @@
+<%= turbo_frame_tag "modal" do %>
+  <%= render "documents/file_preview", blob: @document.main_file, title: @document.main_file.filename.to_s %>
+<% end %>

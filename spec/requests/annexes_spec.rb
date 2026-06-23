@@ -111,4 +111,44 @@ RSpec.describe "Annexes", type: :request do
       end
     end
   end
+
+  describe "GET /entities/:entity_id/documents/:document_id/annexes/:id/preview" do
+    let!(:document) { create(:document, entity: entity, created_by: user) }
+
+    before { document.annexes.attach(io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf") }
+
+    context "as a user who can view the document" do
+      before do
+        create(:entity_user, :owner, entity: entity, user: user, status: "active")
+        sign_in user
+      end
+
+      it "renders the inline preview" do
+        annex = document.annexes.first
+
+        get preview_entity_document_annex_path(entity, document, annex)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include(rails_blob_path(annex, disposition: "inline"))
+      end
+    end
+
+    context "as a guest who cannot view the document" do
+      let!(:document) { create(:document, entity: entity, created_by: create(:user)) }
+
+      before do
+        document.annexes.attach(io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf")
+        create(:entity_user, :guest, entity: entity, user: user, status: "active")
+        sign_in user
+      end
+
+      it "denies access" do
+        annex = document.annexes.first
+
+        get preview_entity_document_annex_path(entity, document, annex)
+
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
 end

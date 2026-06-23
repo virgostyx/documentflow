@@ -31,6 +31,10 @@ RSpec.describe Documents::MainFileComponent, type: :component do
       expect(subject).to have_link("Download", href: Rails.application.routes.url_helpers.rails_blob_path(document.main_file, disposition: "attachment", only_path: true))
     end
 
+    it "links to preview the file" do
+      expect(subject).to have_css("a[href='#{Rails.application.routes.url_helpers.preview_entity_document_main_file_path(document.entity, document)}']")
+    end
+
     it "displays a remove link" do
       expect(subject).to have_link("Remove")
     end

@@ -23,6 +23,12 @@ class AnnexesController < ApplicationController
     redirect_to document_path, notice: "Annex removed successfully."
   end
 
+  def preview
+    authorize @document, :show?
+
+    @annex = @document.annexes.attachments.find(params[:id])
+  end
+
   private
 
   def set_document

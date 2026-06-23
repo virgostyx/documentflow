@@ -35,6 +35,11 @@ RSpec.describe Documents::AnnexListComponent, type: :component do
       expect(subject).to have_link("Download", href: Rails.application.routes.url_helpers.rails_blob_path(document.annexes.first, disposition: "attachment", only_path: true))
     end
 
+    it "links to preview each annex" do
+      annex = document.annexes.first
+      expect(subject).to have_css("a[href='#{Rails.application.routes.url_helpers.preview_entity_document_annex_path(document.entity, document, annex)}']")
+    end
+
     it "displays a remove link for each annex" do
       expect(subject).to have_link("Remove")
     end

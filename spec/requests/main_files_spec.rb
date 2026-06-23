@@ -12,7 +12,7 @@ RSpec.describe "MainFiles", type: :request do
 
     context "as the document's author" do
       before do
-        create(:entity_user, entity: entity, user: user, status: "active")
+        create(:entity_user, :owner, entity: entity, user: user, status: "active")
         sign_in user
       end
 
@@ -98,7 +98,7 @@ RSpec.describe "MainFiles", type: :request do
 
     context "as the document's author" do
       before do
-        create(:entity_user, entity: entity, user: user, status: "active")
+        create(:entity_user, :owner, entity: entity, user: user, status: "active")
         sign_in user
       end
 
@@ -140,6 +140,56 @@ RSpec.describe "MainFiles", type: :request do
         expect(response).to redirect_to(entity_document_path(entity, document))
         expect(flash[:alert]).to be_present
         expect(document.reload.main_file).to be_attached
+      end
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/:document_id/main_file/preview" do
+    context "as a user who can view the document" do
+      let!(:document) { create(:document, entity: entity, created_by: user) }
+
+      before do
+        document.main_file.attach(io: StringIO.new("content"), filename: "main.pdf", content_type: "application/pdf")
+        create(:entity_user, :owner, entity: entity, user: user, status: "active")
+        sign_in user
+      end
+
+      it "renders the inline preview" do
+        get preview_entity_document_main_file_path(entity, document)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include(rails_blob_path(document.main_file, disposition: "inline"))
+      end
+    end
+
+    context "as a guest who cannot view the document" do
+      let!(:document) { create(:document, entity: entity, created_by: create(:user)) }
+
+      before do
+        create(:entity_user, :guest, entity: entity, user: user, status: "active")
+        document.main_file.attach(io: StringIO.new("content"), filename: "main.pdf", content_type: "application/pdf")
+        sign_in user
+      end
+
+      it "denies access" do
+        get preview_entity_document_main_file_path(entity, document)
+
+        expect(response).to redirect_to(root_path)
+      end
+    end
+
+    context "when no main document is attached" do
+      let!(:document) { create(:document, entity: entity, created_by: user) }
+
+      before do
+        create(:entity_user, :owner, entity: entity, user: user, status: "active")
+        sign_in user
+      end
+
+      it "returns not found" do
+        get preview_entity_document_main_file_path(entity, document)
+
+        expect(response).to have_http_status(:not_found)
       end
     end
   end

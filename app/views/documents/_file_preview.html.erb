@@ -1,0 +1,8 @@
+<div class="p-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold text-gray-900 truncate"><%= title %></h2>
+    <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Close" } %>
+  </div>
+  <iframe src="<%= rails_blob_path(blob, disposition: "inline") %>" title="<%= title %>"
+          class="w-full h-[80vh] rounded border border-gray-200"></iframe>
+</div>

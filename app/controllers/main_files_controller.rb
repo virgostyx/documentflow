@@ -29,6 +29,12 @@ class MainFilesController < ApplicationController
     end
   end
 
+  def preview
+    authorize @document, :show?
+
+    head :not_found unless @document.main_file.attached?
+  end
+
   private
 
   def set_document

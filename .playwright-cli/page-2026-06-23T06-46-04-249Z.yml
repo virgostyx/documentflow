@@ -1,0 +1,132 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e7]
+        - generic [ref=e9]: DocumentFlow
+      - generic [ref=e10]:
+        - link "Features" [ref=e11] [cursor=pointer]:
+          - /url: "#features"
+        - link "Workflow" [ref=e12] [cursor=pointer]:
+          - /url: "#how-it-works"
+        - link "Sign in" [ref=e13] [cursor=pointer]:
+          - /url: /users/sign_in
+        - link "Sign up" [ref=e14] [cursor=pointer]:
+          - /url: /users/sign_up
+  - generic [ref=e16]:
+    - heading "Manage your document flows with rigor and traceability" [level=1] [ref=e17]:
+      - text: Manage your document flows
+      - generic [ref=e18]: with rigor and traceability
+    - paragraph [ref=e19]: DocumentFlow structures the recording, multi-actor validation and archiving of your documents through a fully traceable RED → VISA → SIGN → EXP circuit.
+    - generic [ref=e20]:
+      - link "Get started" [ref=e21] [cursor=pointer]:
+        - /url: /users/sign_up
+        - generic [ref=e22]: Get started
+        - img [ref=e23]
+      - link "Watch a demo" [ref=e25] [cursor=pointer]:
+        - /url: "#how-it-works"
+        - img [ref=e26]
+        - text: Watch a demo
+    - generic [ref=e29]:
+      - paragraph [ref=e30]: Trusted by organizations with high traceability standards
+      - generic [ref=e31]:
+        - generic [ref=e32]: Public administration
+        - generic [ref=e33]: Law firm
+        - generic [ref=e34]: Executive management
+  - generic [ref=e36]:
+    - generic [ref=e37]:
+      - heading "Features built for rigor" [level=2] [ref=e38]
+      - paragraph [ref=e39]: Everything you need to structure and trace your document flows
+    - generic [ref=e40]:
+      - generic [ref=e41]:
+        - img [ref=e43]
+        - heading "Structured workflow" [level=3] [ref=e45]
+        - paragraph [ref=e46]: "A four-step validation circuit: Drafting, Review, Signature and Dispatch"
+      - generic [ref=e47]:
+        - img [ref=e49]
+        - heading "Multi-actor validation" [level=3] [ref=e51]
+        - paragraph [ref=e52]: Each step is assigned to an identified actor, with parallel reviews possible
+      - generic [ref=e53]:
+        - img [ref=e55]
+        - heading "Complete audit trail" [level=3] [ref=e57]
+        - paragraph [ref=e58]: Every action is logged and timestamped for full traceability
+      - generic [ref=e59]:
+        - img [ref=e61]
+        - heading "Automatic PDF conversion" [level=3] [ref=e63]
+        - paragraph [ref=e64]: Your documents are converted and archived as PDF as soon as they're finalized
+      - generic [ref=e65]:
+        - img [ref=e67]
+        - heading "Time-limited sharing" [level=3] [ref=e69]
+        - paragraph [ref=e70]: Generate public access links with automatic expiration for your finalized documents
+      - generic [ref=e71]:
+        - img [ref=e73]
+        - heading "Full-text search" [level=3] [ref=e75]
+        - paragraph [ref=e76]: Instantly find your documents by reference, subject, sender or addressee
+  - generic [ref=e78]:
+    - generic [ref=e79]:
+      - heading "How it works" [level=2] [ref=e80]
+      - paragraph [ref=e81]: From submission to archiving, in four steps
+    - generic [ref=e82]:
+      - generic [ref=e83]:
+        - generic [ref=e84]: "1"
+        - heading "Create a document" [level=3] [ref=e85]
+        - paragraph [ref=e86]: Fill in the subject, date and attachments
+      - generic [ref=e87]:
+        - generic [ref=e88]: "2"
+        - heading "Define the validation circuit" [level=3] [ref=e89]
+        - paragraph [ref=e90]: Choose the RED, VISA, SIGN and EXP actors
+      - generic [ref=e91]:
+        - generic [ref=e92]: "3"
+        - heading "Actors approve or reject" [level=3] [ref=e93]
+        - paragraph [ref=e94]: Each step moves forward or backward depending on the decision made
+      - generic [ref=e95]:
+        - generic [ref=e96]: "4"
+        - heading "Finalization and PDF archiving" [level=3] [ref=e97]
+        - paragraph [ref=e98]: The document is converted, locked and archived automatically
+  - generic [ref=e100]:
+    - heading "Ready to digitalize your document flows?" [level=2] [ref=e101]
+    - paragraph [ref=e102]: Join the organizations that trust DocumentFlow for their document traceability
+    - link "Start for free" [ref=e103] [cursor=pointer]:
+      - /url: /users/sign_up
+      - generic [ref=e104]: Start for free
+      - img [ref=e105]
+    - paragraph [ref=e107]: No credit card required
+  - contentinfo [ref=e108]:
+    - generic [ref=e109]:
+      - generic [ref=e110]:
+        - generic [ref=e111]:
+          - generic [ref=e112]:
+            - img [ref=e113]
+            - generic [ref=e115]: DocumentFlow
+          - paragraph [ref=e116]: Document flow management with multi-actor validation and complete traceability.
+        - generic [ref=e117]:
+          - heading "Product" [level=3] [ref=e118]
+          - list [ref=e119]:
+            - listitem [ref=e120]:
+              - link "Features" [ref=e121] [cursor=pointer]:
+                - /url: "#features"
+            - listitem [ref=e122]:
+              - link "Workflow" [ref=e123] [cursor=pointer]:
+                - /url: "#how-it-works"
+        - generic [ref=e124]:
+          - heading "Resources" [level=3] [ref=e125]
+          - list [ref=e126]:
+            - listitem [ref=e127]:
+              - link "Documentation" [ref=e128] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e129]:
+              - link "Support" [ref=e130] [cursor=pointer]:
+                - /url: "#"
+        - generic [ref=e131]:
+          - heading "Company" [level=3] [ref=e132]
+          - list [ref=e133]:
+            - listitem [ref=e134]:
+              - link "About" [ref=e135] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e136]:
+              - link "Contact" [ref=e137] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e138]:
+              - link "Privacy" [ref=e139] [cursor=pointer]:
+                - /url: "#"
+      - paragraph [ref=e141]: © 2026 DocumentFlow. All rights reserved.

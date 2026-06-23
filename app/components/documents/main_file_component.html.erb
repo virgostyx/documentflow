@@ -34,7 +34,7 @@
 
     <% if attached? %>
       <%= render(Ui::ButtonComponent.new(
-        href: entity_document_main_file_path(document.entity, document), variant: :danger, method: :delete,
+        href: entity_document_main_file_path(document.entity, document), variant: :danger, size: :sm, method: :delete,
         data: { turbo_confirm: "Remove the main document?" }
       )) { "Remove" } %>
     <% end %>

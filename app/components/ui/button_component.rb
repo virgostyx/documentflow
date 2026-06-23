@@ -8,19 +8,25 @@ module Ui
       danger: "bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500"
     }.freeze
 
-    BASE_CLASSES = "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium " \
+    SIZES = {
+      md: "px-4 py-2 text-sm",
+      sm: "px-2.5 py-1 text-xs"
+    }.freeze
+
+    BASE_CLASSES = "inline-flex items-center justify-center gap-2 rounded-md font-medium " \
                    "transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 " \
                    "disabled:opacity-50 disabled:cursor-not-allowed"
 
-    def initialize(href: nil, variant: :primary, method: nil, **html_options)
+    def initialize(href: nil, variant: :primary, size: :md, method: nil, **html_options)
       @href = href
       @variant = variant
+      @size = size
       @method = method
       @html_options = html_options
     end
 
     def classes
-      "#{BASE_CLASSES} #{VARIANTS[@variant] || VARIANTS[:primary]}"
+      "#{BASE_CLASSES} #{SIZES[@size] || SIZES[:md]} #{VARIANTS[@variant] || VARIANTS[:primary]}"
     end
 
     def link?

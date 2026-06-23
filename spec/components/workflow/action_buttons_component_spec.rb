@@ -39,12 +39,4 @@ RSpec.describe Workflow::ActionButtonsComponent, type: :component do
       expect(subject).not_to have_button("Reject")
     end
   end
-
-  context "when the current user can cancel the document" do
-    let(:document) { create(:document, :with_workflow, :in_progress, created_by: actor) }
-
-    it "displays the cancel link" do
-      expect(subject).to have_link("Cancel document")
-    end
-  end
 end

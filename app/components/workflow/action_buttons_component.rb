@@ -16,10 +16,6 @@ module Workflow
       @policy.reject? && current_step&.actor == @current_user && current_step&.role != "RED"
     end
 
-    def show_cancel?
-      @policy.cancel?
-    end
-
     private
 
     attr_reader :document, :current_user

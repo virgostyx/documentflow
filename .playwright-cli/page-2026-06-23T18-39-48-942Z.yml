@@ -1,0 +1,214 @@
+- generic [active] [ref=e190]:
+  - complementary [ref=e191]:
+    - link "DocumentFlow" [ref=e192] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e193]
+      - generic [ref=e195]: DocumentFlow
+    - generic [ref=e196]:
+      - paragraph [ref=e197]: Acme Manufacturing Ltd
+      - paragraph [ref=e198]: ENT-BO0SKL
+      - generic [ref=e200]: All departments
+      - link "Switch entity" [ref=e201] [cursor=pointer]:
+        - /url: /entities
+    - navigation [ref=e202]:
+      - generic [ref=e203]:
+        - button "Documents" [ref=e204]:
+          - paragraph [ref=e205]: Documents
+          - img [ref=e206]
+        - generic [ref=e208]:
+          - link "Overview 8" [ref=e209] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - generic [ref=e210]:
+              - img [ref=e211]
+              - text: Overview
+            - generic [ref=e213]: "8"
+          - link "My Inbox 3" [ref=e214] [cursor=pointer]:
+            - /url: /entities/1/documents/received
+            - generic [ref=e215]:
+              - img [ref=e216]
+              - text: My Inbox
+            - generic [ref=e218]: "3"
+          - link "My Outbox 3" [ref=e219] [cursor=pointer]:
+            - /url: /entities/1/documents/mine
+            - generic [ref=e220]:
+              - img [ref=e221]
+              - text: My Outbox
+            - generic [ref=e223]: "3"
+          - link "ToDo 0" [ref=e224] [cursor=pointer]:
+            - /url: /entities/1/documents/todo
+            - generic [ref=e225]:
+              - img [ref=e226]
+              - text: ToDo
+            - generic [ref=e228]: "0"
+          - link "Waiting 0" [ref=e229] [cursor=pointer]:
+            - /url: /entities/1/documents/waiting
+            - generic [ref=e230]:
+              - img [ref=e231]
+              - text: Waiting
+            - generic [ref=e233]: "0"
+          - link "Info 6" [ref=e234] [cursor=pointer]:
+            - /url: /entities/1/documents/info
+            - generic [ref=e235]:
+              - img [ref=e236]
+              - text: Info
+            - generic [ref=e239]: "6"
+      - generic [ref=e240]:
+        - button "Incoming Mail" [ref=e241]:
+          - paragraph [ref=e242]: Incoming Mail
+          - img [ref=e243]
+        - generic [ref=e245]:
+          - link "Incoming Inbox 0" [ref=e246] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/inbox
+            - generic [ref=e247]:
+              - img [ref=e248]
+              - text: Incoming Inbox
+            - generic [ref=e250]: "0"
+          - link "Pending Triage 0" [ref=e251] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/pending_triage
+            - generic [ref=e252]:
+              - img [ref=e253]
+              - text: Pending Triage
+            - generic [ref=e256]: "0"
+      - generic [ref=e258]:
+        - button "Classification" [ref=e259]:
+          - paragraph [ref=e260]: Classification
+          - img [ref=e261]
+        - link "Manage" [ref=e263] [cursor=pointer]:
+          - /url: /entities/1/classification_nodes
+      - button "Contacts" [ref=e265]:
+        - paragraph [ref=e266]: Contacts
+        - img [ref=e267]
+      - button "Settings" [ref=e270]:
+        - paragraph [ref=e271]: Settings
+        - img [ref=e272]
+    - generic [ref=e274]:
+      - generic [ref=e275]:
+        - generic [ref=e276]: S
+        - paragraph [ref=e278]: sophia.rodriguez@acme-mfg.example
+      - link "Sign out" [ref=e279] [cursor=pointer]:
+        - /url: /users/sign_out
+        - img [ref=e280]
+        - text: Sign out
+  - generic [ref=e282]:
+    - banner [ref=e283]
+    - alert [ref=e285]:
+      - img [ref=e287]
+      - paragraph [ref=e289]: Main document uploaded successfully.
+      - button [ref=e290]:
+        - img [ref=e291]
+    - main [ref=e294]:
+      - generic [ref=e295]:
+        - generic [ref=e296]:
+          - link "Documents" [ref=e297] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - img [ref=e298]
+            - text: Documents
+          - heading "2026/00001" [level=1] [ref=e301]
+          - paragraph [ref=e302]: Service Agreement Renewal - Hayes & Co Distribution
+        - generic [ref=e303]:
+          - link "Launch" [ref=e304] [cursor=pointer]:
+            - /url: /entities/1/documents/1/launch
+          - link "Edit" [ref=e305] [cursor=pointer]:
+            - /url: /entities/1/documents/1/edit
+          - link "Cancel document" [ref=e306] [cursor=pointer]:
+            - /url: /entities/1/documents/1/cancel
+          - link "Delete" [ref=e307] [cursor=pointer]:
+            - /url: /entities/1/documents/1
+        - generic [ref=e308]:
+          - generic [ref=e310]: Draft
+          - generic [ref=e311]:
+            - generic [ref=e312]:
+              - paragraph [ref=e313]:
+                - text: "From: Sophia Rodriguez"
+                - generic [ref=e314]: Internal
+              - paragraph [ref=e315]:
+                - text: "To: Robert Hayes"
+                - generic [ref=e316]: External
+              - paragraph [ref=e317]: "Date: 20/06/2026"
+            - generic [ref=e319]:
+              - generic [ref=e320]:
+                - term [ref=e321]: Reference number
+                - definition [ref=e322]: 2026/00001
+              - generic [ref=e323]:
+                - term [ref=e324]: Document date
+                - definition [ref=e325]: 20/06/2026
+              - generic [ref=e326]:
+                - term [ref=e327]: Created by
+                - definition [ref=e328]: sophia.rodriguez@acme-mfg.example
+              - generic [ref=e329]:
+                - term [ref=e330]: Expects a response
+                - definition [ref=e331]: "No"
+        - generic [ref=e333]:
+          - generic [ref=e334]: Main document
+          - generic [ref=e335]:
+            - generic [ref=e336]:
+              - generic [ref=e337]: sample.pdf
+              - generic [ref=e338]:
+                - link "Preview" [ref=e339] [cursor=pointer]:
+                  - /url: /entities/1/documents/1/main_file/preview
+                  - img [ref=e340]
+                - link "Download" [ref=e343] [cursor=pointer]:
+                  - /url: /rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MjAsInB1ciI6ImJsb2JfaWQifX0=--d85c20915c23b811e7bc6c3ec2fb46c85b71d846/sample.pdf?disposition=attachment
+            - generic [ref=e344]:
+              - button "Choose File" [ref=e346]
+              - link "Remove" [ref=e347] [cursor=pointer]:
+                - /url: /entities/1/documents/1/main_file
+            - link "Check out" [ref=e349] [cursor=pointer]:
+              - /url: /entities/1/documents/1/checkout
+        - generic [ref=e351]:
+          - generic [ref=e352]: Annexes
+          - generic [ref=e353]:
+            - paragraph [ref=e354]: No annexes attached.
+            - button "Choose File" [ref=e357]
+        - generic [ref=e359]:
+          - generic [ref=e360]: Copy
+          - generic [ref=e361]:
+            - paragraph [ref=e362]: No one is in copy on this document yet.
+            - generic [ref=e363]:
+              - generic [ref=e365]:
+                - generic [ref=e366]:
+                  - combobox "Add to copy *" [ref=e367]:
+                    - option "Select a person..." [selected]
+                    - option "Fatima Al-Sayed"
+                    - option "James Whitfield"
+                    - option "Marcus Chen"
+                    - option "Olivia Bennett"
+                    - option "Sophia Rodriguez"
+                    - option "Robert Hayes"
+                    - option "Linda Martinez"
+                  - generic: Add to copy *
+                  - img [ref=e369]
+                - button "+ New contact" [ref=e371]
+              - button "Add" [ref=e372]
+        - generic [ref=e374]:
+          - generic [ref=e375]: Validation circuit
+          - generic [ref=e376]:
+            - paragraph [ref=e377]: No validation circuit defined for this document yet.
+            - generic [ref=e378]:
+              - generic [ref=e380]:
+                - combobox "Role *" [ref=e381]:
+                  - option "Select a role..." [selected]
+                  - option "RED"
+                  - option "VISA"
+                  - option "SIGN"
+                  - option "EXP"
+                - generic: Role *
+                - img [ref=e383]
+              - generic [ref=e386]:
+                - combobox "Actor" [ref=e387]:
+                  - option "Unassigned" [selected]
+                  - option "Fatima Al-Sayed"
+                  - option "James Whitfield"
+                  - option "Marcus Chen"
+                  - option "Olivia Bennett"
+                  - option "Sophia Rodriguez"
+                - generic: Actor
+                - img [ref=e389]
+              - button "Add step" [ref=e392]
+            - generic [ref=e393]:
+              - generic [ref=e394]:
+                - generic [ref=e395]: Apply template
+                - combobox "Apply template" [ref=e396]:
+                  - option "Dual Review" [selected]
+                  - option "Standard Approval"
+              - button "Apply" [ref=e397]

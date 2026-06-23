@@ -1,0 +1,198 @@
+- generic [active] [ref=e1]:
+  - complementary [ref=e2]:
+    - link "DocumentFlow" [ref=e3] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e4]
+      - generic [ref=e6]: DocumentFlow
+    - generic [ref=e7]:
+      - paragraph [ref=e8]: Acme Manufacturing Ltd
+      - paragraph [ref=e9]: ENT-BO0SKL
+      - generic [ref=e11]: All departments
+      - link "Switch entity" [ref=e12] [cursor=pointer]:
+        - /url: /entities
+    - navigation [ref=e13]:
+      - generic [ref=e14]:
+        - button "Documents" [ref=e15]:
+          - paragraph [ref=e16]: Documents
+          - img [ref=e17]
+        - generic [ref=e19]:
+          - link "Overview 8" [ref=e20] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - generic [ref=e21]:
+              - img [ref=e22]
+              - text: Overview
+            - generic [ref=e24]: "8"
+          - link "My Inbox 3" [ref=e25] [cursor=pointer]:
+            - /url: /entities/1/documents/received
+            - generic [ref=e26]:
+              - img [ref=e27]
+              - text: My Inbox
+            - generic [ref=e29]: "3"
+          - link "My Outbox 3" [ref=e30] [cursor=pointer]:
+            - /url: /entities/1/documents/mine
+            - generic [ref=e31]:
+              - img [ref=e32]
+              - text: My Outbox
+            - generic [ref=e34]: "3"
+          - link "ToDo 0" [ref=e35] [cursor=pointer]:
+            - /url: /entities/1/documents/todo
+            - generic [ref=e36]:
+              - img [ref=e37]
+              - text: ToDo
+            - generic [ref=e39]: "0"
+          - link "Waiting 0" [ref=e40] [cursor=pointer]:
+            - /url: /entities/1/documents/waiting
+            - generic [ref=e41]:
+              - img [ref=e42]
+              - text: Waiting
+            - generic [ref=e44]: "0"
+          - link "Info 6" [ref=e45] [cursor=pointer]:
+            - /url: /entities/1/documents/info
+            - generic [ref=e46]:
+              - img [ref=e47]
+              - text: Info
+            - generic [ref=e50]: "6"
+      - generic [ref=e51]:
+        - button "Incoming Mail" [ref=e52]:
+          - paragraph [ref=e53]: Incoming Mail
+          - img [ref=e54]
+        - generic [ref=e56]:
+          - link "Incoming Inbox 0" [ref=e57] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/inbox
+            - generic [ref=e58]:
+              - img [ref=e59]
+              - text: Incoming Inbox
+            - generic [ref=e61]: "0"
+          - link "Pending Triage 0" [ref=e62] [cursor=pointer]:
+            - /url: /entities/1/incoming_mails/pending_triage
+            - generic [ref=e63]:
+              - img [ref=e64]
+              - text: Pending Triage
+            - generic [ref=e67]: "0"
+      - generic [ref=e69]:
+        - button "Classification" [ref=e70]:
+          - paragraph [ref=e71]: Classification
+          - img [ref=e72]
+        - link "Manage" [ref=e74] [cursor=pointer]:
+          - /url: /entities/1/classification_nodes
+      - button "Contacts" [ref=e76]:
+        - paragraph [ref=e77]: Contacts
+        - img [ref=e78]
+      - button "Settings" [ref=e81]:
+        - paragraph [ref=e82]: Settings
+        - img [ref=e83]
+    - generic [ref=e85]:
+      - generic [ref=e86]:
+        - generic [ref=e87]: S
+        - paragraph [ref=e89]: sophia.rodriguez@acme-mfg.example
+      - link "Sign out" [ref=e90] [cursor=pointer]:
+        - /url: /users/sign_out
+        - img [ref=e91]
+        - text: Sign out
+  - generic [ref=e93]:
+    - banner [ref=e94]
+    - main [ref=e95]:
+      - generic [ref=e96]:
+        - generic [ref=e97]:
+          - link "Documents" [ref=e98] [cursor=pointer]:
+            - /url: /entities/1/documents
+            - img [ref=e99]
+            - text: Documents
+          - heading "2026/00001" [level=1] [ref=e102]
+          - paragraph [ref=e103]: Service Agreement Renewal - Hayes & Co Distribution
+        - generic [ref=e104]:
+          - link "Launch" [ref=e105] [cursor=pointer]:
+            - /url: /entities/1/documents/1/launch
+          - link "Edit" [ref=e106] [cursor=pointer]:
+            - /url: /entities/1/documents/1/edit
+          - link "Cancel document" [ref=e107] [cursor=pointer]:
+            - /url: /entities/1/documents/1/cancel
+          - link "Delete" [ref=e108] [cursor=pointer]:
+            - /url: /entities/1/documents/1
+        - paragraph [ref=e109]: A main document must be attached before this document can be launched.
+        - generic [ref=e110]:
+          - generic [ref=e112]: Draft
+          - generic [ref=e113]:
+            - generic [ref=e114]:
+              - paragraph [ref=e115]:
+                - text: "From: Sophia Rodriguez"
+                - generic [ref=e116]: Internal
+              - paragraph [ref=e117]:
+                - text: "To: Robert Hayes"
+                - generic [ref=e118]: External
+              - paragraph [ref=e119]: "Date: 20/06/2026"
+            - generic [ref=e121]:
+              - generic [ref=e122]:
+                - term [ref=e123]: Reference number
+                - definition [ref=e124]: 2026/00001
+              - generic [ref=e125]:
+                - term [ref=e126]: Document date
+                - definition [ref=e127]: 20/06/2026
+              - generic [ref=e128]:
+                - term [ref=e129]: Created by
+                - definition [ref=e130]: sophia.rodriguez@acme-mfg.example
+              - generic [ref=e131]:
+                - term [ref=e132]: Expects a response
+                - definition [ref=e133]: "No"
+        - generic [ref=e135]:
+          - generic [ref=e136]: Main document
+          - generic [ref=e137]:
+            - paragraph [ref=e138]: No main document attached yet.
+            - button "Choose File" [ref=e141]
+        - generic [ref=e143]:
+          - generic [ref=e144]: Annexes
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: No annexes attached.
+            - button "Choose File" [ref=e149]
+        - generic [ref=e151]:
+          - generic [ref=e152]: Copy
+          - generic [ref=e153]:
+            - paragraph [ref=e154]: No one is in copy on this document yet.
+            - generic [ref=e155]:
+              - generic [ref=e157]:
+                - generic [ref=e158]:
+                  - combobox "Add to copy *" [ref=e159]:
+                    - option "Select a person..." [selected]
+                    - option "Fatima Al-Sayed"
+                    - option "James Whitfield"
+                    - option "Marcus Chen"
+                    - option "Olivia Bennett"
+                    - option "Sophia Rodriguez"
+                    - option "Robert Hayes"
+                    - option "Linda Martinez"
+                  - generic: Add to copy *
+                  - img [ref=e161]
+                - button "+ New contact" [ref=e163]
+              - button "Add" [ref=e164]
+        - generic [ref=e166]:
+          - generic [ref=e167]: Validation circuit
+          - generic [ref=e168]:
+            - paragraph [ref=e169]: No validation circuit defined for this document yet.
+            - generic [ref=e170]:
+              - generic [ref=e172]:
+                - combobox "Role *" [ref=e173]:
+                  - option "Select a role..." [selected]
+                  - option "RED"
+                  - option "VISA"
+                  - option "SIGN"
+                  - option "EXP"
+                - generic: Role *
+                - img [ref=e175]
+              - generic [ref=e178]:
+                - combobox "Actor" [ref=e179]:
+                  - option "Unassigned" [selected]
+                  - option "Fatima Al-Sayed"
+                  - option "James Whitfield"
+                  - option "Marcus Chen"
+                  - option "Olivia Bennett"
+                  - option "Sophia Rodriguez"
+                - generic: Actor
+                - img [ref=e181]
+              - button "Add step" [ref=e184]
+            - generic [ref=e185]:
+              - generic [ref=e186]:
+                - generic [ref=e187]: Apply template
+                - combobox "Apply template" [ref=e188]:
+                  - option "Dual Review" [selected]
+                  - option "Standard Approval"
+              - button "Apply" [ref=e189]

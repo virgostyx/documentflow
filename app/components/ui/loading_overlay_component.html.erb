@@ -1,0 +1,20 @@
+<div
+  id="upload-loading-overlay"
+  class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-white/85 backdrop-blur-sm"
+  role="status"
+  aria-label="Uploading">
+  <div class="flex flex-col items-center gap-5 bg-white rounded-2xl shadow-2xl border border-gray-100 px-12 py-10">
+    <div class="relative h-12 w-12">
+      <svg class="h-12 w-12 text-primary-100" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none"/>
+      </svg>
+      <svg class="animate-spin h-12 w-12 text-primary-600 absolute inset-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+      </svg>
+    </div>
+    <div class="text-center space-y-1">
+      <p class="text-sm font-semibold text-gray-800">Loading…</p>
+      <p class="text-xs text-gray-400">Please wait</p>
+    </div>
+  </div>
+</div>

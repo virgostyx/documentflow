@@ -14,7 +14,7 @@ RSpec.describe Documents::AnnexListComponent, type: :component do
     end
 
     it "displays the add annex form" do
-      expect(subject).to have_button("Add annex")
+      expect(subject).to have_css("input[type=file]")
     end
   end
 
@@ -57,7 +57,7 @@ RSpec.describe Documents::AnnexListComponent, type: :component do
     end
 
     it "does not display the add or remove controls" do
-      expect(subject).not_to have_button("Add annex")
+      expect(subject).not_to have_css("input[type=file]")
       expect(subject).not_to have_link("Remove")
     end
   end

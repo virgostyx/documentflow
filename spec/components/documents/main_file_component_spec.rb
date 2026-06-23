@@ -44,7 +44,7 @@ RSpec.describe Documents::MainFileComponent, type: :component do
     let(:document) { create(:document, :in_progress, created_by: user) }
 
     it "does not display upload or remove controls" do
-      expect(subject).not_to have_button("Upload")
+      expect(subject).not_to have_css("input[type=file]")
       expect(subject).not_to have_link("Remove")
     end
   end
@@ -62,7 +62,7 @@ RSpec.describe Documents::MainFileComponent, type: :component do
     end
 
     it "hides the upload/replace and remove controls" do
-      expect(subject).not_to have_button("Replace")
+      expect(subject).not_to have_css("input[type=file]")
       expect(subject).not_to have_link("Remove")
     end
 

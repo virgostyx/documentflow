@@ -34,6 +34,8 @@ env:
     - AR_ENCRYPTION_PRIMARY_KEY
     - AR_ENCRYPTION_DETERMINISTIC_KEY
     - AR_ENCRYPTION_KEY_DERIVATION_SALT
+    - CLOUDFLARE_R2_ACCESS_KEY_ID
+    - CLOUDFLARE_R2_SECRET_ACCESS_KEY
   clear:
     RAILS_ENV: production
 
@@ -50,6 +52,10 @@ env:
 
     # Logs
     RAILS_LOG_LEVEL: info
+
+    # Cloudflare R2 (Active Storage)
+    CLOUDFLARE_R2_BUCKET: documentflowmanagement
+    CLOUDFLARE_R2_ENDPOINT: https://73db70054ed12d64dd22412ee03af049.r2.cloudflarestorage.com
 
     # Email SMTP Configuration (Hostinger)
     SMTP_ADDRESS: smtp.hostinger.com

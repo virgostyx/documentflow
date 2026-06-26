@@ -13,5 +13,32 @@
   <%= render "shared/flash" %>
   <%= yield %>
   <%= render Ui::ConfirmModalComponent.new %>
+
+<!-- Cookie Consent Banner -->
+<%= render Ui::CookieBannerComponent.new %>
+
+<!-- Back to Top -->
+<button
+  data-controller="back-to-top"
+  data-action="click->back-to-top#scrollToTop"
+  class="fixed bottom-24 right-6 z-50 p-3 rounded-full bg-primary-600 text-white shadow-lg opacity-0 pointer-events-none translate-y-4 transition-all duration-300 ease-in-out hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+  aria-label="Back to top">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+  </svg>
+</button>
+
+<script
+  data-name="BMC-Widget"
+  data-cfasync="false"
+  src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
+  data-id="virgostyx"
+  data-description="Support DocumentFlow!"
+  data-message="If DocumentFlow helps your team, a coffee is always welcome ☕"
+  data-color="#40DCA5"
+  data-position="Right"
+  data-x_margin="18"
+  data-y_margin="18"
+></script>
 </body>
 </html>

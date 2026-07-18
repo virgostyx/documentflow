@@ -4,7 +4,7 @@
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
-PASSWORD = "password123"
+PASSWORD = "test_pa22word"
 SAMPLE_FILE = Rails.root.join("spec/fixtures/files/sample.pdf")
 
 def find_or_create_user!(email:, first_name:, last_name:, super_admin: false)

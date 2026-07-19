@@ -14,6 +14,7 @@ servers:
 proxy:
   ssl: true
   host: documentflowmanagement.com
+  app_port: 3000
 
 # IMPORTANT: Activez aussi config.assume_ssl et config.force_ssl dans config/environments/production.rb
 
@@ -46,7 +47,7 @@ env:
     SOLID_QUEUE_IN_PUMA: true
 
     # Puma web server
-    WEB_CONCURRENCY: 3          # 3 workers pour 8GB RAM (2 pour 4GB RAM)
+    WEB_CONCURRENCY: 2          # 3 workers pour 8GB RAM (2 pour 4GB RAM)
     RAILS_MAX_THREADS: 5
     PORT: 3000
 
@@ -89,6 +90,8 @@ builder:
 ssh:
   user: virgostyx
   port: 2222
+  keys: ["~/.ssh/id_ed25519_documentflow"]
+  keys_only: true
 
 # Use accessory services (secrets come from .kamal/secrets).
 accessories:

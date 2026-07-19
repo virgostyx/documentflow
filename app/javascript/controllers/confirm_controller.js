@@ -4,6 +4,7 @@ export default class extends Controller {
   static targets = ["message", "confirmButton", "container"]
 
   confirmAction(event) {
+    if (this.element.classList.contains("hidden")) return
     if (event) event.preventDefault()
 
     this.hide()
@@ -15,6 +16,7 @@ export default class extends Controller {
   }
 
   cancel(event) {
+    if (this.element.classList.contains("hidden")) return
     if (event) event.preventDefault()
 
     this.hide()

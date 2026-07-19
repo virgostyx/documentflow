@@ -570,6 +570,40 @@ RSpec.describe Document, type: :model do
     end
   end
 
+  describe ".pending_for" do
+    it "returns documents where the user is the actor of the current (lowest-order) pending step" do
+      user = create(:user)
+      document = create(:document, :with_workflow, :in_progress, entity: entity)
+      document.workflow_steps.find_by(role: "RED").update!(status: "approved")
+      document.workflow_steps.find_by(role: "VISA").update!(actor: user)
+
+      expect(Document.pending_for(user)).to contain_exactly(document)
+    end
+
+    it "excludes documents where the user is the actor of a later pending step while an earlier step is still pending" do
+      user = create(:user)
+      document = create(:document, :with_workflow, :in_progress, entity: entity)
+      document.workflow_steps.find_by(role: "SIGN").update!(actor: user)
+
+      expect(Document.pending_for(user)).to be_empty
+    end
+
+    it "excludes documents where the user's step has already been approved" do
+      user = create(:user)
+      document = create(:document, :with_workflow, :in_progress, entity: entity)
+      document.workflow_steps.find_by(role: "RED").update!(actor: user, status: "approved")
+
+      expect(Document.pending_for(user)).to be_empty
+    end
+
+    it "excludes documents where the user is not a workflow step actor" do
+      user = create(:user)
+      create(:document, :with_workflow, :in_progress, entity: entity)
+
+      expect(Document.pending_for(user)).to be_empty
+    end
+  end
+
   describe ".waiting_for" do
     it "returns documents authored by the user where a response is expected" do
       user = create(:user)

@@ -12,6 +12,10 @@ module Entities
       documents_base_scope.count
     end
 
+    def to_validate_count
+      current_entity.documents.outgoing.pending_for(current_user).count
+    end
+
     def received_count
       documents_base_scope.received_by(current_user).count
     end

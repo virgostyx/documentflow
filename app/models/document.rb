@@ -65,6 +65,15 @@ class Document < ApplicationRecord
   scope :todo_for, ->(user) {
     where(addressee_type: "User", addressee_id: user.id, expects_response: true)
   }
+  scope :pending_for, ->(user) {
+    joins(:workflow_steps)
+      .where(workflow_steps: { status: "pending", actor_id: user.id })
+      .where(
+        "workflow_steps.\"order\" = (SELECT MIN(ws2.\"order\") FROM workflow_steps ws2 " \
+        "WHERE ws2.document_id = documents.id AND ws2.status = 'pending')"
+      )
+      .distinct
+  }
   scope :waiting_for, ->(user) {
     where(created_by: user, expects_response: true)
   }

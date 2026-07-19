@@ -68,6 +68,7 @@ Rails.application.routes.draw do
         get :todo
         get :waiting
         get :info
+        get :to_validate
       end
     end
 

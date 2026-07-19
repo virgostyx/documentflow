@@ -308,6 +308,48 @@ RSpec.describe "Documents", type: :request do
     end
   end
 
+  describe "GET /entities/:entity_id/documents/to_validate" do
+    let!(:entity_user) do
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
+      eu
+    end
+    let!(:to_validate) { create(:document, :with_workflow, :in_progress, entity: entity, department: department, subject: "Awaiting my VISA") }
+    let!(:not_yet_my_turn) { create(:document, :with_workflow, :in_progress, entity: entity, department: department, subject: "Not my turn yet") }
+
+    before do
+      to_validate.workflow_steps.find_by(role: "RED").update!(status: "approved")
+      to_validate.workflow_steps.find_by(role: "VISA").update!(actor: user)
+      not_yet_my_turn.workflow_steps.find_by(role: "SIGN").update!(actor: user)
+
+      sign_in user
+    end
+
+    it "lists only documents where the current user is the actor of the current pending step" do
+      get to_validate_entity_documents_path(entity)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(to_validate.subject)
+      expect(response.body).not_to include(not_yet_my_turn.subject)
+    end
+
+    context "when the document belongs to a department the user is not a member of" do
+      let(:other_department) { create(:department, entity: entity) }
+      let!(:outside_department) { create(:document, :with_workflow, :in_progress, entity: entity, department: other_department, subject: "Outside my department") }
+
+      before do
+        outside_department.workflow_steps.find_by(role: "RED").update!(status: "approved")
+        outside_department.workflow_steps.find_by(role: "VISA").update!(actor: user)
+      end
+
+      it "still lists it, since a step actor is authorized regardless of department" do
+        get to_validate_entity_documents_path(entity)
+
+        expect(response.body).to include(outside_department.subject)
+      end
+    end
+  end
+
   describe "GET /entities/:entity_id/documents/info" do
     let!(:entity_user) do
       eu = create(:entity_user, entity: entity, user: user)

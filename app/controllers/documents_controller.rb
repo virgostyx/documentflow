@@ -4,7 +4,7 @@ class DocumentsController < ApplicationController
   include EntityScoped
 
   before_action :set_document, only: %i[show edit update destroy launch cancel classify_form classify]
-  before_action :load_classification_tree, only: %i[index mine received todo waiting info search classify_form]
+  before_action :load_classification_tree, only: %i[index mine received todo waiting info to_validate search classify_form]
 
   def index
     @list_scope = "all"
@@ -38,6 +38,12 @@ class DocumentsController < ApplicationController
   def info
     @list_scope = "info"
     @documents = load_documents(base_scope.info_for(current_user))
+    render :index
+  end
+
+  def to_validate
+    @list_scope = "to_validate"
+    @documents = load_documents(current_entity.documents.outgoing.pending_for(current_user))
     render :index
   end
 
@@ -168,6 +174,7 @@ class DocumentsController < ApplicationController
     when "todo" then base_scope.todo_for(current_user)
     when "waiting" then base_scope.waiting_for(current_user)
     when "info" then base_scope.info_for(current_user)
+    when "to_validate" then current_entity.documents.outgoing.pending_for(current_user)
     else base_scope
     end
   end

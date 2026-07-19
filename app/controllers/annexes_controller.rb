@@ -9,7 +9,7 @@ class AnnexesController < ApplicationController
     authorize @document, :update?
 
     if params.dig(:document, :annex).present?
-      @document.annexes.attach(params.dig(:document, :annex))
+      @document.annexes.create(file: params.dig(:document, :annex))
       redirect_to document_path, notice: "Annex added successfully."
     else
       redirect_to document_path, alert: "Please select a file to upload."
@@ -19,14 +19,23 @@ class AnnexesController < ApplicationController
   def destroy
     authorize @document, :update?
 
-    @document.annexes.attachments.find(params[:id]).purge
+    @document.annexes.find(params[:id]).destroy
     redirect_to document_path, notice: "Annex removed successfully."
   end
 
   def preview
     authorize @document, :show?
 
-    @annex = @document.annexes.attachments.find(params[:id])
+    @annex = @document.annexes.find(params[:id])
+  end
+
+  def preview_content
+    authorize @document, :show?
+
+    annex = @document.annexes.find(params[:id])
+    send_data FilePreviewRenderer.pdf_bytes_for(annex.file), type: "application/pdf", disposition: "inline"
+  rescue PdfConverter::ConversionError
+    head :unprocessable_content
   end
 
   private

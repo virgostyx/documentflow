@@ -2,13 +2,23 @@
   <div class="p-6">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Check in new version</h2>
 
+    <p class="text-sm text-gray-500 mb-4">Select at least one file to check in.</p>
+
     <%= form_with url: entity_document_checkout_path(current_entity, @document), method: :patch,
                   local: true, multipart: true, data: { turbo_frame: "_top" } do |f| %>
       <div>
-        <%= label_tag "document_file_version[file]", "File", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= file_field_tag "document_file_version[file]", required: true,
+        <%= label_tag "document_file_version[file]", "Main document (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= file_field_tag "document_file_version[file]",
               class: "block text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
       </div>
+
+      <% @document.annexes.each do |annex| %>
+        <div class="mt-4">
+          <%= label_tag "annex_versions[#{annex.id}]", annex.file.filename.to_s, class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= file_field_tag "annex_versions[#{annex.id}]",
+                class: "block text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
+        </div>
+      <% end %>
 
       <div class="mt-4">
         <%= label_tag "document_file_version[comment]", "Comment (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>

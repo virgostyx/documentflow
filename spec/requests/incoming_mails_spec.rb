@@ -97,6 +97,30 @@ RSpec.describe "Incoming mails", type: :request do
         expect(document.annexes).to be_one
       end
     end
+
+    context "with a blank annexes entry (as submitted by a multiple file_field with none chosen)" do
+      let(:main_file) { fixture_file_upload("sample.pdf", "application/pdf") }
+      let(:params) do
+        {
+          document: {
+            subject: "Tax notice",
+            document_date: Date.current,
+            department_id: department.id,
+            sender_token: "Contact-#{sender.id}",
+            lead_user_id: lead.id,
+            main_file: main_file,
+            annexes: [ "" ]
+          }
+        }
+      end
+
+      it "does not create an annex for the blank entry" do
+        post entity_incoming_mails_path(entity), params: params
+
+        document = entity.documents.incoming.last
+        expect(document.annexes).to be_empty
+      end
+    end
   end
 
   describe "GET /entities/:entity_id/incoming_mails/:id" do

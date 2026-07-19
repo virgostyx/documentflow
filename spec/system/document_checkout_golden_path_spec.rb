@@ -67,6 +67,32 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     within("[data-role='SIGN']") { expect(page).to have_content("Approved") }
   end
 
+  it "lets the VISA actor check in the main file and an annex together in one submission" do
+    document.annexes.create!(file: { io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf" })
+
+    sign_in_via_form(visa_actor)
+    expect(page).to have_current_path(entity_documents_path(entity))
+    visit entity_document_path(entity, document)
+
+    original_window = current_window
+    window_opened_by { click_link "Check out" }
+    switch_to_window(original_window)
+    expect(page).to have_content("checked out successfully")
+
+    click_link "Check in"
+    within("dialog") do
+      expect(page).to have_button("Check in")
+      attach_file "document_file_version[file]", Rails.root.join("spec/fixtures/files/sample.pdf")
+      attach_file "annex_versions[#{document.annexes.first.id}]", Rails.root.join("spec/fixtures/files/sample.pdf")
+      click_button "Check in"
+    end
+
+    expect(page).to have_content("checked in successfully")
+    expect(document.document_file_versions.count).to eq(2)
+    expect(document.document_file_versions.pluck(:version_number).uniq).to eq([ 1 ])
+    expect(page).to have_content("Version 1", count: 2)
+  end
+
   it "lets the VISA actor cancel a checkout without creating a new version" do
     sign_in_via_form(visa_actor)
     expect(page).to have_current_path(entity_documents_path(entity))

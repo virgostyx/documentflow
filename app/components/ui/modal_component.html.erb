@@ -1,4 +1,12 @@
 <dialog data-modal-target="dialog" data-action="click->modal#closeBackdrop"
         class="m-auto rounded-lg shadow-xl p-0 w-full max-w-4xl max-h-[90vh] overflow-y-auto backdrop:bg-gray-900/50">
-  <%= helpers.turbo_frame_tag @id %>
+  <%= helpers.turbo_frame_tag @id do %>
+    <div role="status" class="flex items-center justify-center p-12">
+      <svg class="h-8 w-8 animate-spin text-primary-600" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      <span class="sr-only">Loading…</span>
+    </div>
+  <% end %>
 </dialog>

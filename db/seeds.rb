@@ -96,11 +96,11 @@ def attach_main_file!(document)
 end
 
 def attach_annexes!(document, filenames)
-  return if document.annexes.attached?
+  return if document.annexes.any?
 
   filenames.each do |filename|
-    document.annexes.attach(
-      io: File.open(SAMPLE_FILE), filename: filename, content_type: "application/pdf"
+    document.annexes.create!(
+      file: { io: File.open(SAMPLE_FILE), filename: filename, content_type: "application/pdf" }
     )
   end
 end

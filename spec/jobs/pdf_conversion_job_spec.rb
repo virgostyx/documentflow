@@ -38,15 +38,17 @@ RSpec.describe PdfConversionJob do
 
     context "annexes" do
       it "skips annexes that are already PDFs" do
-        document.annexes.attach(io: StringIO.new("%PDF-1.4 content"), filename: "report.pdf", content_type: "application/pdf")
+        annex = create(:annex, document: document)
+        annex.file.attach(io: StringIO.new("%PDF-1.4 content"), filename: "report.pdf", content_type: "application/pdf")
 
         expect(PdfConverter).not_to receive(:convert)
 
         described_class.new.perform(document.id)
       end
 
-      it "converts non-PDF annexes, attaches the resulting PDF and cleans up the temporary file" do
-        document.annexes.attach(io: StringIO.new("plain text content"), filename: "notes.txt", content_type: "text/plain")
+      it "converts a non-PDF annex, replaces it with the resulting PDF in place and cleans up the temporary file" do
+        annex = create(:annex, document: document)
+        annex.file.attach(io: StringIO.new("plain text content"), filename: "notes.txt", content_type: "text/plain")
 
         converted_path = Rails.root.join("tmp", "notes-#{SecureRandom.hex(4)}.pdf").to_s
         File.write(converted_path, "%PDF-1.4 converted content")
@@ -55,11 +57,11 @@ RSpec.describe PdfConversionJob do
 
         expect do
           described_class.new.perform(document.id)
-          document.reload
-        end.to change { document.annexes.count }.by(1)
+        end.not_to change { document.annexes.count }
 
-        converted_attachment = document.annexes.find { |annex| annex.content_type == "application/pdf" }
-        expect(converted_attachment.filename.to_s).to eq("notes.pdf")
+        annex.reload
+        expect(annex.file.filename.to_s).to eq("notes.pdf")
+        expect(annex.file.content_type).to eq("application/pdf")
         expect(File.exist?(converted_path)).to be(false)
       end
     end

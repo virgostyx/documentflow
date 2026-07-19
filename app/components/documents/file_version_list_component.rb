@@ -14,6 +14,10 @@ module Documents
       versions.any?
     end
 
+    def target_label(version)
+      version.annex_id.nil? ? "Main file" : version.annex.file.filename.to_s
+    end
+
     private
 
     attr_reader :document

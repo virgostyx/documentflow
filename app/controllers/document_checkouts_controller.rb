@@ -28,7 +28,8 @@ class DocumentCheckoutsController < ApplicationController
     result = Documents::CheckInOrganizer.call(
       document: @document,
       current_user: current_user,
-      file: params.dig(:document_file_version, :file),
+      main_file: params.dig(:document_file_version, :file),
+      annex_files: annex_files_param,
       comment: params.dig(:document_file_version, :comment)
     )
 
@@ -46,6 +47,13 @@ class DocumentCheckoutsController < ApplicationController
   end
 
   private
+
+  def annex_files_param
+    @document.annexes.each_with_object({}) do |annex, files|
+      file = params.dig(:annex_versions, annex.id.to_s)
+      files[annex.id] = file if file.present?
+    end
+  end
 
   def set_document
     @document = current_entity.documents.find(params[:document_id])

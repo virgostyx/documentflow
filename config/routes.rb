@@ -42,10 +42,12 @@ Rails.application.routes.draw do
       resources :cc_recipients, only: %i[create destroy]
       resource :main_file, only: %i[create destroy] do
         get :preview
+        get :preview_content
       end
       resources :annexes, only: %i[create destroy] do
         member do
           get :preview
+          get :preview_content
         end
       end
       resource :checkout, only: %i[create update destroy], controller: "document_checkouts" do

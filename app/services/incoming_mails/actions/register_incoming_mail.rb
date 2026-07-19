@@ -7,8 +7,10 @@ module IncomingMails
       promises :document
 
       executed do |ctx|
+        annex_files = Array(ctx.document_params[:annexes]).reject(&:blank?)
+
         document = Document.new(
-          ctx.document_params.merge(
+          ctx.document_params.except(:annexes).merge(
             entity: ctx.entity,
             created_by: ctx.current_user,
             direction: "incoming",
@@ -18,6 +20,8 @@ module IncomingMails
         )
 
         if document.save
+          annex_files.each { |file| document.annexes.create!(file: file) }
+
           ctx.document = document
           ctx[:user] = ctx.current_user
           ctx[:auditable] = document

@@ -3,7 +3,7 @@
     <li class="flex items-center justify-between py-2 text-sm">
       <div>
         <span class="text-gray-900 font-medium">Version <%= version.version_number %></span>
-        <span class="text-gray-500"> &middot; <%= version.user.email %> &middot; <%= l(version.created_at, format: :short) %></span>
+        <span class="text-gray-500"> &middot; <%= target_label(version) %> &middot; <%= version.user.email %> &middot; <%= l(version.created_at, format: :short) %></span>
         <% if version.comment.present? %>
           <p class="text-gray-600"><%= version.comment %></p>
         <% end %>

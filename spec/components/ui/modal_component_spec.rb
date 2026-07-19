@@ -20,4 +20,10 @@ RSpec.describe Ui::ModalComponent, type: :component do
 
     expect(rendered).to have_css("dialog turbo-frame#custom_modal")
   end
+
+  it "shows a loading indicator as the frame's default content" do
+    rendered = render_inline(described_class.new)
+
+    expect(rendered).to have_css("turbo-frame#modal [role='status']")
+  end
 end

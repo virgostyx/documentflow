@@ -18,7 +18,7 @@ RSpec.describe Document, type: :model do
     it { is_expected.to belong_to(:in_reply_to).class_name("Document").optional }
     it { is_expected.to have_many(:replies).class_name("Document") }
     it { is_expected.to have_one_attached(:main_file) }
-    it { is_expected.to have_many_attached(:annexes) }
+    it { is_expected.to have_many(:annexes).dependent(:destroy) }
     it { is_expected.to belong_to(:checked_out_by).class_name("User").optional }
     it { is_expected.to have_many(:document_file_versions) }
   end

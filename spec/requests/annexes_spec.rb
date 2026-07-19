@@ -72,7 +72,7 @@ RSpec.describe "Annexes", type: :request do
   describe "DELETE /entities/:entity_id/documents/:document_id/annexes/:id" do
     let!(:document) { create(:document, entity: entity, created_by: user) }
 
-    before { document.annexes.attach(io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf") }
+    before { document.annexes.create!(file: { io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf" }) }
 
     context "as the document's author" do
       before do
@@ -115,7 +115,7 @@ RSpec.describe "Annexes", type: :request do
   describe "GET /entities/:entity_id/documents/:document_id/annexes/:id/preview" do
     let!(:document) { create(:document, entity: entity, created_by: user) }
 
-    before { document.annexes.attach(io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf") }
+    before { document.annexes.create!(file: { io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf" }) }
 
     context "as a user who can view the document" do
       before do
@@ -129,7 +129,7 @@ RSpec.describe "Annexes", type: :request do
         get preview_entity_document_annex_path(entity, document, annex)
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include(rails_blob_path(annex, disposition: "inline"))
+        expect(response.body).to include(preview_content_entity_document_annex_path(entity, document, annex))
       end
     end
 
@@ -137,7 +137,7 @@ RSpec.describe "Annexes", type: :request do
       let!(:document) { create(:document, entity: entity, created_by: create(:user)) }
 
       before do
-        document.annexes.attach(io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf")
+        document.annexes.create!(file: { io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf" })
         create(:entity_user, :guest, entity: entity, user: user, status: "active")
         sign_in user
       end
@@ -148,6 +148,51 @@ RSpec.describe "Annexes", type: :request do
         get preview_entity_document_annex_path(entity, document, annex)
 
         expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/:document_id/annexes/:id/preview_content" do
+    let!(:document) { create(:document, entity: entity, created_by: user) }
+
+    before do
+      create(:entity_user, :owner, entity: entity, user: user, status: "active")
+      sign_in user
+    end
+
+    context "when the annex is already a PDF" do
+      let!(:annex) { document.annexes.create!(file: { io: StringIO.new("%PDF-1.4 content"), filename: "appendix.pdf", content_type: "application/pdf" }) }
+
+      it "streams the file inline without converting" do
+        expect(PdfConverter).not_to receive(:convert)
+
+        get preview_content_entity_document_annex_path(entity, document, annex)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.media_type).to eq("application/pdf")
+      end
+    end
+
+    context "when the annex is not a PDF" do
+      let!(:annex) { document.annexes.create!(file: { io: StringIO.new("plain text"), filename: "notes.txt", content_type: "text/plain" }) }
+
+      it "converts it and streams the resulting PDF inline" do
+        converted_path = Rails.root.join("tmp", "notes-#{SecureRandom.hex(4)}.pdf").to_s
+        File.write(converted_path, "%PDF-1.4 converted content")
+        allow(PdfConverter).to receive(:convert).and_return(converted_path)
+
+        get preview_content_entity_document_annex_path(entity, document, annex)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq("%PDF-1.4 converted content")
+      end
+
+      it "returns unprocessable_content when the format cannot be converted" do
+        allow(PdfConverter).to receive(:convert).and_raise(PdfConverter::ConversionError)
+
+        get preview_content_entity_document_annex_path(entity, document, annex)
+
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

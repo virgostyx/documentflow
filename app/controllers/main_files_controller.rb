@@ -35,6 +35,16 @@ class MainFilesController < ApplicationController
     head :not_found unless @document.main_file.attached?
   end
 
+  def preview_content
+    authorize @document, :show?
+
+    return head :not_found unless @document.main_file.attached?
+
+    send_data FilePreviewRenderer.pdf_bytes_for(@document.main_file), type: "application/pdf", disposition: "inline"
+  rescue PdfConverter::ConversionError
+    head :unprocessable_content
+  end
+
   private
 
   def set_document

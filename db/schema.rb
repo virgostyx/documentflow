@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_21_130400) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_19_163856) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_130400) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "annexes", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "document_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_id"], name: "index_annexes_on_document_id"
   end
 
   create_table "audit_logs", force: :cascade do |t|
@@ -130,13 +137,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_130400) do
   end
 
   create_table "document_file_versions", force: :cascade do |t|
+    t.bigint "annex_id"
     t.text "comment"
     t.datetime "created_at", null: false
     t.bigint "document_id", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.integer "version_number", null: false
-    t.index ["document_id", "version_number"], name: "index_document_file_versions_on_document_id_and_version_number", unique: true
+    t.index ["annex_id"], name: "index_document_file_versions_on_annex_id"
+    t.index ["document_id", "annex_id", "version_number"], name: "index_document_file_versions_on_document_annex_version", unique: true
     t.index ["document_id"], name: "index_document_file_versions_on_document_id"
     t.index ["user_id"], name: "index_document_file_versions_on_user_id"
   end
@@ -268,6 +277,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_130400) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "annexes", "documents"
   add_foreign_key "audit_logs", "users"
   add_foreign_key "cc_recipients", "documents"
   add_foreign_key "circuit_template_steps", "circuit_templates"
@@ -277,6 +287,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_130400) do
   add_foreign_key "classification_nodes", "entities"
   add_foreign_key "contacts", "entities"
   add_foreign_key "departments", "entities"
+  add_foreign_key "document_file_versions", "annexes"
   add_foreign_key "document_file_versions", "documents"
   add_foreign_key "document_file_versions", "users"
   add_foreign_key "documents", "classification_nodes"

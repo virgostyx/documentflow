@@ -13,6 +13,7 @@ RSpec.describe DocumentFileVersion, type: :model do
   describe "associations" do
     it { is_expected.to belong_to(:document) }
     it { is_expected.to belong_to(:user) }
+    it { is_expected.to belong_to(:annex).optional }
     it { is_expected.to have_one_attached(:file) }
   end
 
@@ -21,6 +22,26 @@ RSpec.describe DocumentFileVersion, type: :model do
   describe "validations" do
     it { is_expected.to validate_presence_of(:version_number) }
     it { is_expected.to validate_numericality_of(:version_number).only_integer.is_greater_than(0) }
+    it { is_expected.to validate_uniqueness_of(:version_number).scoped_to(:document_id, :annex_id) }
+  end
+
+  # ── Version numbering across targets ─────────────────────────────────────
+
+  describe "annex_id" do
+    it "is nil when the version belongs to the document's main file" do
+      version = create(:document_file_version, document: document, user: user)
+
+      expect(version.annex_id).to be_nil
+    end
+
+    it "can share a version_number with a main-file version from the same check-in" do
+      annex = create(:annex, document: document)
+
+      main_version = create(:document_file_version, document: document, user: user, version_number: 5)
+      annex_version = create(:document_file_version, document: document, user: user, annex: annex, version_number: 5)
+
+      expect(main_version.version_number).to eq(annex_version.version_number)
+    end
   end
 
   # ── Scopes ────────────────────────────────────────────────────────────────

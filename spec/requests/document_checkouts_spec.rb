@@ -83,6 +83,53 @@ RSpec.describe "DocumentCheckouts", type: :request do
         expect(document.reload.checked_out_by).to eq(visa_actor)
       end
     end
+
+    context "checking in only an annex, with no main file" do
+      let!(:annex) { create(:annex, document: document) }
+
+      before { sign_in visa_actor }
+
+      it "checks in the annex and releases the lock" do
+        patch entity_document_checkout_path(entity, document),
+          params: { annex_versions: { annex.id.to_s => new_file } }
+
+        expect(response).to redirect_to(entity_document_path(entity, document))
+        expect(flash[:notice]).to be_present
+        expect(document.reload.checked_out_by).to be_nil
+        expect(annex.reload.file.filename.to_s).to eq("sample.pdf")
+      end
+    end
+
+    context "checking in both the main file and an annex" do
+      let!(:annex) { create(:annex, document: document) }
+
+      before { sign_in visa_actor }
+
+      it "checks in both files in one submission" do
+        patch entity_document_checkout_path(entity, document),
+          params: {
+            document_file_version: { file: new_file, comment: "Both updated" },
+            annex_versions: { annex.id.to_s => new_file }
+          }
+
+        expect(response).to redirect_to(entity_document_path(entity, document))
+        expect(document.document_file_versions.count).to eq(2)
+        expect(document.document_file_versions.pluck(:version_number).uniq).to eq([ 1 ])
+      end
+    end
+
+    context "checking in without selecting any file" do
+      before { sign_in visa_actor }
+
+      it "fails, keeps the checkout, and does not create a version" do
+        patch entity_document_checkout_path(entity, document), params: {}
+
+        expect(response).to redirect_to(entity_document_path(entity, document))
+        expect(flash[:alert]).to be_present
+        expect(document.reload.checked_out_by).to eq(visa_actor)
+        expect(document.document_file_versions.count).to eq(0)
+      end
+    end
   end
 
   describe "GET /entities/:entity_id/documents/:document_id/checkout/confirm_cancel" do

@@ -34,7 +34,7 @@ class Document < ApplicationRecord
   has_many :audit_logs, as: :auditable, dependent: :destroy
   has_many :document_file_versions, dependent: :destroy
   has_one_attached :main_file
-  has_many_attached :annexes
+  has_many :annexes, -> { order(:id) }, dependent: :destroy
 
   party_assignable :sender, :addressee
 

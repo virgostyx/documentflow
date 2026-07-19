@@ -63,6 +63,34 @@ RSpec.describe PdfConverter do
       expect(described_class.convert(path)).to eq(output_path)
     end
 
+    it "converts an .odt document to PDF via LibreOffice" do
+      path = write_file("contract.odt", "fake odt content")
+      output_path = File.join(@tmp_dir, "contract.pdf")
+
+      expect(described_class).to receive(:system).with(
+        "soffice", "--headless", "--convert-to", "pdf", "--outdir", @tmp_dir, path
+      ) do
+        File.write(output_path, "%PDF-1.4 converted")
+        true
+      end
+
+      expect(described_class.convert(path)).to eq(output_path)
+    end
+
+    it "converts a .rtf document to PDF via LibreOffice" do
+      path = write_file("contract.rtf", "fake rtf content")
+      output_path = File.join(@tmp_dir, "contract.pdf")
+
+      expect(described_class).to receive(:system).with(
+        "soffice", "--headless", "--convert-to", "pdf", "--outdir", @tmp_dir, path
+      ) do
+        File.write(output_path, "%PDF-1.4 converted")
+        true
+      end
+
+      expect(described_class.convert(path)).to eq(output_path)
+    end
+
     it "raises a ConversionError when the LibreOffice conversion fails" do
       path = write_file("contract.docx", "fake docx content")
 

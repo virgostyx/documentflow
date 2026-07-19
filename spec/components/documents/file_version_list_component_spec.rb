@@ -32,5 +32,20 @@ RSpec.describe Documents::FileVersionListComponent, type: :component do
     it "links to download each version" do
       expect(subject).to have_link("Download", href: Rails.application.routes.url_helpers.rails_blob_path(v2.file, disposition: "attachment", only_path: true))
     end
+
+    it "labels main-file versions as such" do
+      rows = subject.css("li").map(&:text)
+      expect(rows).to all(include("Main file"))
+    end
+  end
+
+  context "when a version belongs to an annex" do
+    let(:annex) { create(:annex, document: document) }
+    let!(:version) { create(:document_file_version, document: document, user: user, annex: annex, version_number: 1) }
+
+    it "labels the row with the annex's filename" do
+      rows = subject.css("li").map(&:text)
+      expect(rows.first).to include(annex.file.filename.to_s)
+    end
   end
 end

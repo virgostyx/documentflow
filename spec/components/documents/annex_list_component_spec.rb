@@ -20,10 +20,8 @@ RSpec.describe Documents::AnnexListComponent, type: :component do
 
   context "when the document has annexes attached" do
     before do
-      document.annexes.attach(
-        io: StringIO.new("content"),
-        filename: "appendix.pdf",
-        content_type: "application/pdf"
+      document.annexes.create!(
+        file: { io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf" }
       )
     end
 
@@ -32,7 +30,7 @@ RSpec.describe Documents::AnnexListComponent, type: :component do
     end
 
     it "links to download each annex" do
-      expect(subject).to have_link("Download", href: Rails.application.routes.url_helpers.rails_blob_path(document.annexes.first, disposition: "attachment", only_path: true))
+      expect(subject).to have_link("Download", href: Rails.application.routes.url_helpers.rails_blob_path(document.annexes.first.file, disposition: "attachment", only_path: true))
     end
 
     it "links to preview each annex" do
@@ -49,10 +47,8 @@ RSpec.describe Documents::AnnexListComponent, type: :component do
     let(:document) { create(:document, :in_progress, created_by: user) }
 
     before do
-      document.annexes.attach(
-        io: StringIO.new("content"),
-        filename: "appendix.pdf",
-        content_type: "application/pdf"
+      document.annexes.create!(
+        file: { io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf" }
       )
     end
 

@@ -29,17 +29,22 @@ class PdfConversionJob < ApplicationJob
   end
 
   def convert_annexes(document)
-    annexes_to_convert = document.annexes.reject { |annex| annex.content_type == "application/pdf" }
+    document.annexes.each do |annex|
+      next unless annex.file.attached?
+      next if annex.file.content_type == "application/pdf"
 
-    annexes_to_convert.each { |annex| convert_and_attach_annex(document, annex) }
+      convert_and_replace_annex_file(annex)
+    end
   end
 
-  def convert_and_attach_annex(document, annex)
-    annex.open do |temp_file|
+  def convert_and_replace_annex_file(annex)
+    original_basename = annex.file.filename.base
+
+    annex.file.open do |temp_file|
       pdf_path = PdfConverter.convert(temp_file.path)
 
       File.open(pdf_path) do |pdf_file|
-        document.annexes.attach(io: pdf_file, filename: "#{annex.filename.base}.pdf", content_type: "application/pdf")
+        annex.file.attach(io: pdf_file, filename: "#{original_basename}.pdf", content_type: "application/pdf")
       end
 
       File.delete(pdf_path) if File.exist?(pdf_path)

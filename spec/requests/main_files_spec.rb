@@ -158,7 +158,7 @@ RSpec.describe "MainFiles", type: :request do
         get preview_entity_document_main_file_path(entity, document)
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include(rails_blob_path(document.main_file, disposition: "inline"))
+        expect(response.body).to include(preview_content_entity_document_main_file_path(entity, document))
       end
     end
 
@@ -188,6 +188,60 @@ RSpec.describe "MainFiles", type: :request do
 
       it "returns not found" do
         get preview_entity_document_main_file_path(entity, document)
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/:document_id/main_file/preview_content" do
+    let!(:document) { create(:document, entity: entity, created_by: user) }
+
+    before do
+      create(:entity_user, :owner, entity: entity, user: user, status: "active")
+      sign_in user
+    end
+
+    context "when the main file is already a PDF" do
+      before { document.main_file.attach(io: StringIO.new("%PDF-1.4 content"), filename: "main.pdf", content_type: "application/pdf") }
+
+      it "streams the file inline without converting" do
+        expect(PdfConverter).not_to receive(:convert)
+
+        get preview_content_entity_document_main_file_path(entity, document)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.media_type).to eq("application/pdf")
+        expect(response.headers["Content-Disposition"]).to include("inline")
+      end
+    end
+
+    context "when the main file is not a PDF" do
+      before { document.main_file.attach(io: StringIO.new("plain text"), filename: "notes.txt", content_type: "text/plain") }
+
+      it "converts it and streams the resulting PDF inline" do
+        converted_path = Rails.root.join("tmp", "notes-#{SecureRandom.hex(4)}.pdf").to_s
+        File.write(converted_path, "%PDF-1.4 converted content")
+        allow(PdfConverter).to receive(:convert).and_return(converted_path)
+
+        get preview_content_entity_document_main_file_path(entity, document)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq("%PDF-1.4 converted content")
+      end
+
+      it "returns unprocessable_content when the format cannot be converted" do
+        allow(PdfConverter).to receive(:convert).and_raise(PdfConverter::ConversionError)
+
+        get preview_content_entity_document_main_file_path(entity, document)
+
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+    end
+
+    context "when no main document is attached" do
+      it "returns not found" do
+        get preview_content_entity_document_main_file_path(entity, document)
 
         expect(response).to have_http_status(:not_found)
       end

@@ -13,10 +13,15 @@ class Entity < ApplicationRecord
   has_many :circuit_templates, dependent: :destroy
   has_one_attached :logo
 
+  LOGO_CONTENT_TYPES = %w[image/png image/jpeg image/svg+xml image/webp].freeze
+  LOGO_MAX_SIZE = 1.megabyte
+
   # Validations
   validates :name, presence: true, uniqueness: true
   validates :code, presence: true, uniqueness: true
   validates :status, presence: true, inclusion: { in: STATUSES }
+  validates :acronym, length: { maximum: 10 }, allow_blank: true
+  validate :logo_must_be_a_valid_image
 
   # Callbacks
   before_validation :generate_code, on: :create
@@ -39,9 +44,25 @@ class Entity < ApplicationRecord
     status == "cancelled"
   end
 
+  def branded?
+    logo.attached? && acronym.present?
+  end
+
   private
 
   def generate_code
     self.code = "ENT-#{SecureRandom.alphanumeric(6).upcase}" if code.blank?
+  end
+
+  def logo_must_be_a_valid_image
+    return unless logo.attached?
+
+    unless logo.content_type.in?(LOGO_CONTENT_TYPES)
+      errors.add(:logo, "must be a PNG, JPEG, SVG, or WebP image")
+    end
+
+    if logo.blob.byte_size > LOGO_MAX_SIZE
+      errors.add(:logo, "must be smaller than #{LOGO_MAX_SIZE / 1.megabyte}MB")
+    end
   end
 end

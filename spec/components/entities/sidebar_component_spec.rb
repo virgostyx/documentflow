@@ -29,6 +29,28 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     expect(rendered).to have_link("Switch entity", href: entities_path)
   end
 
+  describe "branding" do
+    context "when the entity has both a logo and an acronym" do
+      let(:entity) { create(:entity, :with_logo, name: "Acme Corp") }
+
+      it "shows the logo and acronym instead of the full name" do
+        expect(rendered).to have_css("img")
+        expect(rendered).to have_text(entity.acronym)
+        expect(rendered).not_to have_text(entity.name)
+        expect(rendered).to have_text(entity.code)
+      end
+    end
+
+    context "when the entity has an acronym but no logo" do
+      let(:entity) { create(:entity, name: "Acme Corp", acronym: "ACR") }
+
+      it "falls back to the full name" do
+        expect(rendered).to have_text(entity.name)
+        expect(rendered).not_to have_css("img")
+      end
+    end
+  end
+
   describe "Documents section" do
     it "links to Overview, To Validate, My Inbox, My Outbox, ToDo, Waiting and Info, in that order" do
       expect(rendered).to have_link("Overview", href: entity_documents_path(entity))

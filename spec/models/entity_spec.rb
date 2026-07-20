@@ -22,6 +22,44 @@ RSpec.describe Entity, type: :model do
     it { is_expected.to validate_uniqueness_of(:name) }
     it { is_expected.to validate_uniqueness_of(:code) }
     it { is_expected.to validate_presence_of(:status) }
+    it { is_expected.to validate_length_of(:acronym).is_at_most(10) }
+
+    describe "logo content type" do
+      it "accepts a PNG logo" do
+        entity.logo.attach(
+          io: File.open(Rails.root.join("spec/fixtures/files/logo.png")),
+          filename: "logo.png",
+          content_type: "image/png"
+        )
+
+        expect(entity).to be_valid
+      end
+
+      it "rejects a non-image logo" do
+        entity.logo.attach(
+          io: File.open(Rails.root.join("spec/fixtures/files/sample.pdf")),
+          filename: "sample.pdf",
+          content_type: "application/pdf"
+        )
+
+        expect(entity).not_to be_valid
+        expect(entity.errors[:logo]).to be_present
+      end
+    end
+
+    describe "logo size" do
+      it "rejects a logo larger than the configured max size" do
+        entity.logo.attach(
+          io: File.open(Rails.root.join("spec/fixtures/files/logo.png")),
+          filename: "logo.png",
+          content_type: "image/png"
+        )
+        allow(entity.logo.blob).to receive(:byte_size).and_return(Entity::LOGO_MAX_SIZE + 1)
+
+        expect(entity).not_to be_valid
+        expect(entity.errors[:logo]).to be_present
+      end
+    end
 
     describe "status inclusion" do
       it "accepts active" do
@@ -133,6 +171,23 @@ RSpec.describe Entity, type: :model do
     it "returns false otherwise" do
       entity.status = "active"
       expect(entity.cancelled?).to be false
+    end
+  end
+
+  describe "#branded?" do
+    it "returns true when both a logo and an acronym are present" do
+      entity = create(:entity, :with_logo)
+      expect(entity.branded?).to be true
+    end
+
+    it "returns false when the acronym is missing" do
+      entity = create(:entity, :with_logo, acronym: nil)
+      expect(entity.branded?).to be false
+    end
+
+    it "returns false when the logo is missing" do
+      entity = create(:entity, acronym: "ACR")
+      expect(entity.branded?).to be false
     end
   end
 end

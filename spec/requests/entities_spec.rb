@@ -161,6 +161,16 @@ RSpec.describe "Entities", type: :request do
         expect(entity.reload.name).to eq("New Name")
         expect(response).to redirect_to(entity_settings_path(entity))
       end
+
+      it "updates the acronym and logo" do
+        logo = fixture_file_upload("logo.png", "image/png")
+
+        patch entity_path(entity), params: { entity: { acronym: "ACR", logo: logo } }
+
+        entity.reload
+        expect(entity.acronym).to eq("ACR")
+        expect(entity.logo).to be_attached
+      end
     end
 
     context "when the user is a member" do

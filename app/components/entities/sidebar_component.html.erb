@@ -9,7 +9,14 @@
 
   <%# Current entity %>
   <div class="px-5 py-3 border-b border-gray-100">
-    <p class="text-sm font-semibold text-gray-900 truncate"><%= current_entity.name %></p>
+    <% if current_entity.branded? %>
+      <div class="flex items-center gap-2">
+        <%= image_tag current_entity.logo.variant(resize_to_limit: [32, 32]), class: "w-8 h-8 rounded object-contain shrink-0" %>
+        <p class="text-sm font-semibold text-gray-900 truncate"><%= current_entity.acronym %></p>
+      </div>
+    <% else %>
+      <p class="text-sm font-semibold text-gray-900 truncate"><%= current_entity.name %></p>
+    <% end %>
     <p class="text-xs text-gray-400 truncate"><%= current_entity.code %></p>
 
     <% if current_entity_user %>

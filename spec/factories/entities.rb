@@ -12,5 +12,17 @@ FactoryBot.define do
     trait :cancelled do
       status { "cancelled" }
     end
+
+    trait :with_logo do
+      acronym { "ACR" }
+
+      after(:build) do |entity|
+        entity.logo.attach(
+          io: File.open(Rails.root.join("spec/fixtures/files/logo.png")),
+          filename: "logo.png",
+          content_type: "image/png"
+        )
+      end
+    end
   end
 end

@@ -14,6 +14,7 @@ RSpec.describe Department, type: :model do
     it { is_expected.to have_many(:entity_user_departments).dependent(:destroy) }
     it { is_expected.to have_many(:entity_users).through(:entity_user_departments) }
     it { is_expected.to have_many(:documents).dependent(:restrict_with_error) }
+    it { is_expected.to have_one_attached(:logo) }
   end
 
   # ── Validations ───────────────────────────────────────────────────────────
@@ -35,6 +36,43 @@ RSpec.describe Department, type: :model do
       other_entity = create(:entity)
       other_department = build(:department, entity: other_entity, name: "Finance")
       expect(other_department).to be_valid
+    end
+
+    describe "logo content type" do
+      it "accepts a PNG logo" do
+        department.logo.attach(
+          io: File.open(Rails.root.join("spec/fixtures/files/logo.png")),
+          filename: "logo.png",
+          content_type: "image/png"
+        )
+
+        expect(department).to be_valid
+      end
+
+      it "rejects a non-image logo" do
+        department.logo.attach(
+          io: File.open(Rails.root.join("spec/fixtures/files/sample.pdf")),
+          filename: "sample.pdf",
+          content_type: "application/pdf"
+        )
+
+        expect(department).not_to be_valid
+        expect(department.errors[:logo]).to be_present
+      end
+    end
+
+    describe "logo size" do
+      it "rejects a logo larger than the configured max size" do
+        department.logo.attach(
+          io: File.open(Rails.root.join("spec/fixtures/files/logo.png")),
+          filename: "logo.png",
+          content_type: "image/png"
+        )
+        allow(department.logo.blob).to receive(:byte_size).and_return(Department::LOGO_MAX_SIZE + 1)
+
+        expect(department).not_to be_valid
+        expect(department.errors[:logo]).to be_present
+      end
     end
   end
 

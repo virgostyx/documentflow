@@ -59,7 +59,7 @@ module Entities
     end
 
     def department_params
-      params.require(:department).permit(:name)
+      params.require(:department).permit(:name, :logo)
     end
   end
 end

@@ -434,6 +434,28 @@ RSpec.describe Entities::SidebarComponent, type: :component do
         expect(rendered).to have_text("Finance")
         expect(rendered).not_to have_text("All departments")
       end
+
+      it "does not show a logo image when the department has none" do
+        expect(rendered).not_to have_css("img")
+      end
+    end
+
+    context "when the current user's department has a logo" do
+      let(:finance) { create(:department, :with_logo, entity: entity, name: "Finance") }
+      let(:entity_user) { create(:entity_user, entity: entity, user: user, role: "member") }
+
+      before { create(:entity_user_department, :primary, entity_user: entity_user, department: finance) }
+
+      subject(:rendered) do
+        with_request_url(current_path) do
+          render_inline(described_class.new(current_entity: entity, current_user: user, current_entity_user: entity_user))
+        end
+      end
+
+      it "shows the logo before the department name" do
+        expect(rendered).to have_css("img")
+        expect(rendered).to have_text("Finance")
+      end
     end
 
     context "when the current user belongs to multiple departments" do

@@ -128,6 +128,14 @@ RSpec.describe "Entities::Departments", type: :request do
       expect(response).to redirect_to(entity_settings_path(entity))
     end
 
+    it "updates the department's logo" do
+      logo = fixture_file_upload("logo.png", "image/png")
+
+      patch entity_department_path(entity, department), params: { department: { logo: logo } }
+
+      expect(department.reload.logo).to be_attached
+    end
+
     context "when a regular member attempts to update" do
       before { sign_in member_user }
 

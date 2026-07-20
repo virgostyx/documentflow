@@ -25,7 +25,12 @@
           <%= render(Ui::BadgeComponent.new(color: :info)) { "All departments" } %>
         <% else %>
           <% departments.each do |department| %>
-            <%= render(Ui::BadgeComponent.new(color: department == current_entity_user.primary_department ? :primary : :gray)) { department.name } %>
+            <%= render(Ui::BadgeComponent.new(color: department == current_entity_user.primary_department ? :primary : :gray)) do %>
+              <% if department.logo.attached? %>
+                <%= image_tag department.logo.variant(resize_to_limit: [16, 16]), class: "w-4 h-4 rounded-full object-contain mr-1 -ml-0.5 inline-block align-text-bottom" %>
+              <% end %>
+              <%= department.name %>
+            <% end %>
           <% end %>
         <% end %>
       </div>

@@ -4,6 +4,7 @@ FactoryBot.define do
   factory :department do
     association :entity
     sequence(:name) { |n| "Department #{n}" }
+    sequence(:prefix) { |n| "DEP#{n}" }
     is_default { false }
 
     trait :default do

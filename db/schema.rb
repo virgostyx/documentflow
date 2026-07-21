@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_20_054130) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_21_190958) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -131,8 +131,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_20_054130) do
     t.bigint "entity_id", null: false
     t.boolean "is_default", default: false, null: false
     t.string "name", null: false
+    t.string "prefix", null: false
     t.datetime "updated_at", null: false
     t.index ["entity_id", "name"], name: "index_departments_on_entity_id_and_name", unique: true
+    t.index ["entity_id", "prefix"], name: "index_departments_on_entity_id_and_prefix", unique: true
     t.index ["entity_id"], name: "index_departments_on_entity_id"
   end
 
@@ -193,10 +195,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_20_054130) do
     t.string "code", null: false
     t.datetime "created_at", null: false
     t.string "name", null: false
+    t.string "prefix", null: false
     t.string "status", default: "active", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_entities_on_code", unique: true
     t.index ["name"], name: "index_entities_on_name", unique: true
+    t.index ["prefix"], name: "index_entities_on_prefix", unique: true
     t.index ["status"], name: "index_entities_on_status"
   end
 

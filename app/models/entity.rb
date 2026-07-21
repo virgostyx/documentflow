@@ -21,10 +21,15 @@ class Entity < ApplicationRecord
   validates :code, presence: true, uniqueness: true
   validates :status, presence: true, inclusion: { in: STATUSES }
   validates :acronym, length: { maximum: 10 }, allow_blank: true
+  validates :prefix, presence: true,
+                      length: { maximum: 8 },
+                      format: { with: /\A[A-Z0-9]+\z/, message: "must contain only uppercase letters and digits" },
+                      uniqueness: true
   validate :logo_must_be_a_valid_image
 
   # Callbacks
   before_validation :generate_code, on: :create
+  before_validation :normalize_prefix
 
   # Scopes
   scope :active, -> { where(status: "active") }
@@ -52,6 +57,10 @@ class Entity < ApplicationRecord
 
   def generate_code
     self.code = "ENT-#{SecureRandom.alphanumeric(6).upcase}" if code.blank?
+  end
+
+  def normalize_prefix
+    self.prefix = prefix.upcase if prefix.present?
   end
 
   def logo_must_be_a_valid_image

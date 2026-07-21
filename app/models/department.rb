@@ -11,7 +11,13 @@ class Department < ApplicationRecord
   LOGO_MAX_SIZE = 1.megabyte
 
   validates :name, presence: true, uniqueness: { scope: :entity_id }
+  validates :prefix, presence: true,
+                      length: { maximum: 8 },
+                      format: { with: /\A[A-Z0-9]+\z/, message: "must contain only uppercase letters and digits" },
+                      uniqueness: { scope: :entity_id }
   validate :logo_must_be_a_valid_image
+
+  before_validation :normalize_prefix
 
   scope :default, -> { where(is_default: true) }
 
@@ -20,6 +26,10 @@ class Department < ApplicationRecord
   end
 
   private
+
+  def normalize_prefix
+    self.prefix = prefix.upcase if prefix.present?
+  end
 
   def logo_must_be_a_valid_image
     return unless logo.attached?

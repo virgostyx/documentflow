@@ -7,7 +7,8 @@ module Entities
       promises :department
 
       executed do |ctx|
-        department = ctx.entity.departments.create(name: "General", is_default: true)
+        prefix = "#{ctx.entity.prefix}GEN"[0, 8]
+        department = ctx.entity.departments.create(name: "General", is_default: true, prefix: prefix)
 
         if department.persisted?
           ctx.department = department

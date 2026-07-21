@@ -18,6 +18,14 @@
   </div>
 
   <div class="mt-4">
+    <%= f.floating_text_field :prefix,
+                              label: "Document number prefix",
+                              required: true,
+                              maxlength: 8,
+                              placeholder: " " %>
+  </div>
+
+  <div class="mt-4">
     <label class="block text-sm font-medium text-gray-700 mb-1">Logo</label>
     <% if entity.logo.attached? %>
       <%= image_tag entity.logo.variant(resize_to_limit: [64, 64]), class: "w-16 h-16 rounded object-contain mb-2" %>

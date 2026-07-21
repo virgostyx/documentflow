@@ -23,6 +23,23 @@ RSpec.describe Entity, type: :model do
     it { is_expected.to validate_uniqueness_of(:code) }
     it { is_expected.to validate_presence_of(:status) }
     it { is_expected.to validate_length_of(:acronym).is_at_most(10) }
+    it { is_expected.to validate_presence_of(:prefix) }
+    it { is_expected.to validate_length_of(:prefix).is_at_most(8) }
+    it { is_expected.to validate_uniqueness_of(:prefix).case_insensitive }
+
+    describe "prefix format" do
+      it "rejects lowercase letters before normalization" do
+        entity.prefix = "abc"
+        entity.valid?
+        expect(entity.prefix).to eq("ABC")
+      end
+
+      it "rejects punctuation" do
+        entity.prefix = "AB-CD"
+        expect(entity).not_to be_valid
+        expect(entity.errors[:prefix]).to be_present
+      end
+    end
 
     describe "logo content type" do
       it "accepts a PNG logo" do

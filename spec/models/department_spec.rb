@@ -38,6 +38,37 @@ RSpec.describe Department, type: :model do
       expect(other_department).to be_valid
     end
 
+    it { is_expected.to validate_presence_of(:prefix) }
+    it { is_expected.to validate_length_of(:prefix).is_at_most(8) }
+
+    it "validates uniqueness of prefix scoped to entity" do
+      create(:department, entity: entity, prefix: "FIN")
+
+      duplicate = build(:department, entity: entity, prefix: "FIN")
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:prefix]).to be_present
+    end
+
+    it "allows the same prefix in a different entity" do
+      create(:department, entity: entity, prefix: "FIN")
+
+      other_entity = create(:entity)
+      other_department = build(:department, entity: other_entity, prefix: "FIN")
+      expect(other_department).to be_valid
+    end
+
+    it "normalizes the prefix to uppercase" do
+      department.prefix = "fin"
+      department.valid?
+      expect(department.prefix).to eq("FIN")
+    end
+
+    it "rejects a prefix with punctuation" do
+      department.prefix = "FI-N"
+      expect(department).not_to be_valid
+      expect(department.errors[:prefix]).to be_present
+    end
+
     describe "logo content type" do
       it "accepts a PNG logo" do
         department.logo.attach(

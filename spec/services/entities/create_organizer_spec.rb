@@ -4,7 +4,7 @@ require "rails_helper"
 
 RSpec.describe Entities::CreateOrganizer do
   let(:user) { create(:user) }
-  let(:entity_params) { { name: "Acme Corp" } }
+  let(:entity_params) { { name: "Acme Corp", prefix: "ACME" } }
 
   describe ".call" do
     context "avec des paramètres valides" do

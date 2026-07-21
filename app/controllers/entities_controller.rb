@@ -59,6 +59,6 @@ class EntitiesController < ApplicationController
   end
 
   def entity_params
-    params.require(:entity).permit(:name, :acronym, :logo)
+    params.require(:entity).permit(:name, :acronym, :prefix, :logo)
   end
 end

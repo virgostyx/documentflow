@@ -35,8 +35,11 @@ def add_pending_invitation!(entity:, email:, role:, inviter:)
   end
 end
 
-def add_department!(entity:, name:, is_default: false)
-  entity.departments.find_or_create_by!(name: name) { |d| d.is_default = is_default }
+def add_department!(entity:, name:, prefix:, is_default: false)
+  entity.departments.find_or_create_by!(name: name) do |d|
+    d.prefix = prefix
+    d.is_default = is_default
+  end
 end
 
 def assign_department!(entity_user:, department:, primary: false)
@@ -127,9 +130,20 @@ liam   = find_or_create_user!(email: "liam.carter@harborview.example", first_nam
 fatima = find_or_create_user!(email: "fatima.alsayed@acme-mfg.example", first_name: "Fatima", last_name: "Al-Sayed")
 
 puts "== Seeding entities =="
-acme        = Entity.find_or_create_by!(name: "Acme Manufacturing Ltd") { |e| e.status = "active" }
-northbridge = Entity.find_or_create_by!(name: "Northbridge Consulting Group") { |e| e.status = "active" }
-harborview  = Entity.find_or_create_by!(name: "Harborview Logistics Inc") { |e| e.status = "active" }
+acme = Entity.find_or_create_by!(name: "Acme Manufacturing Ltd") do |e|
+  e.status = "active"
+  e.prefix = "ACME"
+end
+
+northbridge = Entity.find_or_create_by!(name: "Northbridge Consulting Group") do |e|
+  e.status = "active"
+  e.prefix = "NORTHBRI"
+end
+
+harborview = Entity.find_or_create_by!(name: "Harborview Logistics Inc") do |e|
+  e.status = "active"
+  e.prefix = "HARBOR"
+end
 
 puts "== Seeding entity memberships =="
 add_member!(entity: acme, user: marcus, role: "owner", inviter: marcus)
@@ -149,15 +163,15 @@ add_member!(entity: harborview, user: priya, role: "guest", inviter: emma)
 add_member!(entity: harborview, user: olivia, role: "admin", inviter: emma)
 
 puts "== Seeding departments =="
-acme_sales      = add_department!(entity: acme, name: "Sales")
-acme_finance    = add_department!(entity: acme, name: "Finance & Administration")
-acme_operations = add_department!(entity: acme, name: "Operations")
+acme_sales      = add_department!(entity: acme, name: "Sales", prefix: "SALES")
+acme_finance    = add_department!(entity: acme, name: "Finance & Administration", prefix: "FINANCE")
+acme_operations = add_department!(entity: acme, name: "Operations", prefix: "OPS")
 
-northbridge_advisory = add_department!(entity: northbridge, name: "Advisory Services")
-northbridge_finance  = add_department!(entity: northbridge, name: "Finance & Administration")
+northbridge_advisory = add_department!(entity: northbridge, name: "Advisory Services", prefix: "ADVISORY")
+northbridge_finance  = add_department!(entity: northbridge, name: "Finance & Administration", prefix: "FINANCE")
 
-harborview_logistics = add_department!(entity: harborview, name: "Logistics Operations")
-harborview_finance   = add_department!(entity: harborview, name: "Finance & Administration")
+harborview_logistics = add_department!(entity: harborview, name: "Logistics Operations", prefix: "LOGISTIC")
+harborview_finance   = add_department!(entity: harborview, name: "Finance & Administration", prefix: "FINANCE")
 
 puts "== Assigning members to departments =="
 # james belongs to a single department: he only sees Operations documents.

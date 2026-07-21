@@ -47,7 +47,7 @@ RSpec.describe "Entities", type: :request do
     before { sign_in user }
 
     context "with valid params" do
-      let(:entity_params) { { entity: { name: "Acme Corp" } } }
+      let(:entity_params) { { entity: { name: "Acme Corp", prefix: "ACME" } } }
 
       it "creates the entity" do
         expect {

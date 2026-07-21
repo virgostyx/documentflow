@@ -3,6 +3,7 @@
 FactoryBot.define do
   factory :entity do
     sequence(:name) { |n| "Entity #{n}" }
+    sequence(:prefix) { |n| "ENT#{n}" }
     status { "active" }
 
     trait :suspended do

@@ -191,11 +191,12 @@ class Document < ApplicationRecord
 
   def generate_reference_number
     return if reference_number.present?
-    return unless entity
+    return unless entity && department
 
     year = document_date&.year || Date.current.year
-    last = entity.documents.where("reference_number LIKE ?", "#{year}/%").maximum(:reference_number)
-    reference = last ? ReferenceNumber.parse(last).next : ReferenceNumber.first_for(year)
+    prefix = department.prefix.presence || entity.prefix
+    last = department.documents.where("reference_number LIKE ?", "#{prefix}(#{year})%").maximum(:reference_number)
+    reference = last ? ReferenceNumber.parse(last).next : ReferenceNumber.first_for(prefix: prefix, year: year)
     self.reference_number = reference.to_s
   end
 

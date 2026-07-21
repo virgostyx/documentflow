@@ -1,6 +1,7 @@
 # Document Prefix Feature — Implementation Plan
 
-Status: DRAFT — pending user review/validation before any code is written.
+Status: IMPLEMENTED (2026-07-21). 1279/1279 specs green, RuboCop clean, dev DB
+backfilled and reference numbers regenerated.
 
 ## 1. Concept
 
@@ -69,14 +70,9 @@ validates :prefix, presence: true,
   characters are the format's own delimiters — allowing them would make parsing the
   reference number ambiguous.
 
-**Open point to confirm:** should `Department#prefix` uniqueness also be enforced
-*globally* (across entities), not just within the entity? Two unrelated entities could
-otherwise both use `FIN`, producing identical-looking reference numbers
-(`FIN(2026)00001`) for two different organizations. This is not a data-integrity issue
-(everything is still scoped by `entity_id`/`department_id` internally) but could be
-confusing if numbers are ever compared/exported across entities (e.g. shared links).
-Default proposal: **entity-scoped only** (simpler, matches `name`'s existing pattern).
-Flag if you want global uniqueness instead.
+**Confirmed:** `Department#prefix` uniqueness is **entity-scoped only** (matches
+`name`'s existing pattern) — two different entities may use the same department
+prefix.
 
 ## 4. Number generation logic
 
@@ -289,15 +285,10 @@ Following the project's TDD convention (Red → Green → Refactor per slice):
 7. Regeneration rake task + spec, run in a non-prod environment first, then production
    per §7's precautions.
 
-## 11. Open items to confirm before starting
+## 11. Open items — resolved
 
-- [ ] Global vs. entity-scoped uniqueness for `Department#prefix` (§3.2).
-- [ ] Exact backfill derivation rule for placeholder prefixes (§6.1) — acronym-first as
-      proposed, or another source?
-- [ ] Should `Entity#prefix` be edited through the existing `entities/_form.html.erb`
-      (open to owner/admin like every other entity field), or does it warrant its own
-      confirmation step given it feeds document numbering? Proposal: no extra
-      confirmation needed, same as any other entity setting.
-- [ ] Confirm no external system ingests/parses `reference_number` (only found
-      in-app display usages in this repo — but if a downstream integration exists
-      outside this codebase, the regeneration in §7 would affect it).
+- [x] `Department#prefix` uniqueness: **entity-scoped** (§3.2).
+- [x] Backfill derivation rule: **`acronym` truncated to 8 chars** (uppercase), falling
+      back to a cleaned `name` when `acronym` is blank (§6.1).
+- [x] No external system parses `reference_number` — confirmed by the user; only
+      in-app display usages found in this repo (§8). Regeneration in §7 is safe to run.

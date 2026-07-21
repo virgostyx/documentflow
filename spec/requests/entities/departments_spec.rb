@@ -46,7 +46,7 @@ RSpec.describe "Entities::Departments", type: :request do
     before { sign_in owner }
 
     context "with valid params" do
-      let(:department_params) { { department: { name: "Finance & Administration" } } }
+      let(:department_params) { { department: { name: "Finance & Administration", prefix: "FINANCE" } } }
 
       it "creates the department" do
         expect {

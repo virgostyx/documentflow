@@ -19,7 +19,7 @@
 
 <div class="mb-6">
   <h1 class="text-2xl font-bold text-gray-900"><%= current_entity.name %></h1>
-  <p class="mt-1 text-gray-600"><%= current_entity.code %></p>
+  <p class="mt-1 text-gray-600"><%= current_entity.code %> &middot; Prefix: <%= current_entity.prefix %></p>
 </div>
 
 <% if policy(current_entity).manage_members? %>
@@ -57,7 +57,10 @@
     <ul class="divide-y divide-gray-100">
       <% @departments.each do |department| %>
         <li class="flex items-center justify-between py-3">
-          <span class="text-gray-900"><%= department.name %><%= " (default)" if department.default? %></span>
+          <span class="text-gray-900">
+            <%= department.name %><%= " (default)" if department.default? %>
+            <span class="text-gray-500 text-sm">(<%= department.prefix %>)</span>
+          </span>
 
           <% if policy(department).update? %>
             <%= render(Ui::ButtonComponent.new(href: edit_entity_department_path(current_entity, department), variant: :secondary)) { "Edit" } %>

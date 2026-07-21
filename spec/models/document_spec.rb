@@ -180,30 +180,47 @@ RSpec.describe Document, type: :model do
   # ── Callbacks ─────────────────────────────────────────────────────────────
 
   describe "before_validation :generate_reference_number" do
-    it "generates a reference number matching YYYY/#####" do
+    it "generates a reference number matching PREFIX(YYYY)#####" do
       document.save!
-      expect(document.reference_number).to match(/\A\d{4}\/\d{5}\z/)
+      expect(document.reference_number).to match(/\A[A-Z0-9]{1,8}\(\d{4}\)\d{5}\z/)
     end
 
-    it "increments the sequence for the same entity and year" do
-      first = create(:document, entity: entity)
-      second = create(:document, entity: entity)
+    it "uses the department's prefix" do
+      department = create(:department, entity: entity, prefix: "FIN")
+      doc = create(:document, entity: entity, department: department)
+      expect(doc.reference_number).to eq("FIN(#{Date.current.year})00001")
+    end
+
+    it "increments the sequence for the same department and year" do
+      department = create(:department, entity: entity)
+      first = create(:document, entity: entity, department: department)
+      second = create(:document, entity: entity, department: department)
       expect(ReferenceNumber.parse(second.reference_number).sequence)
         .to eq(ReferenceNumber.parse(first.reference_number).sequence + 1)
     end
 
+    it "keeps independent sequences for different departments in the same entity" do
+      first_department = create(:department, entity: entity)
+      second_department = create(:department, entity: entity)
+      first = create(:document, entity: entity, department: first_department)
+      second = create(:document, entity: entity, department: second_department)
+      expect(ReferenceNumber.parse(first.reference_number).sequence).to eq(1)
+      expect(ReferenceNumber.parse(second.reference_number).sequence).to eq(1)
+    end
+
     it "resets the counter every year" do
-      travel_to(Date.new(2025, 12, 31)) { create(:document, entity: entity) }
+      department = create(:department, entity: entity, prefix: "FIN")
+      travel_to(Date.new(2025, 12, 31)) { create(:document, entity: entity, department: department) }
       travel_to(Date.new(2026, 1, 1)) do
-        doc = create(:document, entity: entity)
-        expect(doc.reference_number).to eq("2026/00001")
+        doc = create(:document, entity: entity, department: department)
+        expect(doc.reference_number).to eq("FIN(2026)00001")
       end
     end
 
     it "does not regenerate an existing reference number" do
-      document.reference_number = "2020/00099"
+      document.reference_number = "FIN(2020)00099"
       document.valid?
-      expect(document.reference_number).to eq("2020/00099")
+      expect(document.reference_number).to eq("FIN(2020)00099")
     end
   end
 

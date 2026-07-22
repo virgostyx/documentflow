@@ -59,8 +59,8 @@
     </div>
   <% end %>
 
-  <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-    <div class="lg:col-span-2 space-y-6">
+  <div class="mt-6 grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+    <div class="lg:col-span-3 space-y-6">
       <%= render Ui::CardComponent.new do |card| %>
         <% card.with_header { "Main document" } %>
         <%= render Documents::MainFileComponent.new(document: @document, current_user: current_user) %>
@@ -69,6 +69,46 @@
       <%= render Ui::CardComponent.new do |card| %>
         <% card.with_header { "Annexes" } %>
         <%= render Documents::AnnexListComponent.new(document: @document, current_user: current_user) %>
+      <% end %>
+
+      <% new_cc_recipient = CcRecipient.new(document: @document) %>
+      <% if policy(new_cc_recipient).create? || @document.cc_recipients.any? %>
+        <%= render Ui::CardComponent.new do |card| %>
+          <% card.with_header { "Copy" } %>
+
+          <% if @document.cc_recipients.any? %>
+            <ul class="divide-y divide-gray-100">
+              <% @document.cc_recipients.each do |cc_recipient| %>
+                <li class="py-3 flex items-center justify-between gap-4">
+                  <p class="text-sm text-gray-900">
+                    <%= cc_recipient.party&.display_name %> <%= party_badge(cc_recipient.party) %>
+                  </p>
+                  <% if policy(cc_recipient).destroy? %>
+                    <%= render(Ui::ButtonComponent.new(
+                      href: entity_document_cc_recipient_path(current_entity, @document, cc_recipient), variant: :danger, method: :delete,
+                      data: { turbo_confirm: "Remove this recipient from the copy list?" }
+                    )) { "Remove" } %>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-sm text-gray-500">No one is in copy on this document yet.</p>
+          <% end %>
+
+          <% if policy(new_cc_recipient).create? %>
+            <%= form_with model: [ current_entity, @document, new_cc_recipient ],
+                          builder: FloatingLabelsRails::FormBuilder, local: true, class: "mt-4 flex items-end gap-3" do |f| %>
+              <div class="flex-1">
+                <%= render(Documents::PartyPickerComponent.new(
+                  form: f, attribute: :party_token, entity: current_entity,
+                  label: "Add to copy", required: true, include_blank: "Select a person..."
+                )) %>
+              </div>
+              <%= render(Ui::ButtonComponent.new(variant: :secondary)) { "Add" } %>
+            <% end %>
+          <% end %>
+        <% end %>
       <% end %>
 
       <% if @document.document_file_versions.any? %>
@@ -83,7 +123,7 @@
       <% end %>
     </div>
 
-    <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-20">
+    <div class="lg:col-span-2 space-y-6 lg:sticky lg:top-20">
       <%= render Ui::CardComponent.new do |card| %>
         <%= render Documents::MetadataComponent.new(document: @document) %>
 
@@ -109,44 +149,6 @@
       <% end %>
 
       <%= render Workflow::StepsComponent.new(document: @document, current_user: current_user) %>
-
-      <% new_cc_recipient = CcRecipient.new(document: @document) %>
-      <% if policy(new_cc_recipient).create? || @document.cc_recipients.any? %>
-        <%= render Ui::CardComponent.new do |card| %>
-          <% card.with_header { "Copy" } %>
-
-          <% if @document.cc_recipients.any? %>
-            <ul class="divide-y divide-gray-100">
-              <% @document.cc_recipients.each do |cc_recipient| %>
-                <li class="py-3 flex items-center justify-between gap-4">
-                  <p class="text-sm text-gray-900">
-                    <%= cc_recipient.party&.display_name %> <%= party_badge(cc_recipient.party) %>
-                  </p>
-                  <% if policy(cc_recipient).destroy? %>
-                    <%= render(Ui::ButtonComponent.new(
-                      href: entity_document_cc_recipient_path(current_entity, @document, cc_recipient), variant: :danger, size: :sm, method: :delete,
-                      data: { turbo_confirm: "Remove this recipient from the copy list?" }
-                    )) { "Remove" } %>
-                  <% end %>
-                </li>
-              <% end %>
-            </ul>
-          <% else %>
-            <p class="text-sm text-gray-500">No one is in copy on this document yet.</p>
-          <% end %>
-
-          <% if policy(new_cc_recipient).create? %>
-            <%= form_with model: [ current_entity, @document, new_cc_recipient ],
-                          builder: FloatingLabelsRails::FormBuilder, local: true, class: "mt-4 flex flex-col items-stretch gap-3" do |f| %>
-              <%= render(Documents::PartyPickerComponent.new(
-                form: f, attribute: :party_token, entity: current_entity,
-                label: "Add to copy", required: true, include_blank: "Select a person..."
-              )) %>
-              <%= render(Ui::ButtonComponent.new(variant: :secondary)) { "Add" } %>
-            <% end %>
-          <% end %>
-        <% end %>
-      <% end %>
 
       <% if policy(@document.shared_links.new).create? || @document.shared_links.active.any? %>
         <%= render Ui::CardComponent.new do |card| %>

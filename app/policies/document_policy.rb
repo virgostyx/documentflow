@@ -46,11 +46,11 @@ class DocumentPolicy < ApplicationPolicy
   end
 
   def approve?
-    record.current_step&.actor == user
+    (record.in_progress? || record.signed?) && record.current_step&.actor == user
   end
 
   def reject?
-    record.current_step&.actor == user && record.current_step&.role != "RED"
+    (record.in_progress? || record.signed?) && record.current_step&.actor == user && record.current_step&.role != "RED"
   end
 
   def classify?

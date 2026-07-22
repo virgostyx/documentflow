@@ -10,6 +10,10 @@ module Workflow
         step = ctx.step
         ctx.document = step.document
 
+        unless ctx.document.in_progress? || ctx.document.signed?
+          next fail_with!(ctx, "This document has not been launched yet", :validation_error)
+        end
+
         unless step.pending?
           next fail_with!(ctx, "This step has already been processed", :validation_error)
         end

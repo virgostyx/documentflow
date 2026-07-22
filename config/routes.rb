@@ -29,6 +29,7 @@ Rails.application.routes.draw do
       resources :workflow_steps, only: %i[create update destroy] do
         member do
           post :approve
+          get :confirm_reject
           post :reject
           post :move_up
           post :move_down

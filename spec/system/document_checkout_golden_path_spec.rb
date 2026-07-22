@@ -51,7 +51,8 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     expect(page).to have_content("Version 1")
     expect(page).to have_content("Fixed the payment terms")
 
-    click_button "Approve"
+    open_actions_menu
+    click_link "Approve"
     expect(page).to have_content("approved")
     within("[data-role='VISA']") { expect(page).to have_content("Approved") }
     within("[data-role='SIGN']") { expect(page).to have_content("Pending") }
@@ -61,7 +62,8 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     sign_in_via_form(sign_actor)
     expect(page).to have_current_path(entity_documents_path(entity))
     visit entity_document_path(entity, document)
-    click_button "Approve"
+    open_actions_menu
+    click_link "Approve"
 
     expect(page).to have_content("approved")
     within("[data-role='SIGN']") { expect(page).to have_content("Approved") }
@@ -113,7 +115,8 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     expect(page).not_to have_content("Checked out by")
     expect(document.reload.document_file_versions.count).to eq(0)
 
-    click_button "Approve"
+    open_actions_menu
+    click_link "Approve"
     expect(page).to have_content("approved")
     within("[data-role='VISA']") { expect(page).to have_content("Approved") }
   end

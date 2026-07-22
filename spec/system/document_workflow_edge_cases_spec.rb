@@ -24,7 +24,10 @@ RSpec.describe "Document validation circuit edge cases", type: :system do
       sign_in_via_form(visa_actor)
       visit entity_document_path(entity, document)
 
-      fill_in "Reason for rejection", with: "Missing signature page"
+      open_actions_menu
+      click_link "Reject"
+
+      fill_in "Reason", with: "Missing signature page"
       click_button "Reject"
 
       expect(page).to have_content("Step rejected successfully.")

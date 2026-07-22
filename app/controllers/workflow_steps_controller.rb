@@ -61,6 +61,10 @@ class WorkflowStepsController < ApplicationController
     head :ok
   end
 
+  def confirm_reject
+    authorize @document, :reject?
+  end
+
   def apply_template
     authorize @document.workflow_steps.new, :apply_template?
 

@@ -7,6 +7,10 @@ module SystemHelpers
     fill_in "Password", with: password
     click_button "Sign in"
   end
+
+  def open_actions_menu
+    click_button "Actions"
+  end
 end
 
 RSpec.configure do |config|

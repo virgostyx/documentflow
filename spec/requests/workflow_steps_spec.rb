@@ -54,6 +54,38 @@ RSpec.describe "WorkflowSteps", type: :request do
     end
   end
 
+  describe "GET /entities/:entity_id/documents/:document_id/workflow_steps/:id/confirm_reject" do
+    let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
+
+    context "as the step's actor" do
+      before do
+        create(:entity_user, entity: entity, user: visa_step.actor)
+        sign_in visa_step.actor
+      end
+
+      it "renders the reject confirmation modal" do
+        get confirm_reject_entity_document_workflow_step_path(entity, document, visa_step)
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "as another user" do
+      let(:other_user) { create(:user) }
+
+      before do
+        create(:entity_user, entity: entity, user: other_user)
+        sign_in other_user
+      end
+
+      it "redirects with an authorization error" do
+        get confirm_reject_entity_document_workflow_step_path(entity, document, visa_step)
+
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
   describe "POST /entities/:entity_id/documents/:document_id/workflow_steps/:id/reject" do
     let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
 

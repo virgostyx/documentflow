@@ -32,12 +32,14 @@ RSpec.describe "Document validation circuit golden path", type: :system do
     visit entity_document_path(entity, document)
     expect(page).to have_content("Draft")
 
+    open_actions_menu
     click_link "Launch"
     expect(page).to have_content("Document launched successfully")
     expect(page).to have_content("In Progress")
     within("[data-role='RED']") { expect(page).to have_content("Pending") }
 
-    click_button "Approve"
+    open_actions_menu
+    click_link "Approve"
     expect(page).to have_content("approved")
     within("[data-role='RED']") { expect(page).to have_content("Approved") }
     within("[data-role='VISA']") { expect(page).to have_content("Pending") }
@@ -45,7 +47,8 @@ RSpec.describe "Document validation circuit golden path", type: :system do
     click_link "Sign out"
     sign_in_via_form(visa_actor)
     visit entity_document_path(entity, document)
-    click_button "Approve"
+    open_actions_menu
+    click_link "Approve"
     expect(page).to have_content("approved")
     within("[data-role='VISA']") { expect(page).to have_content("Approved") }
     within("[data-role='SIGN']") { expect(page).to have_content("Pending") }
@@ -53,14 +56,16 @@ RSpec.describe "Document validation circuit golden path", type: :system do
     click_link "Sign out"
     sign_in_via_form(sign_actor)
     visit entity_document_path(entity, document)
-    click_button "Approve"
+    open_actions_menu
+    click_link "Approve"
     within("[data-role='SIGN']") { expect(page).to have_content("Approved") }
     within("[data-role='EXP']") { expect(page).to have_content("Pending") }
 
     click_link "Sign out"
     sign_in_via_form(exp_actor)
     visit entity_document_path(entity, document)
-    click_button "Approve"
+    open_actions_menu
+    click_link "Approve"
 
     expect(page).to have_content("Finalized")
     within("[data-role='EXP']") { expect(page).to have_content("Approved") }

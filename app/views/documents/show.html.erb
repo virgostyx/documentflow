@@ -1,54 +1,57 @@
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <%= render Ui::PageHeaderComponent.new(
-    title: @document.reference_number,
-    description: @document.subject,
-    back_path: entity_documents_path(current_entity),
-    back_text: "Documents"
-  ) %>
+<% content_for :breadcrumb do %>
+  <%= render Ui::BreadcrumbsComponent.new(items: [
+    { label: "Documents", path: entity_documents_path(current_entity) },
+    { label: @document.reference_number }
+  ]) %>
+<% end %>
 
-  <div class="flex justify-end gap-3 mb-4">
-    <%= render(Ui::ActionsMenuComponent.new) do |menu| %>
-      <% if policy(@document).approve? %>
-        <% menu.with_item(href: approve_entity_document_workflow_step_path(current_entity, @document, @document.current_step), method: :post) { "Approve" } %>
-      <% end %>
-      <% if policy(@document).reject? %>
-        <% menu.with_item(
-          href: confirm_reject_entity_document_workflow_step_path(current_entity, @document, @document.current_step),
-          data: { turbo_frame: "modal", action: "click->modal#open" }, variant: :danger
-        ) { "Reject" } %>
-      <% end %>
-      <% if policy(@document).launch? %>
-        <% menu.with_item(
-          href: launch_entity_document_path(current_entity, @document), method: :post,
-          data: { turbo_confirm: "Launch this document into its validation circuit?" }
-        ) { "Launch" } %>
-      <% end %>
-      <% if policy(@document).update? %>
-        <% menu.with_item(href: edit_entity_document_path(current_entity, @document)) { "Edit" } %>
-      <% end %>
-      <% if policy(@document).cancel? %>
-        <% menu.with_item(
-          href: cancel_entity_document_path(current_entity, @document), method: :post, variant: :danger,
-          data: { turbo_confirm: "Are you sure you want to cancel this document?" }
-        ) { "Cancel document" } %>
-      <% end %>
-      <% if policy(@document).destroy? %>
-        <% menu.with_item(
-          href: entity_document_path(current_entity, @document), method: :delete, variant: :danger,
-          data: { turbo_confirm: "Are you sure you want to delete this document? This cannot be undone." }
-        ) { "Delete" } %>
-      <% end %>
+<% content_for :actions do %>
+  <%= render Documents::DocumentStatusBadgeComponent.new(status: @document.status) %>
+  <%= render(Ui::ActionsMenuComponent.new) do |menu| %>
+    <% if policy(@document).approve? %>
+      <% menu.with_item(href: approve_entity_document_workflow_step_path(current_entity, @document, @document.current_step), method: :post) { "Approve" } %>
     <% end %>
-  </div>
+    <% if policy(@document).reject? %>
+      <% menu.with_item(
+        href: confirm_reject_entity_document_workflow_step_path(current_entity, @document, @document.current_step),
+        data: { turbo_frame: "modal", action: "click->modal#open" }, variant: :danger
+      ) { "Reject" } %>
+    <% end %>
+    <% if policy(@document).launch? %>
+      <% menu.with_item(
+        href: launch_entity_document_path(current_entity, @document), method: :post,
+        data: { turbo_confirm: "Launch this document into its validation circuit?" }
+      ) { "Launch" } %>
+    <% end %>
+    <% if policy(@document).update? %>
+      <% menu.with_item(href: edit_entity_document_path(current_entity, @document)) { "Edit" } %>
+    <% end %>
+    <% if policy(@document).cancel? %>
+      <% menu.with_item(
+        href: cancel_entity_document_path(current_entity, @document), method: :post, variant: :danger,
+        data: { turbo_confirm: "Are you sure you want to cancel this document?" }
+      ) { "Cancel document" } %>
+    <% end %>
+    <% if policy(@document).destroy? %>
+      <% menu.with_item(
+        href: entity_document_path(current_entity, @document), method: :delete, variant: :danger,
+        data: { turbo_confirm: "Are you sure you want to delete this document? This cannot be undone." }
+      ) { "Delete" } %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <h1 class="text-2xl font-bold text-gray-900 mb-1"><%= @document.subject %></h1>
 
   <% if policy(@document).launch? && !@document.main_file.attached? %>
-    <p class="mb-4 text-sm text-warning-700 bg-warning-50 border border-warning-100 rounded-md px-4 py-2">
+    <p class="mt-4 text-sm text-warning-700 bg-warning-50 border border-warning-100 rounded-md px-4 py-2">
       A main document must be attached before this document can be launched.
     </p>
   <% end %>
 
   <% if @document_chain.size > 1 %>
-    <div class="mb-6">
+    <div class="mt-6">
       <%= render Ui::CardComponent.new do |card| %>
         <% card.with_header { "Document chain" } %>
         <%= render Documents::ThreadComponent.new(documents: @document_chain, current_document: @document) %>
@@ -56,137 +59,131 @@
     </div>
   <% end %>
 
-  <%= render Ui::CardComponent.new do |card| %>
-    <% card.with_header { render(Documents::DocumentStatusBadgeComponent.new(status: @document.status)) } %>
+  <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <div class="lg:col-span-2 space-y-6">
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header { "Main document" } %>
+        <%= render Documents::MainFileComponent.new(document: @document, current_user: current_user) %>
+      <% end %>
 
-    <%= render Documents::MetadataComponent.new(document: @document) %>
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header { "Annexes" } %>
+        <%= render Documents::AnnexListComponent.new(document: @document, current_user: current_user) %>
+      <% end %>
 
-    <div class="mt-6">
-      <%= render Ui::DefinitionListComponent.new do |dl| %>
-        <% dl.with_item(term: "Reference number") { @document.reference_number } %>
-        <% dl.with_item(term: "Document date") { l(@document.document_date) } %>
-        <% dl.with_item(term: "Created by") { @document.created_by.email } %>
-        <% dl.with_item(term: "Expects a response") { @document.expects_response? ? "Yes" : "No" } %>
-        <% if @document.response_deadline.present? %>
-          <% dl.with_item(term: "Response deadline") do %>
-            <% if @document.deadline_overdue? %>
-              <%= render(Ui::BadgeComponent.new(color: :danger)) { l(@document.response_deadline) } %>
-            <% elsif @document.deadline_due_tomorrow? %>
-              <%= render(Ui::BadgeComponent.new(color: :warning)) { l(@document.response_deadline) } %>
-            <% else %>
-              <%= l(@document.response_deadline) %>
-            <% end %>
-          <% end %>
-        <% end %>
+      <% if @document.document_file_versions.any? %>
+        <details class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <summary class="cursor-pointer select-none border-b border-gray-200 px-6 py-4 font-medium text-gray-900">
+            Version history
+          </summary>
+          <div class="p-6">
+            <%= render Documents::FileVersionListComponent.new(document: @document) %>
+          </div>
+        </details>
       <% end %>
     </div>
-  <% end %>
 
-  <div class="mt-6">
-    <%= render Ui::CardComponent.new do |card| %>
-      <% card.with_header { "Main document" } %>
-      <%= render Documents::MainFileComponent.new(document: @document, current_user: current_user) %>
-    <% end %>
-  </div>
-
-  <% if @document.document_file_versions.any? %>
-    <div class="mt-6">
+    <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-20">
       <%= render Ui::CardComponent.new do |card| %>
-        <% card.with_header { "Version history" } %>
-        <%= render Documents::FileVersionListComponent.new(document: @document) %>
-      <% end %>
-    </div>
-  <% end %>
+        <%= render Documents::MetadataComponent.new(document: @document) %>
 
-  <div class="mt-6">
-    <%= render Ui::CardComponent.new do |card| %>
-      <% card.with_header { "Annexes" } %>
-      <%= render Documents::AnnexListComponent.new(document: @document, current_user: current_user) %>
-    <% end %>
-  </div>
-
-  <% new_cc_recipient = CcRecipient.new(document: @document) %>
-  <% if policy(new_cc_recipient).create? || @document.cc_recipients.any? %>
-    <div class="mt-6">
-      <%= render Ui::CardComponent.new do |card| %>
-        <% card.with_header { "Copy" } %>
-
-        <% if @document.cc_recipients.any? %>
-          <ul class="divide-y divide-gray-100">
-            <% @document.cc_recipients.each do |cc_recipient| %>
-              <li class="py-3 flex items-center justify-between gap-4">
-                <p class="text-sm text-gray-900">
-                  <%= cc_recipient.party&.display_name %> <%= party_badge(cc_recipient.party) %>
-                </p>
-                <% if policy(cc_recipient).destroy? %>
-                  <%= render(Ui::ButtonComponent.new(
-                    href: entity_document_cc_recipient_path(current_entity, @document, cc_recipient), variant: :danger, method: :delete,
-                    data: { turbo_confirm: "Remove this recipient from the copy list?" }
-                  )) { "Remove" } %>
+        <div class="mt-6">
+          <%= render Ui::DefinitionListComponent.new do |dl| %>
+            <% dl.with_item(term: "Reference number") { @document.reference_number } %>
+            <% dl.with_item(term: "Document date") { l(@document.document_date) } %>
+            <% dl.with_item(term: "Created by") { @document.created_by.email } %>
+            <% dl.with_item(term: "Expects a response") { @document.expects_response? ? "Yes" : "No" } %>
+            <% if @document.response_deadline.present? %>
+              <% dl.with_item(term: "Response deadline") do %>
+                <% if @document.deadline_overdue? %>
+                  <%= render(Ui::BadgeComponent.new(color: :danger)) { l(@document.response_deadline) } %>
+                <% elsif @document.deadline_due_tomorrow? %>
+                  <%= render(Ui::BadgeComponent.new(color: :warning)) { l(@document.response_deadline) } %>
+                <% else %>
+                  <%= l(@document.response_deadline) %>
                 <% end %>
-              </li>
+              <% end %>
             <% end %>
-          </ul>
-        <% else %>
-          <p class="text-sm text-gray-500">No one is in copy on this document yet.</p>
-        <% end %>
-
-        <% if policy(new_cc_recipient).create? %>
-          <%= form_with model: [ current_entity, @document, new_cc_recipient ],
-                        builder: FloatingLabelsRails::FormBuilder, local: true, class: "mt-4 flex items-end gap-3" do |f| %>
-            <div class="flex-1">
-              <%= render(Documents::PartyPickerComponent.new(
-                form: f, attribute: :party_token, entity: current_entity,
-                label: "Add to copy", required: true, include_blank: "Select a person..."
-              )) %>
-            </div>
-            <%= render(Ui::ButtonComponent.new(variant: :secondary)) { "Add" } %>
           <% end %>
-        <% end %>
+        </div>
       <% end %>
-    </div>
-  <% end %>
 
-  <% if policy(@document.shared_links.new).create? || @document.shared_links.active.any? %>
-    <div class="mt-6">
-      <%= render Ui::CardComponent.new do |card| %>
-        <% card.with_header { "Public sharing" } %>
+      <%= render Workflow::StepsComponent.new(document: @document, current_user: current_user) %>
 
-        <%= turbo_frame_tag "shared_links" do %>
-          <% if @document.shared_links.active.any? %>
+      <% new_cc_recipient = CcRecipient.new(document: @document) %>
+      <% if policy(new_cc_recipient).create? || @document.cc_recipients.any? %>
+        <%= render Ui::CardComponent.new do |card| %>
+          <% card.with_header { "Copy" } %>
+
+          <% if @document.cc_recipients.any? %>
             <ul class="divide-y divide-gray-100">
-              <% @document.shared_links.active.each do |shared_link| %>
+              <% @document.cc_recipients.each do |cc_recipient| %>
                 <li class="py-3 flex items-center justify-between gap-4">
-                  <div class="min-w-0">
-                    <p class="text-sm text-gray-900 truncate"><%= shared_document_url(token: shared_link.token) %></p>
-                    <p class="text-sm text-gray-500">Expires on <%= l(shared_link.expires_at.to_date) %></p>
-                  </div>
-                  <% if policy(shared_link).destroy? %>
+                  <p class="text-sm text-gray-900">
+                    <%= cc_recipient.party&.display_name %> <%= party_badge(cc_recipient.party) %>
+                  </p>
+                  <% if policy(cc_recipient).destroy? %>
                     <%= render(Ui::ButtonComponent.new(
-                      href: entity_document_shared_link_path(current_entity, @document, shared_link), variant: :danger, method: :delete,
-                      data: { turbo_confirm: "Revoke this share link? Anyone using it will lose access to the document." }
-                    )) { "Revoke" } %>
+                      href: entity_document_cc_recipient_path(current_entity, @document, cc_recipient), variant: :danger, size: :sm, method: :delete,
+                      data: { turbo_confirm: "Remove this recipient from the copy list?" }
+                    )) { "Remove" } %>
                   <% end %>
                 </li>
               <% end %>
             </ul>
           <% else %>
-            <p class="text-sm text-gray-500">This document has not been shared yet.</p>
+            <p class="text-sm text-gray-500">No one is in copy on this document yet.</p>
           <% end %>
 
-          <% if policy(@document.shared_links.new).create? %>
-            <div class="mt-4">
-              <%= render(Ui::ButtonComponent.new(
-                href: entity_document_shared_links_path(current_entity, @document), variant: :secondary, method: :post
-              )) { "Generate share link" } %>
-            </div>
+          <% if policy(new_cc_recipient).create? %>
+            <%= form_with model: [ current_entity, @document, new_cc_recipient ],
+                          builder: FloatingLabelsRails::FormBuilder, local: true, class: "mt-4 flex flex-col items-stretch gap-3" do |f| %>
+              <%= render(Documents::PartyPickerComponent.new(
+                form: f, attribute: :party_token, entity: current_entity,
+                label: "Add to copy", required: true, include_blank: "Select a person..."
+              )) %>
+              <%= render(Ui::ButtonComponent.new(variant: :secondary)) { "Add" } %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% if policy(@document.shared_links.new).create? || @document.shared_links.active.any? %>
+        <%= render Ui::CardComponent.new do |card| %>
+          <% card.with_header { "Public sharing" } %>
+
+          <%= turbo_frame_tag "shared_links" do %>
+            <% if @document.shared_links.active.any? %>
+              <ul class="divide-y divide-gray-100">
+                <% @document.shared_links.active.each do |shared_link| %>
+                  <li class="py-3 flex flex-col gap-2">
+                    <div class="min-w-0">
+                      <p class="text-sm text-gray-900 truncate"><%= shared_document_url(token: shared_link.token) %></p>
+                      <p class="text-sm text-gray-500">Expires on <%= l(shared_link.expires_at.to_date) %></p>
+                    </div>
+                    <% if policy(shared_link).destroy? %>
+                      <%= render(Ui::ButtonComponent.new(
+                        href: entity_document_shared_link_path(current_entity, @document, shared_link), variant: :danger, size: :sm, method: :delete,
+                        data: { turbo_confirm: "Revoke this share link? Anyone using it will lose access to the document." }
+                      )) { "Revoke" } %>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            <% else %>
+              <p class="text-sm text-gray-500">This document has not been shared yet.</p>
+            <% end %>
+
+            <% if policy(@document.shared_links.new).create? %>
+              <div class="mt-4">
+                <%= render(Ui::ButtonComponent.new(
+                  href: entity_document_shared_links_path(current_entity, @document), variant: :secondary, method: :post, class: "w-full"
+                )) { "Generate share link" } %>
+              </div>
+            <% end %>
           <% end %>
         <% end %>
       <% end %>
     </div>
-  <% end %>
-
-  <div class="mt-6">
-    <%= render Workflow::StepsComponent.new(document: @document, current_user: current_user) %>
   </div>
 </div>

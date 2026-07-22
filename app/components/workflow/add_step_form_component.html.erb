@@ -1,12 +1,12 @@
 <%= form_with model: [ document.entity, document, WorkflowStep.new(document: document) ],
-              builder: FloatingLabelsRails::FormBuilder, local: true, class: "mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:items-end" do |f| %>
+              builder: FloatingLabelsRails::FormBuilder, local: true, class: "mt-4 grid grid-cols-1 gap-3" do |f| %>
   <div>
     <%= f.floating_select :role, options_for_select(role_options), { include_blank: "Select a role..." }, { label: "Role", required: true } %>
   </div>
   <div>
     <%= f.floating_select :actor_id, options_for_select(actor_options), { include_blank: "Unassigned" }, { label: "Actor" } %>
   </div>
-  <div class="sm:mb-6">
-    <%= render(Ui::ButtonComponent.new(variant: :secondary)) { "Add step" } %>
+  <div>
+    <%= render(Ui::ButtonComponent.new(variant: :secondary, class: "w-full")) { "Add step" } %>
   </div>
 <% end %>

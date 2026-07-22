@@ -48,6 +48,7 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
 
     expect(page).to have_content("checked in successfully")
     expect(page).not_to have_content("Checked out by")
+    find("summary", text: "Version history").click
     expect(page).to have_content("Version 1")
     expect(page).to have_content("Fixed the payment terms")
 
@@ -92,6 +93,7 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     expect(page).to have_content("checked in successfully")
     expect(document.document_file_versions.count).to eq(2)
     expect(document.document_file_versions.pluck(:version_number).uniq).to eq([ 1 ])
+    find("summary", text: "Version history").click
     expect(page).to have_content("Version 1", count: 2)
   end
 

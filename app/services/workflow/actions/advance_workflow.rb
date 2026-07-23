@@ -21,7 +21,10 @@ module Workflow
         next if stage_steps.to_a.any?(&:pending?)
 
         ctx.stage_advanced = true
-        document.sign! if step.role == "SIGN" && document.may_sign?
+        if step.role == "SIGN" && document.may_sign?
+          document.sign!
+          PdfConversionJob.perform_later(document.id)
+        end
 
         if document.workflow_steps.ordered.none?(&:pending?)
           ctx.workflow_completed = true

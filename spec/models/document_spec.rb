@@ -251,6 +251,12 @@ RSpec.describe Document, type: :model do
         expect(document).to be_signed
       end
 
+      it "freezes the document" do
+        document = create(:document, :in_progress)
+        document.sign!
+        expect(document.is_frozen).to be true
+      end
+
       it "cannot be signed from draft" do
         document.save!
         expect(document.may_sign?).to be false
@@ -258,11 +264,10 @@ RSpec.describe Document, type: :model do
     end
 
     describe "#finalize" do
-      it "transitions from signed to finalized and freezes the document" do
+      it "transitions from signed to finalized" do
         document = create(:document, :signed)
         expect(document.finalize!).to be true
         expect(document).to be_finalized
-        expect(document.is_frozen).to be true
       end
 
       it "cannot be finalized from in_progress" do

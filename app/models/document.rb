@@ -116,11 +116,11 @@ class Document < ApplicationRecord
     end
 
     event :sign do
-      transitions from: :in_progress, to: :signed
+      transitions from: :in_progress, to: :signed, after: :freeze_document
     end
 
     event :finalize do
-      transitions from: :signed, to: :finalized, after: :freeze_document
+      transitions from: :signed, to: :finalized
     end
 
     event :cancel do

@@ -109,6 +109,18 @@ RSpec.describe Workflow::ApproveStepOrganizer do
 
         expect(document.reload.current_step.role).to eq("EXP")
       end
+
+      it "gèle le document" do
+        described_class.call(step: sign_step, current_user: sign_step.actor)
+
+        expect(document.reload.frozen?).to be true
+      end
+
+      it "planifie la conversion PDF" do
+        expect(PdfConversionJob).to receive(:perform_later).with(document.id)
+
+        described_class.call(step: sign_step, current_user: sign_step.actor)
+      end
     end
 
     context "approbation de la dernière étape EXP (fin du circuit)" do
@@ -116,7 +128,7 @@ RSpec.describe Workflow::ApproveStepOrganizer do
 
       before do
         document.workflow_steps.where(role: %w[VISA SIGN]).find_each { |s| s.update!(status: "approved") }
-        document.update!(status: "signed")
+        document.sign!
       end
 
       it "finalise le document (gelé et statut finalized)" do

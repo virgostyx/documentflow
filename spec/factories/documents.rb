@@ -17,6 +17,7 @@ FactoryBot.define do
 
     trait :signed do
       status { "signed" }
+      is_frozen { true }
     end
 
     trait :finalized do

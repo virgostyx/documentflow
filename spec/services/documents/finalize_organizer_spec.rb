@@ -16,12 +16,6 @@ RSpec.describe Documents::FinalizeOrganizer do
         expect(document.frozen?).to be true
       end
 
-      it "planifie la conversion PDF" do
-        expect(PdfConversionJob).to receive(:perform_later).with(document.id)
-
-        described_class.call(document: document, current_user: user)
-      end
-
       it "notifie le créateur de la finalisation" do
         expect(NotificationJob).to receive(:perform_later).with(user.id, "action_required", document.id)
 

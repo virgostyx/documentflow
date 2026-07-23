@@ -15,16 +15,19 @@ class PdfConversionJob < ApplicationJob
   def convert_main_file(document)
     main_file = document.main_file
     return unless main_file.attached?
-    return if main_file.content_type == "application/pdf"
+
+    already_pdf = main_file.content_type == "application/pdf"
 
     main_file.open do |temp_file|
-      pdf_path = PdfConverter.convert(temp_file.path)
+      pdf_path = already_pdf ? temp_file.path : PdfConverter.convert(temp_file.path)
+      stamped_path = PdfStamper.stamp(pdf_path, document)
 
-      File.open(pdf_path) do |pdf_file|
+      File.open(stamped_path) do |pdf_file|
         document.main_file.attach(io: pdf_file, filename: "#{main_file.filename.base}.pdf", content_type: "application/pdf")
       end
 
-      File.delete(pdf_path) if File.exist?(pdf_path)
+      File.delete(pdf_path) if !already_pdf && File.exist?(pdf_path)
+      File.delete(stamped_path) if stamped_path != pdf_path && File.exist?(stamped_path)
     end
   end
 

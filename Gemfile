@@ -60,6 +60,7 @@ gem "light-service", "~> 0.18"
 # PDF
 gem "prawn"
 gem "prawn-table"
+gem "prawn-templates"
 
 # Recherche full-text
 gem "pg_search"
@@ -118,4 +119,5 @@ group :test do
   gem "pundit-matchers"
   gem "database_cleaner-active_record"
   gem "simplecov", require: false
+  gem "pdf-reader"
 end

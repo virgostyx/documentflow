@@ -86,6 +86,14 @@ RSpec.describe "Entities::ClassificationNodes", type: :request do
 
         expect(response).to have_http_status(:unprocessable_content)
       end
+
+      it "replaces the modal frame in place when the request is a turbo stream, instead of breaking out to the top" do
+        post entity_classification_nodes_path(entity), params: node_params,
+             headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+        expect(response.body).to include('turbo-stream action="replace" target="modal"')
+      end
     end
 
     context "as a regular member (not owner/admin)" do
@@ -136,6 +144,23 @@ RSpec.describe "Entities::ClassificationNodes", type: :request do
 
       expect(node.reload.name).to eq("Invoices")
       expect(response).to redirect_to(entity_classification_nodes_path(entity))
+    end
+
+    context "with invalid params" do
+      it "does not update the node" do
+        patch entity_classification_node_path(entity, node), params: { classification_node: { code: "01" } }
+
+        expect(node.reload.code).to eq("1")
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+
+      it "replaces the modal frame in place when the request is a turbo stream, instead of breaking out to the top" do
+        patch entity_classification_node_path(entity, node), params: { classification_node: { code: "01" } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+        expect(response.body).to include('turbo-stream action="replace" target="modal"')
+      end
     end
 
     context "as a regular member (not owner/admin)" do

@@ -23,7 +23,7 @@ module Entities
         redirect_to entity_classification_nodes_path(current_entity), notice: "Classification node created successfully."
       else
         flash.now[:alert] = @classification_node.errors.full_messages.to_sentence
-        render :new, status: :unprocessable_content
+        render_modal_errors :new
       end
     end
 
@@ -38,7 +38,7 @@ module Entities
         redirect_to entity_classification_nodes_path(current_entity), notice: "Classification node updated successfully."
       else
         flash.now[:alert] = @classification_node.errors.full_messages.to_sentence
-        render :edit, status: :unprocessable_content
+        render_modal_errors :edit
       end
     end
 
@@ -64,6 +64,20 @@ module Entities
 
     def classification_node_params
       params.require(:classification_node).permit(:code, :name, :parent_id)
+    end
+
+    # The form targets turbo_frame "_top" so a successful save can break out of the
+    # modal and land on the index page. On validation failure that same targeting
+    # would blow away the modal instead of just showing the errors inside it, so we
+    # respond with a turbo stream that replaces the "modal" frame directly.
+    def render_modal_errors(template)
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace("modal", template: "entities/classification_nodes/#{template}"),
+                 status: :unprocessable_content
+        end
+        format.html { render template, status: :unprocessable_content }
+      end
     end
   end
 end

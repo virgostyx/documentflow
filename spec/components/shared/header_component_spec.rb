@@ -14,7 +14,7 @@ RSpec.describe Shared::HeaderComponent, type: :component do
   end
 
   it "affiche un lien de déconnexion" do
-    expect(subject).to have_css("a[data-turbo-method='delete']", text: /[Ss]ign out/)
+    expect(subject).to have_css("a[data-turbo-method='delete']", text: /[Ss]ign out/, visible: false)
   end
 
   it "est un header fixe en haut de la page" do

@@ -7,10 +7,8 @@
       <span class="ml-2 text-xl font-bold text-gray-900">DocumentFlow</span>
     <% end %>
 
-    <div class="relative flex items-center gap-4" data-controller="dropdown">
-      <button type="button"
-              data-action="click->dropdown#toggle"
-              class="flex items-center gap-2 text-sm text-gray-700 hover:text-primary-600 transition-colors">
+    <details class="relative flex items-center gap-4" data-controller="dropdown">
+      <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer flex items-center gap-2 text-sm text-gray-700 hover:text-primary-600 transition-colors">
         <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 text-primary-700 font-medium">
           <%= current_user.email.first.upcase %>
         </span>
@@ -18,14 +16,13 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
         </svg>
-      </button>
+      </summary>
 
-      <div data-dropdown-target="menu"
-           class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1">
+      <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1">
         <%= link_to "Sign out", destroy_user_session_path,
               data: { turbo_method: :delete },
               class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
       </div>
-    </div>
+    </details>
   </div>
 </header>

@@ -9,7 +9,7 @@ module SystemHelpers
   end
 
   def open_actions_menu
-    click_button "Actions"
+    find("summary", text: "Actions").click
   end
 end
 

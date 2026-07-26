@@ -2,8 +2,6 @@
 
 module SharedLinks
   class RequestRenewal
-    THROTTLE_WINDOW = 10.minutes
-
     class << self
       def call(token:, email:)
         new(token: token, email: email).call
@@ -21,7 +19,7 @@ module SharedLinks
 
       role, party = matching_party(document)
       return false if party.nil?
-      return false if recently_renewed?(document)
+      return false unless document.claim_shared_link_renewal!
 
       document.active_shared_link
       notify(role, party, document)
@@ -41,10 +39,6 @@ module SharedLinks
 
     def matches?(party)
       party&.external? && party.email.casecmp?(@email)
-    end
-
-    def recently_renewed?(document)
-      document.shared_links.active.where(created_at: THROTTLE_WINDOW.ago..).exists?
     end
 
     def notify(role, party, document)

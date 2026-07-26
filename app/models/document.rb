@@ -137,6 +137,10 @@ class Document < ApplicationRecord
     shared_links.active.first || shared_links.create!
   end
 
+  def claim_shared_link_renewal!
+    self.class.where(id: id, shared_link_renewed_at: nil).update_all(shared_link_renewed_at: Time.current) == 1
+  end
+
   def awaiting_response_from?(user)
     expects_response? && addressee_type == "User" && addressee_id == user.id
   end

@@ -23,6 +23,12 @@ RSpec.describe SharedLinks::RequestRenewal do
         }.to change { document.shared_links.active.count }.by(1)
       end
 
+      it "marks the document's shared link as renewed" do
+        expect {
+          described_class.call(token: expired_link.token, email: document.addressee.email)
+        }.to change { document.reload.shared_link_renewed_at }.from(nil)
+      end
+
       it "matches case-insensitively and ignores surrounding whitespace" do
         expect(AddresseeNotificationJob).to receive(:perform_later)
 
@@ -79,13 +85,25 @@ RSpec.describe SharedLinks::RequestRenewal do
       end
     end
 
-    context "when a shared link for the document was already (re)created recently" do
-      before { create(:shared_link, document: document, created_at: 1.minute.ago) }
+    context "when the document's shared link has already been renewed once" do
+      before { document.update!(shared_link_renewed_at: 1.day.ago) }
 
       it "does not enqueue another notification and returns false" do
         expect(AddresseeNotificationJob).not_to receive(:perform_later)
+        expect(CcNotificationJob).not_to receive(:perform_later)
 
         result = described_class.call(token: expired_link.token, email: document.addressee.email)
+
+        expect(result).to be false
+      end
+
+      it "does not enqueue another notification even for a different matching external recipient" do
+        contact = create(:contact, entity: document.entity)
+        create(:cc_recipient, document: document, party: contact)
+
+        expect(CcNotificationJob).not_to receive(:perform_later)
+
+        result = described_class.call(token: expired_link.token, email: contact.email)
 
         expect(result).to be false
       end

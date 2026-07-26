@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_21_190958) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_26_094124) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -174,6 +174,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_21_190958) do
     t.text "routing_message"
     t.bigint "sender_id", null: false
     t.string "sender_type", null: false
+    t.datetime "shared_link_renewed_at"
     t.string "status", default: "draft", null: false
     t.string "subject", null: false
     t.datetime "updated_at", null: false

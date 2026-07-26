@@ -129,6 +129,17 @@ RSpec.describe "SharedLinks", type: :request do
         get shared_document_path(token: shared_link.token)
 
         expect(response.body).to include(renew_shared_document_path(token: shared_link.token))
+        expect(response.body).to include("Send me a new link")
+      end
+
+      context "when the document's shared link has already been renewed once" do
+        before { document.update!(shared_link_renewed_at: 1.day.ago) }
+
+        it "does not offer a way to request another new link" do
+          get shared_document_path(token: shared_link.token)
+
+          expect(response.body).not_to include("Send me a new link")
+        end
       end
     end
 

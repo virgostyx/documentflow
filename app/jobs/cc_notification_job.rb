@@ -9,6 +9,6 @@ class CcNotificationJob < ApplicationJob
     party = party_type.constantize.find(party_id)
     document = Document.find(document_id)
 
-    NotificationMailer.cc_notification(party.email, party.display_name, document).deliver_now
+    NotificationMailer.cc_notification(party, document).deliver_now
   end
 end

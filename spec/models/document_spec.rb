@@ -375,6 +375,31 @@ RSpec.describe Document, type: :model do
     end
   end
 
+  describe "#active_shared_link" do
+    it "creates a shared link when none exists" do
+      document.save!
+
+      expect { document.active_shared_link }.to change(document.shared_links, :count).by(1)
+      expect(document.active_shared_link).to be_active
+    end
+
+    it "reuses an existing active shared link instead of creating a new one" do
+      document.save!
+      existing = create(:shared_link, document: document)
+
+      expect { document.active_shared_link }.not_to change(SharedLink, :count)
+      expect(document.active_shared_link).to eq(existing)
+    end
+
+    it "ignores expired shared links and creates a new one" do
+      document.save!
+      create(:shared_link, :expired, document: document)
+
+      expect { document.active_shared_link }.to change(document.shared_links, :count).by(1)
+      expect(document.active_shared_link).to be_active
+    end
+  end
+
   describe "#checked_out? and #checked_out_by? and #locked_for?" do
     let(:user) { create(:user) }
     let(:other_user) { create(:user) }

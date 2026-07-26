@@ -12,6 +12,8 @@ class NotificationJob < ApplicationJob
     case notification_type.to_sym
     when :action_required
       NotificationMailer.action_required(user, document).deliver_now
+    when :document_finalized
+      NotificationMailer.document_finalized(user, document).deliver_now
     when :rejection_alert
       NotificationMailer.rejection_alert(user, document, reason).deliver_now
     when :mail_lead_assigned

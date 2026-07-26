@@ -1,9 +1,5 @@
-Hello <%= @recipient_name %>,
+Hello <%= @user.email %>,
 
 Document <%= @document.reference_number %> (<%= @document.subject %>) has been finalized.
 
 View the document: <%= @document_url %>
-<% if @shared_link %>
-
-This link will expire on <%= l(@shared_link.expires_at) %>.
-<% end %>

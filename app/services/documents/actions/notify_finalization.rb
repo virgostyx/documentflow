@@ -7,7 +7,7 @@ module Documents
 
       executed do |ctx|
         document = ctx.document
-        NotificationJob.perform_later(document.created_by_id, "action_required", document.id)
+        NotificationJob.perform_later(document.created_by_id, "document_finalized", document.id)
       end
     end
   end

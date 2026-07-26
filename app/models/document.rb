@@ -133,6 +133,10 @@ class Document < ApplicationRecord
     is_frozen
   end
 
+  def active_shared_link
+    shared_links.active.first || shared_links.create!
+  end
+
   def awaiting_response_from?(user)
     expects_response? && addressee_type == "User" && addressee_id == user.id
   end

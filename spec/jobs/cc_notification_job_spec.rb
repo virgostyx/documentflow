@@ -11,7 +11,7 @@ RSpec.describe CcNotificationJob do
 
       it "delivers a cc_notification to the user" do
         expect(NotificationMailer).to receive(:cc_notification)
-          .with(user.email, user.display_name, document)
+          .with(user, document)
           .and_return(instance_double(ActionMailer::MessageDelivery, deliver_now: true))
 
         described_class.new.perform("User", user.id, document.id)
@@ -23,7 +23,7 @@ RSpec.describe CcNotificationJob do
 
       it "delivers a cc_notification to the contact" do
         expect(NotificationMailer).to receive(:cc_notification)
-          .with(contact.email, contact.display_name, document)
+          .with(contact, document)
           .and_return(instance_double(ActionMailer::MessageDelivery, deliver_now: true))
 
         described_class.new.perform("Contact", contact.id, document.id)

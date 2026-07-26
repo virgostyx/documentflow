@@ -17,7 +17,7 @@ RSpec.describe Documents::FinalizeOrganizer do
       end
 
       it "notifie le créateur de la finalisation" do
-        expect(NotificationJob).to receive(:perform_later).with(user.id, "action_required", document.id)
+        expect(NotificationJob).to receive(:perform_later).with(user.id, "document_finalized", document.id)
 
         described_class.call(document: document, current_user: user)
       end

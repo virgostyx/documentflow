@@ -32,9 +32,7 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     expect(page).to have_current_path(entity_documents_path(entity))
     visit entity_document_path(entity, document)
 
-    original_window = current_window
-    window_opened_by { click_link "Check out" }
-    switch_to_window(original_window)
+    click_link "Check out"
     expect(page).to have_content("checked out successfully")
     expect(page).to have_content("Checked out by #{visa_actor.email}")
 
@@ -77,9 +75,7 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     expect(page).to have_current_path(entity_documents_path(entity))
     visit entity_document_path(entity, document)
 
-    original_window = current_window
-    window_opened_by { click_link "Check out" }
-    switch_to_window(original_window)
+    click_link "Check out"
     expect(page).to have_content("checked out successfully")
 
     click_link "Check in"
@@ -102,9 +98,7 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     expect(page).to have_current_path(entity_documents_path(entity))
     visit entity_document_path(entity, document)
 
-    original_window = current_window
-    window_opened_by { click_link "Check out" }
-    switch_to_window(original_window)
+    click_link "Check out"
     expect(page).to have_content("Checked out by #{visa_actor.email}")
 
     click_link "Cancel checkout"

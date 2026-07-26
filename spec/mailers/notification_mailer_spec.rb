@@ -122,7 +122,7 @@ RSpec.describe NotificationMailer do
 
       it "renders a text and an html part linking to the authenticated document page" do
         expect(mail.text_part.body.encoded).to include(user.display_name, document.reference_number, document.subject, document_url)
-        expect(mail.html_part.body.encoded).to include(user.display_name, document.reference_number, document.subject, document_url)
+        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(user.display_name), document.reference_number, document.subject, document_url)
       end
 
       it "does not mention any link expiration" do
@@ -149,7 +149,7 @@ RSpec.describe NotificationMailer do
         )
 
         expect(mail.text_part.body.encoded).to include(contact.display_name, document.reference_number, document.subject, shared_url)
-        expect(mail.html_part.body.encoded).to include(contact.display_name, document.reference_number, document.subject, shared_url)
+        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(contact.display_name), document.reference_number, document.subject, shared_url)
       end
 
       it "reuses an existing active shared link instead of creating a new one" do
@@ -181,7 +181,7 @@ RSpec.describe NotificationMailer do
 
       it "renders a text and an html part linking to the authenticated document page" do
         expect(mail.text_part.body.encoded).to include(user.display_name, document.reference_number, document.subject, document_url)
-        expect(mail.html_part.body.encoded).to include(user.display_name, document.reference_number, document.subject, document_url)
+        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(user.display_name), document.reference_number, document.subject, document_url)
       end
 
       it "does not mention any link expiration" do
@@ -208,7 +208,7 @@ RSpec.describe NotificationMailer do
         )
 
         expect(mail.text_part.body.encoded).to include(contact.display_name, document.reference_number, document.subject, shared_url)
-        expect(mail.html_part.body.encoded).to include(contact.display_name, document.reference_number, document.subject, shared_url)
+        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(contact.display_name), document.reference_number, document.subject, shared_url)
       end
 
       it "reuses an existing active shared link instead of creating a new one" do

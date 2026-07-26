@@ -4,6 +4,11 @@ export default class extends Controller {
   static values = { downloadUrl: String }
 
   openDownload() {
-    window.open(this.downloadUrlValue, "_blank")
+    const link = document.createElement("a")
+    link.href = this.downloadUrlValue
+    link.download = ""
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
   }
 }

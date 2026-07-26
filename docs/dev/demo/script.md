@@ -27,8 +27,11 @@ the "external" client — actually lands somewhere you can show.
 
 - Run `bin/rails runner db/demo_seed.rb` against production once, in advance.
 - Have `docs/dev/demo/office_relocation_notice.pdf` ready to upload.
-- Open three browser profiles/private windows, signed in ahead of time as
-  Sarah, David, and Amara — no sign-out waiting mid-pitch.
+- Create three separate **Chrome/Edge profiles** (avatar icon → Add), one per
+  persona — **not** private/incognito windows. All incognito windows in a
+  browser share one session, so a second incognito window shows the same
+  logged-in account as the first, not a fresh one. Sign in to each profile
+  ahead of time as Sarah, David, and Amara — no sign-out waiting mid-pitch.
 - Have your Gmail inbox open in a fourth tab.
 - If a previous demo document exists, delete it from Sarah's account first
   (Actions → Delete, only available before finalization) or just create a

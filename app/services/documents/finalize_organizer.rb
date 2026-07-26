@@ -4,6 +4,7 @@ module Documents
   class FinalizeOrganizer < ApplicationService
     workflow_steps Actions::FinalizeDocument,
                    Actions::NotifyFinalization,
+                   Actions::NotifyAddressee,
                    Actions::NotifyCcRecipients
   end
 end

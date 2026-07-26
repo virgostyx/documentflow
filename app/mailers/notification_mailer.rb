@@ -58,6 +58,20 @@ class NotificationMailer < ApplicationMailer
     mail(to: user.email, subject: "Document finalized: #{document.reference_number}")
   end
 
+  def document_addressed(party, document)
+    @recipient_name = party.display_name
+    @document = document
+
+    if party.external?
+      @shared_link = document.active_shared_link
+      @document_url = shared_document_url(@shared_link.token)
+    else
+      @document_url = entity_document_url(document.entity, document)
+    end
+
+    mail(to: party.email, subject: "Document addressed to you: #{document.reference_number}")
+  end
+
   def cc_notification(party, document)
     @recipient_name = party.display_name
     @document = document

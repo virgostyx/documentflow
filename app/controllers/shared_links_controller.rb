@@ -3,11 +3,11 @@
 class SharedLinksController < ApplicationController
   include EntityScoped
 
-  layout "pages", only: :show
+  layout "pages", only: %i[show renew]
 
-  skip_before_action :authenticate_user!, only: :show
-  skip_before_action :set_current_entity, only: :show
-  skip_before_action :authorize_entity_access!, only: :show
+  skip_before_action :authenticate_user!, only: %i[show renew]
+  skip_before_action :set_current_entity, only: %i[show renew]
+  skip_before_action :authorize_entity_access!, only: %i[show renew]
 
   before_action :set_document, only: %i[create destroy]
   before_action :set_shared_link, only: :destroy
@@ -22,6 +22,12 @@ class SharedLinksController < ApplicationController
     else
       @document = @shared_link.document
     end
+  end
+
+  def renew
+    SharedLinks::RequestRenewal.call(token: params[:token], email: params[:email])
+
+    render :renewal_requested
   end
 
   def create

@@ -22,6 +22,13 @@ RSpec.describe Documents::FinalizeOrganizer do
         described_class.call(document: document, current_user: user)
       end
 
+      it "notifie le destinataire principal du document" do
+        expect(AddresseeNotificationJob).to receive(:perform_later)
+          .with(document.addressee_type, document.addressee_id, document.id)
+
+        described_class.call(document: document, current_user: user)
+      end
+
       it "enregistre un audit log" do
         expect {
           described_class.call(document: document, current_user: user)

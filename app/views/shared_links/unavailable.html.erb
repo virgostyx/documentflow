@@ -14,4 +14,22 @@
       description: "The share link you followed has expired or does not exist. Please ask the sender for a new link."
     ) %>
   <% end %>
+
+  <% if @shared_link %>
+    <div class="mt-6">
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header { "Request a new link" } %>
+
+        <p class="text-sm text-gray-600 mb-4">
+          Enter the email address this document was shared with, and if it matches, we'll send you a new link.
+        </p>
+
+        <%= form_with url: renew_shared_document_path(token: @shared_link.token), method: :post, local: true, class: "flex flex-col sm:flex-row gap-3" do |f| %>
+          <%= f.email_field :email, required: true, placeholder: "you@example.com",
+                class: "flex-1 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" %>
+          <%= render Ui::ButtonComponent.new(type: "submit") { "Send me a new link" } %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
 </div>

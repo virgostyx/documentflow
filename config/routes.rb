@@ -89,6 +89,7 @@ Rails.application.routes.draw do
 
   # Public access to a shared document (no authentication)
   get "share/:token", to: "shared_links#show", as: :shared_document
+  post "share/:token/renew", to: "shared_links#renew", as: :renew_shared_document
 
   # Public invitation acceptance (token-based, no authentication required)
   get  "/invitations/:token",          to: "invitations#show",           as: :invitation

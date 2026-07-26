@@ -124,6 +124,12 @@ RSpec.describe "SharedLinks", type: :request do
         expect(response).to have_http_status(:gone)
         expect(response.body).to include("no longer available")
       end
+
+      it "offers a way to request a new link" do
+        get shared_document_path(token: shared_link.token)
+
+        expect(response.body).to include(renew_shared_document_path(token: shared_link.token))
+      end
     end
 
     context "with an unknown token" do
@@ -132,6 +138,58 @@ RSpec.describe "SharedLinks", type: :request do
 
         expect(response).to have_http_status(:not_found)
         expect(response.body).to include("no longer available")
+      end
+
+      it "does not offer a way to request a new link" do
+        get shared_document_path(token: "unknown-token")
+
+        expect(response.body).not_to include("Send me a new link")
+      end
+    end
+  end
+
+  describe "POST /share/:token/renew (public, self-service renewal)" do
+    let(:document) { create(:document, :finalized, entity: entity) }
+    let!(:shared_link) { create(:shared_link, :expired, document: document) }
+
+    context "with an email matching the document's external addressee" do
+      it "enqueues an addressee notification" do
+        expect(AddresseeNotificationJob).to receive(:perform_later)
+          .with("Contact", document.addressee_id, document.id)
+
+        post renew_shared_document_path(token: shared_link.token), params: { email: document.addressee.email }
+      end
+
+      it "displays a generic confirmation message" do
+        post renew_shared_document_path(token: shared_link.token), params: { email: document.addressee.email }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("we&#39;ve sent a new link")
+      end
+    end
+
+    context "with an email that does not match any external recipient" do
+      it "does not enqueue any notification" do
+        expect(AddresseeNotificationJob).not_to receive(:perform_later)
+        expect(CcNotificationJob).not_to receive(:perform_later)
+
+        post renew_shared_document_path(token: shared_link.token), params: { email: "nobody@example.com" }
+      end
+
+      it "displays the same generic confirmation message, without revealing the mismatch" do
+        post renew_shared_document_path(token: shared_link.token), params: { email: "nobody@example.com" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("we&#39;ve sent a new link")
+      end
+    end
+
+    context "with an unknown token" do
+      it "displays the same generic confirmation message" do
+        post renew_shared_document_path(token: "unknown-token"), params: { email: "nobody@example.com" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("we&#39;ve sent a new link")
       end
     end
   end

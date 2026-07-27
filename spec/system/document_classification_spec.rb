@@ -88,6 +88,24 @@ RSpec.describe "Document classification", type: :system, js: true do
     end
   end
 
+  it "shows and updates the Filing card on the document show page" do
+    root = create(:classification_node, entity: entity, code: "1", name: "Contracts")
+    create(:classification_node, entity: entity, parent: root, code: "1.1", name: "Drafts")
+
+    visit entity_document_path(entity, document)
+    expect(page).to have_content("Filing")
+    expect(page).to have_content("Not filed yet.")
+
+    click_link "Change filing"
+
+    within("dialog") do
+      within("[data-classification-picker-target='row']", text: "Drafts") { click_button "Classify here" }
+    end
+
+    expect(page).to have_content("Document classified under 1.1")
+    expect(page).to have_content("1 › 1.1 — Drafts")
+  end
+
   it "blocks deleting a node that still contains a document, through the modal" do
     node = create(:classification_node, entity: entity, code: "1", name: "Contracts")
     document.update!(classification_node: node)

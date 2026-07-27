@@ -71,6 +71,11 @@
         <%= render Documents::AnnexListComponent.new(document: @document, current_user: current_user) %>
       <% end %>
 
+      <%= render Ui::CardComponent.new do |card| %>
+        <% card.with_header { "Filing" } %>
+        <%= render Documents::FilingComponent.new(document: @document, current_user: current_user) %>
+      <% end %>
+
       <% new_cc_recipient = CcRecipient.new(document: @document) %>
       <% if policy(new_cc_recipient).create? || @document.cc_recipients.any? %>
         <%= render Ui::CardComponent.new do |card| %>

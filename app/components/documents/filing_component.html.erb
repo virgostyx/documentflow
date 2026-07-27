@@ -1,0 +1,16 @@
+<% if classification_node %>
+  <p class="text-sm text-gray-900">
+    <%= path_nodes.map(&:code).join(" › ") %> — <%= classification_node.name %>
+  </p>
+<% else %>
+  <p class="text-sm text-gray-500">Not filed yet.</p>
+<% end %>
+
+<% if show_actions? %>
+  <div class="mt-4">
+    <%= render(Ui::ButtonComponent.new(
+      href: classify_form_entity_document_path(document.entity, document), variant: :secondary, size: :sm,
+      data: { turbo_frame: "modal", action: "click->modal#open" }
+    )) { "Change filing" } %>
+  </div>
+<% end %>

@@ -80,7 +80,8 @@ RSpec.describe "Entities::CircuitTemplates", type: :request do
             name: "Standard approval",
             circuit_template_steps_attributes: {
               "0" => { role: "RED", order: 1, actor_id: colleague.id },
-              "1" => { role: "VISA", order: 2 }
+              "1" => { role: "VISA", order: 2 },
+              "2" => { role: "SIGN", order: 3 }
             }
           }
         }
@@ -91,7 +92,7 @@ RSpec.describe "Entities::CircuitTemplates", type: :request do
           post entity_circuit_templates_path(entity), params: circuit_template_params
         }.to change(entity.circuit_templates, :count).by(1)
 
-        expect(entity.circuit_templates.last.circuit_template_steps.count).to eq(2)
+        expect(entity.circuit_templates.last.circuit_template_steps.count).to eq(3)
       end
 
       it "redirects to the circuit templates list" do
@@ -151,6 +152,8 @@ RSpec.describe "Entities::CircuitTemplates", type: :request do
     before { sign_in owner }
 
     it "updates the circuit template's name" do
+      create(:circuit_template_step, circuit_template: circuit_template, role: "SIGN", order: 2)
+
       patch entity_circuit_template_path(entity, circuit_template), params: { circuit_template: { name: "Renamed circuit" } }
 
       expect(circuit_template.reload.name).to eq("Renamed circuit")
@@ -163,7 +166,7 @@ RSpec.describe "Entities::CircuitTemplates", type: :request do
           name: circuit_template.name,
           circuit_template_steps_attributes: {
             "0" => { id: step.id, role: "RED", order: 1 },
-            "1" => { role: "VISA", order: 2 }
+            "1" => { role: "SIGN", order: 2 }
           }
         }
       }

@@ -324,16 +324,17 @@ RSpec.describe "WorkflowSteps", type: :request do
       before do
         create(:circuit_template_step, circuit_template: circuit_template, role: "RED", order: 1)
         create(:circuit_template_step, circuit_template: circuit_template, role: "VISA", order: 2)
+        create(:circuit_template_step, circuit_template: circuit_template, role: "SIGN", order: 3)
       end
 
       it "clones the template's steps into the document's circuit" do
         expect {
           post apply_template_entity_document_workflow_steps_path(entity, document), params: { circuit_template_id: circuit_template.id }
-        }.to change(document.workflow_steps, :count).by(2)
+        }.to change(document.workflow_steps, :count).by(3)
 
         expect(response).to redirect_to(entity_document_path(entity, document))
         expect(flash[:notice]).to be_present
-        expect(document.workflow_steps.reload.ordered.pluck(:role)).to eq(%w[RED VISA])
+        expect(document.workflow_steps.reload.ordered.pluck(:role)).to eq(%w[RED VISA SIGN])
       end
 
       it "continues the order numbering after existing steps" do
@@ -341,7 +342,7 @@ RSpec.describe "WorkflowSteps", type: :request do
 
         post apply_template_entity_document_workflow_steps_path(entity, document), params: { circuit_template_id: circuit_template.id }
 
-        expect(document.workflow_steps.reload.ordered.pluck(:order)).to eq([ 1, 2, 3 ])
+        expect(document.workflow_steps.reload.ordered.pluck(:order)).to eq([ 1, 2, 3, 4 ])
       end
     end
 

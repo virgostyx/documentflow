@@ -18,11 +18,13 @@ FactoryBot.define do
     trait :signed do
       status { "signed" }
       is_frozen { true }
+      after(:create) { |document| document.send(:assign_reference_number) }
     end
 
     trait :finalized do
       status { "finalized" }
       is_frozen { true }
+      after(:create) { |document| document.send(:assign_reference_number) }
     end
 
     trait :cancelled do

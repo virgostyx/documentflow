@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_26_094124) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_27_192559) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -168,7 +168,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_094124) do
     t.bigint "in_reply_to_id"
     t.boolean "is_frozen", default: false, null: false
     t.bigint "lead_user_id"
-    t.string "reference_number", null: false
+    t.string "reference_number"
     t.date "response_deadline"
     t.datetime "routed_at"
     t.text "routing_message"
@@ -177,6 +177,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_094124) do
     t.datetime "shared_link_renewed_at"
     t.string "status", default: "draft", null: false
     t.string "subject", null: false
+    t.string "temporary_number"
     t.datetime "updated_at", null: false
     t.index ["addressee_type", "addressee_id"], name: "index_documents_on_addressee_type_and_addressee_id"
     t.index ["checked_out_by_id"], name: "index_documents_on_checked_out_by_id"
@@ -189,6 +190,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_094124) do
     t.index ["lead_user_id"], name: "index_documents_on_lead_user_id"
     t.index ["sender_type", "sender_id"], name: "index_documents_on_sender_type_and_sender_id"
     t.index ["status"], name: "index_documents_on_status"
+    t.index ["temporary_number"], name: "index_documents_on_temporary_number", unique: true
   end
 
   create_table "entities", force: :cascade do |t|

@@ -19,12 +19,28 @@ RSpec.describe Workflow::ApplyCircuitTemplateOrganizer do
       end
     end
 
+    context "when the template's steps do not include a SIGN step" do
+      before do
+        create(:circuit_template_step, circuit_template: circuit_template, role: "RED", order: 1)
+        create(:circuit_template_step, circuit_template: circuit_template, role: "VISA", order: 2)
+      end
+
+      it "fails without modifying the document's circuit" do
+        result = described_class.call(document: document, circuit_template: circuit_template, current_user: user)
+
+        expect(result).not_to be_success
+        expect(result.message).to include("SIGN")
+        expect(document.workflow_steps.reload).to be_empty
+      end
+    end
+
     context "when the template has steps" do
       let(:actor) { create(:user) }
 
       before do
         create(:circuit_template_step, circuit_template: circuit_template, role: "RED", order: 1)
         create(:circuit_template_step, circuit_template: circuit_template, role: "VISA", order: 2, actor: actor, is_parallel: true, parallel_group: 1)
+        create(:circuit_template_step, circuit_template: circuit_template, role: "SIGN", order: 3)
       end
 
       context "when the document's circuit is empty" do
@@ -32,7 +48,7 @@ RSpec.describe Workflow::ApplyCircuitTemplateOrganizer do
           described_class.call(document: document, circuit_template: circuit_template, current_user: user)
 
           steps = document.workflow_steps.reload.ordered
-          expect(steps.pluck(:role, :order)).to eq([ [ "RED", 1 ], [ "VISA", 2 ] ])
+          expect(steps.pluck(:role, :order)).to eq([ [ "RED", 1 ], [ "VISA", 2 ], [ "SIGN", 3 ] ])
         end
 
         it "clones step attributes (actor, parallel flags, status)" do
@@ -55,7 +71,7 @@ RSpec.describe Workflow::ApplyCircuitTemplateOrganizer do
           described_class.call(document: document, circuit_template: circuit_template, current_user: user)
 
           steps = document.workflow_steps.reload.ordered
-          expect(steps.pluck(:role, :order)).to eq([ [ "RED", 1 ], [ "RED", 2 ], [ "VISA", 3 ] ])
+          expect(steps.pluck(:role, :order)).to eq([ [ "RED", 1 ], [ "RED", 2 ], [ "VISA", 3 ], [ "SIGN", 4 ] ])
         end
       end
 

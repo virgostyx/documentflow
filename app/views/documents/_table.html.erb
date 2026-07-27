@@ -30,7 +30,10 @@
             <% end %>
           </td>
           <td class="px-4 py-3">
-            <%= link_to document.reference_number, entity_document_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800", data: { turbo_frame: "_top" } %>
+            <%= link_to document.display_number, entity_document_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800", data: { turbo_frame: "_top" } %>
+            <% if document.reference_number.blank? %>
+              <%= render(Ui::BadgeComponent.new(color: :info)) { "Provisional" } %>
+            <% end %>
           </td>
           <td class="px-4 py-3 text-gray-900"><%= document.subject %></td>
           <td class="px-4 py-3 text-gray-500"><%= document.sender&.display_name %> &rarr; <%= document.addressee&.display_name %></td>

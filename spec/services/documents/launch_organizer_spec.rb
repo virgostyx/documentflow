@@ -54,6 +54,24 @@ RSpec.describe Documents::LaunchOrganizer do
       end
     end
 
+    context "quand le circuit du document n'a pas d'étape SIGN" do
+      let(:document) do
+        create(:document, created_by: user).tap do |doc|
+          doc.main_file.attach(io: StringIO.new("content"), filename: "main.pdf", content_type: "application/pdf")
+          create(:workflow_step, :red, document: doc, order: 1, actor: user)
+          create(:workflow_step, :visa, document: doc, order: 2, actor: user)
+        end
+      end
+
+      it "retourne un échec explicite et ne change pas le statut" do
+        result = described_class.call(document: document, current_user: user)
+
+        expect(result).not_to be_success
+        expect(result.message).to include("SIGN")
+        expect(document.reload.status).to eq("draft")
+      end
+    end
+
     context "quand le document n'a pas de document principal" do
       let(:document) do
         create(:document, :with_workflow, created_by: user).tap { |doc| doc.main_file.purge }

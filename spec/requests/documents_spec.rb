@@ -710,7 +710,7 @@ RSpec.describe "Documents", type: :request do
         get entity_document_path(entity, document)
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include(document.reference_number)
+        expect(response.body).to include(document.display_number)
         expect(response.body).to include(document.sender.full_name)
       end
 
@@ -734,14 +734,14 @@ RSpec.describe "Documents", type: :request do
           get entity_document_path(entity, document)
 
           expect(response.body).to include("Document chain")
-          expect(response.body).to include(reply.reference_number)
+          expect(response.body).to include(reply.display_number)
         end
 
         it "shows the document chain on the reply" do
           get entity_document_path(entity, reply)
 
           expect(response.body).to include("Document chain")
-          expect(response.body).to include(document.reference_number)
+          expect(response.body).to include(document.display_number)
         end
       end
 

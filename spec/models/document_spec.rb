@@ -179,22 +179,61 @@ RSpec.describe Document, type: :model do
 
   # ── Callbacks ─────────────────────────────────────────────────────────────
 
-  describe "before_validation :generate_reference_number" do
-    it "generates a reference number matching PREFIX(YYYY)#####" do
+  describe "after_create :assign_temporary_number" do
+    it "assigns a provisional PROV-<id> number to outgoing documents" do
       document.save!
-      expect(document.reference_number).to match(/\A[A-Z0-9]{1,8}\(\d{4}\)\d{5}\z/)
+      expect(document.temporary_number).to eq("PROV-#{document.id}")
+    end
+
+    it "does not assign a reference_number yet" do
+      document.save!
+      expect(document.reference_number).to be_nil
+    end
+
+    it "#display_number falls back to the temporary number" do
+      document.save!
+      expect(document.display_number).to eq(document.temporary_number)
+    end
+  end
+
+  describe "before_validation :generate_reference_number (incoming mail only)" do
+    it "assigns a reference number immediately, matching PREFIX(YYYY)#####" do
+      doc = create(:document, :incoming, entity: entity)
+      expect(doc.reference_number).to match(/\A[A-Z0-9]{1,8}\(\d{4}\)\d{5}\z/)
+    end
+
+    it "does not assign a temporary_number" do
+      doc = create(:document, :incoming, entity: entity)
+      expect(doc.temporary_number).to be_nil
+    end
+
+    it "does not regenerate an existing reference number" do
+      doc = build(:document, :incoming, entity: entity, reference_number: "FIN(2020)00099")
+      doc.valid?
+      expect(doc.reference_number).to eq("FIN(2020)00099")
+    end
+  end
+
+  describe "#sign / after: :assign_reference_number" do
+    it "assigns a reference number matching PREFIX(YYYY)##### when signed" do
+      doc = create(:document, :in_progress, entity: entity)
+      doc.sign!
+      expect(doc.reference_number).to match(/\A[A-Z0-9]{1,8}\(\d{4}\)\d{5}\z/)
     end
 
     it "uses the department's prefix" do
       department = create(:department, entity: entity, prefix: "FIN")
-      doc = create(:document, entity: entity, department: department)
+      doc = create(:document, :in_progress, entity: entity, department: department)
+      doc.sign!
       expect(doc.reference_number).to eq("FIN(#{Date.current.year})00001")
     end
 
     it "increments the sequence for the same department and year" do
       department = create(:department, entity: entity)
-      first = create(:document, entity: entity, department: department)
-      second = create(:document, entity: entity, department: department)
+      first = create(:document, :in_progress, entity: entity, department: department)
+      second = create(:document, :in_progress, entity: entity, department: department)
+      first.sign!
+      second.sign!
       expect(ReferenceNumber.parse(second.reference_number).sequence)
         .to eq(ReferenceNumber.parse(first.reference_number).sequence + 1)
     end
@@ -202,25 +241,37 @@ RSpec.describe Document, type: :model do
     it "keeps independent sequences for different departments in the same entity" do
       first_department = create(:department, entity: entity)
       second_department = create(:department, entity: entity)
-      first = create(:document, entity: entity, department: first_department)
-      second = create(:document, entity: entity, department: second_department)
+      first = create(:document, :in_progress, entity: entity, department: first_department)
+      second = create(:document, :in_progress, entity: entity, department: second_department)
+      first.sign!
+      second.sign!
       expect(ReferenceNumber.parse(first.reference_number).sequence).to eq(1)
       expect(ReferenceNumber.parse(second.reference_number).sequence).to eq(1)
     end
 
-    it "resets the counter every year" do
+    it "resets the counter every year, based on the signature date rather than document_date" do
       department = create(:department, entity: entity, prefix: "FIN")
-      travel_to(Date.new(2025, 12, 31)) { create(:document, entity: entity, department: department) }
+      travel_to(Date.new(2025, 12, 31)) do
+        doc = create(:document, :in_progress, entity: entity, department: department, document_date: Date.new(2025, 12, 31))
+        doc.sign!
+      end
       travel_to(Date.new(2026, 1, 1)) do
-        doc = create(:document, entity: entity, department: department)
+        doc = create(:document, :in_progress, entity: entity, department: department, document_date: Date.new(2025, 12, 31))
+        doc.sign!
         expect(doc.reference_number).to eq("FIN(2026)00001")
       end
     end
 
     it "does not regenerate an existing reference number" do
-      document.reference_number = "FIN(2020)00099"
-      document.valid?
-      expect(document.reference_number).to eq("FIN(2020)00099")
+      doc = create(:document, :in_progress, entity: entity, reference_number: "FIN(2020)00099")
+      doc.sign!
+      expect(doc.reference_number).to eq("FIN(2020)00099")
+    end
+
+    it "clears the temporary_number's role once a definitive number exists (#display_number prefers it)" do
+      doc = create(:document, :in_progress, entity: entity)
+      doc.sign!
+      expect(doc.display_number).to eq(doc.reference_number)
     end
   end
 

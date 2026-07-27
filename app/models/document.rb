@@ -100,7 +100,14 @@ class Document < ApplicationRecord
   }
 
   # Callbacks
-  before_validation :generate_reference_number, on: :create
+  #
+  # Outgoing documents only get a provisional "temporary_number" at creation;
+  # their definitive reference_number is assigned when the SIGN workflow step
+  # is approved (see #assign_reference_number). Incoming mail does not go
+  # through the sign/finalize workflow at all, so it keeps the legacy
+  # behavior of getting its reference_number immediately.
+  before_validation :generate_reference_number, on: :create, if: :incoming?
+  after_create :assign_temporary_number, unless: :incoming?
   before_validation :clear_response_deadline_unless_expecting_response
 
   # State machine
@@ -116,7 +123,7 @@ class Document < ApplicationRecord
     end
 
     event :sign do
-      transitions from: :in_progress, to: :signed, after: :freeze_document
+      transitions from: :in_progress, to: :signed, after: [ :freeze_document, :assign_reference_number ]
     end
 
     event :finalize do
@@ -131,6 +138,12 @@ class Document < ApplicationRecord
   # Methods
   def frozen?
     is_frozen
+  end
+
+  # The number to show to users: the definitive reference_number once
+  # assigned (at signature), otherwise the provisional temporary_number.
+  def display_number
+    reference_number.presence || temporary_number
   end
 
   def active_shared_link
@@ -202,10 +215,32 @@ class Document < ApplicationRecord
     return unless entity && department
 
     year = document_date&.year || Date.current.year
+    self.reference_number = next_reference_number(year: year)
+  end
+
+  # Assigns the definitive reference_number at the moment the document is
+  # signed (SIGN workflow step approved). Scoped per department and per the
+  # actual signature year (not document_date). A row lock on the department
+  # serializes concurrent signatures within the same department/year so two
+  # documents can never be assigned the same number.
+  def assign_reference_number
+    return if reference_number.present?
+    return unless entity && department
+
+    department.with_lock do
+      update_column(:reference_number, next_reference_number(year: Date.current.year))
+    end
+  end
+
+  def next_reference_number(year:)
     prefix = department.prefix.presence || entity.prefix
     last = department.documents.where("reference_number LIKE ?", "#{prefix}(#{year})%").maximum(:reference_number)
     reference = last ? ReferenceNumber.parse(last).next : ReferenceNumber.first_for(prefix: prefix, year: year)
-    self.reference_number = reference.to_s
+    reference.to_s
+  end
+
+  def assign_temporary_number
+    update_column(:temporary_number, "PROV-#{id}")
   end
 
   def freeze_document

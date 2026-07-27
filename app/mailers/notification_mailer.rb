@@ -6,7 +6,7 @@ class NotificationMailer < ApplicationMailer
     @document = document
     @document_url = entity_document_url(document.entity, document)
 
-    mail(to: user.email, subject: "Action required: #{document.reference_number}")
+    mail(to: user.email, subject: "Action required: #{document.display_number}")
   end
 
   def rejection_alert(user, document, reason)
@@ -15,7 +15,7 @@ class NotificationMailer < ApplicationMailer
     @reason = reason
     @document_url = entity_document_url(document.entity, document)
 
-    mail(to: user.email, subject: "Document rejected: #{document.reference_number}")
+    mail(to: user.email, subject: "Document rejected: #{document.display_number}")
   end
 
   def mail_lead_assigned(user, document)
@@ -23,7 +23,7 @@ class NotificationMailer < ApplicationMailer
     @document = document
     @document_url = entity_document_url(document.entity, document)
 
-    mail(to: user.email, subject: "Incoming mail assigned to you: #{document.reference_number}")
+    mail(to: user.email, subject: "Incoming mail assigned to you: #{document.display_number}")
   end
 
   def mail_action_assigned(user, document)
@@ -31,7 +31,7 @@ class NotificationMailer < ApplicationMailer
     @document = document
     @document_url = entity_document_url(document.entity, document)
 
-    mail(to: user.email, subject: "Action required on incoming mail: #{document.reference_number}")
+    mail(to: user.email, subject: "Action required on incoming mail: #{document.display_number}")
   end
 
   def checked_out(user, document)
@@ -39,7 +39,7 @@ class NotificationMailer < ApplicationMailer
     @document = document
     @document_url = entity_document_url(document.entity, document)
 
-    mail(to: user.email, subject: "Document checked out: #{document.reference_number}")
+    mail(to: user.email, subject: "Document checked out: #{document.display_number}")
   end
 
   def checked_in(user, document)
@@ -47,7 +47,7 @@ class NotificationMailer < ApplicationMailer
     @document = document
     @document_url = entity_document_url(document.entity, document)
 
-    mail(to: user.email, subject: "New document version checked in: #{document.reference_number}")
+    mail(to: user.email, subject: "New document version checked in: #{document.display_number}")
   end
 
   def document_finalized(user, document)

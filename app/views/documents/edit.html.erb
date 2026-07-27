@@ -3,7 +3,7 @@
     title: "Edit document",
     description: current_entity.name,
     back_path: entity_document_path(current_entity, @document),
-    back_text: @document.reference_number
+    back_text: @document.display_number
   ) %>
 
   <%= render Ui::CardComponent.new do %>

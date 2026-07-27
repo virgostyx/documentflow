@@ -1,4 +1,4 @@
-<% content_for :title, "#{@document.reference_number} - DocumentFlow" %>
+<% content_for :title, "#{@document.display_number} - DocumentFlow" %>
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="flex items-center gap-2 mb-8">
@@ -18,7 +18,7 @@
 
     <div class="mt-6">
       <%= render Ui::DefinitionListComponent.new do |dl| %>
-        <% dl.with_item(term: "Reference number") { @document.reference_number } %>
+        <% dl.with_item(term: "Reference number") { @document.display_number } %>
         <% dl.with_item(term: "Document date") { l(@document.document_date) } %>
       <% end %>
     </div>

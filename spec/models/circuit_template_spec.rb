@@ -34,6 +34,29 @@ RSpec.describe CircuitTemplate, type: :model do
       other_template = build(:circuit_template, entity: other_entity, name: "Standard circuit")
       expect(other_template).to be_valid
     end
+
+    it "allows a template with no steps at all" do
+      expect(circuit_template).to be_valid
+    end
+
+    it "rejects a template whose steps do not include a SIGN role" do
+      circuit_template.circuit_template_steps_attributes = [
+        { role: "RED", order: 1 },
+        { role: "VISA", order: 2 }
+      ]
+
+      expect(circuit_template).not_to be_valid
+      expect(circuit_template.errors[:base]).to include("Circuit must include a SIGN step")
+    end
+
+    it "accepts a template whose steps include a SIGN role" do
+      circuit_template.circuit_template_steps_attributes = [
+        { role: "RED", order: 1 },
+        { role: "SIGN", order: 2 }
+      ]
+
+      expect(circuit_template).to be_valid
+    end
   end
 
   # ── Nested attributes ────────────────────────────────────────────────────
@@ -42,11 +65,12 @@ RSpec.describe CircuitTemplate, type: :model do
     it "builds and persists circuit template steps" do
       circuit_template.circuit_template_steps_attributes = [
         { role: "RED", order: 1 },
-        { role: "VISA", order: 2 }
+        { role: "VISA", order: 2 },
+        { role: "SIGN", order: 3 }
       ]
       circuit_template.save!
 
-      expect(circuit_template.circuit_template_steps.count).to eq(2)
+      expect(circuit_template.circuit_template_steps.count).to eq(3)
     end
 
     it "destroys steps marked for destruction" do

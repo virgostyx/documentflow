@@ -76,6 +76,11 @@ def add_document!(entity:, subject:, department:, created_by:, sender:, addresse
     doc.status = status
     doc.is_frozen = is_frozen
     doc.expects_response = expects_response
+  end.tap do |doc|
+    # Seed data sets `status` directly instead of going through the AASM
+    # sign event, so it must also assign the definitive reference_number
+    # itself for signed/finalized documents (mirrors Document#assign_reference_number).
+    doc.send(:assign_reference_number) if doc.reference_number.blank? && %w[signed finalized].include?(doc.status)
   end
 end
 

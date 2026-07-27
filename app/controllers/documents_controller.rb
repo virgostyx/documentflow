@@ -182,7 +182,12 @@ class DocumentsController < ApplicationController
   def load_documents(scope)
     documents = scope.includes(:sender, :addressee, :created_by)
     documents = documents.with_status(params[:status])
-    documents = documents.where("subject ILIKE :q OR reference_number ILIKE :q", q: "%#{params[:q]}%") if params[:q].present?
+    if params[:q].present?
+      documents = documents.where(
+        "subject ILIKE :q OR reference_number ILIKE :q OR temporary_number ILIKE :q",
+        q: "%#{params[:q]}%"
+      )
+    end
     documents = apply_classification_filter(documents)
     documents.sorted(params[:sort], params[:direction]).page(params[:page])
   end

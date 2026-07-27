@@ -45,7 +45,7 @@ RSpec.describe PdfStamper do
     it "draws the department logo when the document's department has one" do
       entity = create(:entity)
       department = create(:department, :with_logo, entity: entity)
-      document = create(:document, entity: entity, department: department)
+      document = create(:document, entity: entity, department: department, reference_number: "ENT(2026)00001")
       pdf_path = build_pdf
 
       output_path = described_class.stamp(pdf_path, document)
@@ -56,7 +56,7 @@ RSpec.describe PdfStamper do
     it "falls back to the entity logo when the department has none" do
       entity = create(:entity, :with_logo)
       department = create(:department, entity: entity)
-      document = create(:document, entity: entity, department: department)
+      document = create(:document, entity: entity, department: department, reference_number: "ENT(2026)00001")
       pdf_path = build_pdf
 
       output_path = described_class.stamp(pdf_path, document)
@@ -65,7 +65,7 @@ RSpec.describe PdfStamper do
     end
 
     it "draws a text-only stamp when neither the department nor the entity has a logo" do
-      document = create(:document)
+      document = create(:document, :finalized)
       pdf_path = build_pdf
 
       output_path = described_class.stamp(pdf_path, document)

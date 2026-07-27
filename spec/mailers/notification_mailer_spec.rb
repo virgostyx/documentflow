@@ -16,12 +16,12 @@ RSpec.describe NotificationMailer do
 
     it "is addressed to the user with a subject mentioning the reference number" do
       expect(mail.to).to eq([ user.email ])
-      expect(mail.subject).to include(document.reference_number)
+      expect(mail.subject).to include(document.display_number)
     end
 
     it "renders a text and an html part mentioning the document and linking to it" do
-      expect(mail.text_part.body.encoded).to include(document.reference_number, document.subject, document_url)
-      expect(mail.html_part.body.encoded).to include(document.reference_number, document.subject, document_url)
+      expect(mail.text_part.body.encoded).to include(document.display_number, document.subject, document_url)
+      expect(mail.html_part.body.encoded).to include(document.display_number, document.subject, document_url)
     end
   end
 
@@ -30,7 +30,7 @@ RSpec.describe NotificationMailer do
 
     it "is addressed to the user with a subject mentioning the reference number" do
       expect(mail.to).to eq([ user.email ])
-      expect(mail.subject).to include(document.reference_number)
+      expect(mail.subject).to include(document.display_number)
     end
 
     it "renders a text and an html part with the rejection reason and a link to the document" do
@@ -44,12 +44,12 @@ RSpec.describe NotificationMailer do
 
     it "is addressed to the user with a subject mentioning the reference number" do
       expect(mail.to).to eq([ user.email ])
-      expect(mail.subject).to include(document.reference_number)
+      expect(mail.subject).to include(document.display_number)
     end
 
     it "renders a text and an html part mentioning the document and linking to it" do
-      expect(mail.text_part.body.encoded).to include(document.reference_number, document.subject, document_url)
-      expect(mail.html_part.body.encoded).to include(document.reference_number, document.subject, document_url)
+      expect(mail.text_part.body.encoded).to include(document.display_number, document.subject, document_url)
+      expect(mail.html_part.body.encoded).to include(document.display_number, document.subject, document_url)
     end
   end
 
@@ -58,14 +58,14 @@ RSpec.describe NotificationMailer do
 
     it "is addressed to the user with a subject mentioning the reference number" do
       expect(mail.to).to eq([ user.email ])
-      expect(mail.subject).to include(document.reference_number)
+      expect(mail.subject).to include(document.display_number)
     end
 
     it "renders a text and an html part mentioning the document, the routing message, and linking to it" do
       document.update!(routing_message: "Please handle this by Friday")
 
-      expect(mail.text_part.body.encoded).to include(document.reference_number, document.subject, document.routing_message, document_url)
-      expect(mail.html_part.body.encoded).to include(document.reference_number, document.subject, document.routing_message, document_url)
+      expect(mail.text_part.body.encoded).to include(document.display_number, document.subject, document.routing_message, document_url)
+      expect(mail.html_part.body.encoded).to include(document.display_number, document.subject, document.routing_message, document_url)
     end
   end
 
@@ -74,12 +74,12 @@ RSpec.describe NotificationMailer do
 
     it "is addressed to the user with a subject mentioning the reference number" do
       expect(mail.to).to eq([ user.email ])
-      expect(mail.subject).to include(document.reference_number)
+      expect(mail.subject).to include(document.display_number)
     end
 
     it "renders a text and an html part mentioning the document and linking to it" do
-      expect(mail.text_part.body.encoded).to include(document.reference_number, document.subject, document_url)
-      expect(mail.html_part.body.encoded).to include(document.reference_number, document.subject, document_url)
+      expect(mail.text_part.body.encoded).to include(document.display_number, document.subject, document_url)
+      expect(mail.html_part.body.encoded).to include(document.display_number, document.subject, document_url)
     end
   end
 
@@ -88,16 +88,17 @@ RSpec.describe NotificationMailer do
 
     it "is addressed to the user with a subject mentioning the reference number" do
       expect(mail.to).to eq([ user.email ])
-      expect(mail.subject).to include(document.reference_number)
+      expect(mail.subject).to include(document.display_number)
     end
 
     it "renders a text and an html part mentioning the document and linking to it" do
-      expect(mail.text_part.body.encoded).to include(document.reference_number, document.subject, document_url)
-      expect(mail.html_part.body.encoded).to include(document.reference_number, document.subject, document_url)
+      expect(mail.text_part.body.encoded).to include(document.display_number, document.subject, document_url)
+      expect(mail.html_part.body.encoded).to include(document.display_number, document.subject, document_url)
     end
   end
 
   describe "#document_finalized" do
+    let(:document) { create(:document, :finalized) }
     let(:mail) { described_class.document_finalized(user, document) }
 
     it "is addressed to the user with a subject mentioning the reference number" do
@@ -112,6 +113,8 @@ RSpec.describe NotificationMailer do
   end
 
   describe "#document_addressed" do
+    let(:document) { create(:document, :finalized) }
+
     context "with an internal user recipient" do
       let(:mail) { described_class.document_addressed(user, document) }
 
@@ -171,6 +174,8 @@ RSpec.describe NotificationMailer do
   end
 
   describe "#cc_notification" do
+    let(:document) { create(:document, :finalized) }
+
     context "with an internal user recipient" do
       let(:mail) { described_class.cc_notification(user, document) }
 

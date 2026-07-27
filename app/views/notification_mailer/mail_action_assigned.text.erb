@@ -1,6 +1,6 @@
 Hello <%= @user.email %>,
 
-Action is required on incoming mail <%= @document.reference_number %> (<%= @document.subject %>).
+Action is required on incoming mail <%= @document.display_number %> (<%= @document.subject %>).
 <% if @document.routing_message.present? %>
 
 <%= @document.routing_message %>

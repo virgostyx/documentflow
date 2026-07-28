@@ -17,7 +17,7 @@ module Entities
     end
 
     def received_count
-      documents_base_scope.received_by(current_user).count
+      documents_base_scope.received_by(current_user).finalized.count
     end
 
     def mine_count

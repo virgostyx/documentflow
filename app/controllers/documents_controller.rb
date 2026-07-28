@@ -19,7 +19,7 @@ class DocumentsController < ApplicationController
 
   def received
     @list_scope = "received"
-    @documents = load_documents(base_scope.received_by(current_user))
+    @documents = load_documents(base_scope.received_by(current_user).finalized)
     render :index
   end
 
@@ -170,7 +170,7 @@ class DocumentsController < ApplicationController
   def scoped_base_for(list_scope)
     case list_scope
     when "mine" then base_scope.authored_by(current_user).not_finalized
-    when "received" then base_scope.received_by(current_user)
+    when "received" then base_scope.received_by(current_user).finalized
     when "todo" then base_scope.todo_for(current_user).finalized
     when "waiting" then base_scope.waiting_for(current_user).finalized
     when "info" then base_scope.info_for(current_user).finalized

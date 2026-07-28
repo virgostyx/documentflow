@@ -262,22 +262,29 @@ RSpec.describe "Documents", type: :request do
       create(:entity_user_department, entity_user: eu, department: department)
       eu
     end
-    let!(:addressed_to_me) { create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me") }
-    let!(:cc_to_me) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me") }
-    let!(:not_received) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Not received") }
+    let!(:addressed_to_me) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me") }
+    let!(:cc_to_me) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me") }
+    let!(:not_received) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Not received") }
+    let!(:not_finalized_addressed_to_me) { create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Not yet finalized") }
 
     before do
       create(:cc_recipient, document: cc_to_me, party: user)
       sign_in user
     end
 
-    it "lists documents where the current user is the addressee or a cc recipient" do
+    it "lists finalized documents where the current user is the addressee or a cc recipient" do
       get received_entity_documents_path(entity)
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(addressed_to_me.subject)
       expect(response.body).to include(cc_to_me.subject)
       expect(response.body).not_to include(not_received.subject)
+    end
+
+    it "excludes documents that are not yet finalized" do
+      get received_entity_documents_path(entity)
+
+      expect(response.body).not_to include(not_finalized_addressed_to_me.subject)
     end
   end
 
@@ -456,8 +463,8 @@ RSpec.describe "Documents", type: :request do
     end
 
     it "re-applies the 'received' scope when searching" do
-      received = create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Received supplier deal")
-      other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
+      received = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: user, subject: "Received supplier deal")
+      other = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
 
       get search_entity_documents_path(entity), params: { q: "supplier", scope: "received" }
 

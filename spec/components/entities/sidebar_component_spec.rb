@@ -211,9 +211,15 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
 
     it "counts documents addressed to the user as My Inbox" do
-      create(:document, entity: entity, addressee: user)
+      create(:document, :finalized, entity: entity, addressee: user)
 
       expect(link_text(received_entity_documents_path(entity))).to eq("My Inbox 1")
+    end
+
+    it "excludes a matching My Inbox document that is not yet finalized" do
+      create(:document, entity: entity, addressee: user)
+
+      expect(link_text(received_entity_documents_path(entity))).to eq("My Inbox 0")
     end
 
     it "counts documents addressed to the user expecting a response as ToDo" do

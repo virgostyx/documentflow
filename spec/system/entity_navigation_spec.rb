@@ -9,7 +9,7 @@ RSpec.describe "Entity sidebar navigation", type: :system do
 
   let!(:entity_user) { create(:entity_user, :owner, entity: entity, user: user) }
   let!(:my_document) { create(:document, entity: entity, sender: contact, addressee: contact, subject: "My contract", created_by: user) }
-  let!(:received_document) { create(:document, entity: entity, sender: contact, addressee: user, subject: "Received contract") }
+  let!(:received_document) { create(:document, :finalized, entity: entity, sender: contact, addressee: user, subject: "Received contract") }
   let!(:todo_document) { create(:document, :finalized, :expecting_response, entity: entity, sender: contact, addressee: user, subject: "Document needing my reply") }
   let!(:waiting_document) { create(:document, :finalized, :expecting_response, entity: entity, sender: contact, addressee: contact, subject: "Document awaiting a reply", created_by: user) }
   let!(:info_document) { create(:document, :finalized, entity: entity, sender: contact, addressee: contact, subject: "Finalized info document", created_by: user) }
@@ -47,8 +47,8 @@ RSpec.describe "Entity sidebar navigation", type: :system do
     click_link "Info"
     expect(page).to have_current_path(info_entity_documents_path(entity))
     expect(page).to have_content("Finalized info document")
+    expect(page).to have_content("Received contract")
     expect(page).not_to have_content("My contract")
-    expect(page).not_to have_content("Received contract")
     expect(page).not_to have_content("Document needing my reply")
     expect(page).not_to have_content("Document awaiting a reply")
 

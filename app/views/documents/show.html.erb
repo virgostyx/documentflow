@@ -90,7 +90,7 @@
                   </p>
                   <% if policy(cc_recipient).destroy? %>
                     <%= render(Ui::ButtonComponent.new(
-                      href: entity_document_cc_recipient_path(current_entity, @document, cc_recipient), variant: :danger, method: :delete,
+                      href: entity_document_cc_recipient_path(current_entity, @document, cc_recipient), variant: :danger, size: :sm, method: :delete,
                       data: { turbo_confirm: "Remove this recipient from the copy list?" }
                     )) { "Remove" } %>
                   <% end %>

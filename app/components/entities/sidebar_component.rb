@@ -21,19 +21,19 @@ module Entities
     end
 
     def mine_count
-      documents_base_scope.authored_by(current_user).count
+      documents_base_scope.authored_by(current_user).not_finalized.count
     end
 
     def todo_count
-      documents_base_scope.todo_for(current_user).count
+      documents_base_scope.todo_for(current_user).finalized.count
     end
 
     def waiting_count
-      documents_base_scope.waiting_for(current_user).count
+      documents_base_scope.waiting_for(current_user).finalized.count
     end
 
     def info_count
-      documents_base_scope.info_for(current_user).count
+      documents_base_scope.info_for(current_user).finalized.count
     end
 
     def incoming_inbox_count
@@ -49,7 +49,7 @@ module Entities
     end
 
     def unclassified_count
-      documents_base_scope.unclassified.count
+      documents_base_scope.unclassified.finalized.count
     end
 
     def document_count_for(node)

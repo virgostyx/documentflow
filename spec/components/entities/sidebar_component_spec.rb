@@ -189,6 +189,20 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       expect(link_text(mine_entity_documents_path(entity))).to eq("My Outbox 1")
     end
 
+    it "excludes the user's finalized documents from the My Outbox count" do
+      create(:document, :finalized, entity: entity, created_by: user)
+
+      expect(link_text(mine_entity_documents_path(entity))).to eq("My Outbox 0")
+    end
+
+    it "only counts finalized documents in the Unclassified badge" do
+      create(:document, :finalized, entity: entity)
+      create(:document, entity: entity)
+
+      unclassified_href = entity_documents_path(entity, classification_node_id: "unclassified")
+      expect(link_text(unclassified_href)).to eq("Unclassified 1")
+    end
+
     it "counts all accessible documents as Overview" do
       create(:document, entity: entity, created_by: user)
 
@@ -202,21 +216,39 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
 
     it "counts documents addressed to the user expecting a response as ToDo" do
-      create(:document, :expecting_response, entity: entity, addressee: user)
+      create(:document, :finalized, :expecting_response, entity: entity, addressee: user)
 
       expect(link_text(todo_entity_documents_path(entity))).to eq("ToDo 1")
     end
 
+    it "excludes a matching ToDo document that is not yet finalized" do
+      create(:document, :expecting_response, entity: entity, addressee: user)
+
+      expect(link_text(todo_entity_documents_path(entity))).to eq("ToDo 0")
+    end
+
     it "counts documents authored by the user expecting a response as Waiting" do
-      create(:document, :expecting_response, entity: entity, created_by: user)
+      create(:document, :finalized, :expecting_response, entity: entity, created_by: user)
 
       expect(link_text(waiting_entity_documents_path(entity))).to eq("Waiting 1")
     end
 
+    it "excludes a matching Waiting document that is not yet finalized" do
+      create(:document, :expecting_response, entity: entity, created_by: user)
+
+      expect(link_text(waiting_entity_documents_path(entity))).to eq("Waiting 0")
+    end
+
     it "counts documents addressed to the user not expecting a response as Info" do
-      create(:document, entity: entity, addressee: user)
+      create(:document, :finalized, entity: entity, addressee: user)
 
       expect(link_text(info_entity_documents_path(entity))).to eq("Info 1")
+    end
+
+    it "excludes a matching Info document that is not yet finalized" do
+      create(:document, entity: entity, addressee: user)
+
+      expect(link_text(info_entity_documents_path(entity))).to eq("Info 0")
     end
   end
 

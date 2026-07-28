@@ -25,19 +25,19 @@ class DocumentsController < ApplicationController
 
   def todo
     @list_scope = "todo"
-    @documents = load_documents(base_scope.todo_for(current_user))
+    @documents = load_documents(base_scope.todo_for(current_user).finalized)
     render :index
   end
 
   def waiting
     @list_scope = "waiting"
-    @documents = load_documents(base_scope.waiting_for(current_user))
+    @documents = load_documents(base_scope.waiting_for(current_user).finalized)
     render :index
   end
 
   def info
     @list_scope = "info"
-    @documents = load_documents(base_scope.info_for(current_user))
+    @documents = load_documents(base_scope.info_for(current_user).finalized)
     render :index
   end
 
@@ -171,9 +171,9 @@ class DocumentsController < ApplicationController
     case list_scope
     when "mine" then base_scope.authored_by(current_user).not_finalized
     when "received" then base_scope.received_by(current_user)
-    when "todo" then base_scope.todo_for(current_user)
-    when "waiting" then base_scope.waiting_for(current_user)
-    when "info" then base_scope.info_for(current_user)
+    when "todo" then base_scope.todo_for(current_user).finalized
+    when "waiting" then base_scope.waiting_for(current_user).finalized
+    when "info" then base_scope.info_for(current_user).finalized
     when "to_validate" then current_entity.documents.outgoing.pending_for(current_user)
     else base_scope
     end

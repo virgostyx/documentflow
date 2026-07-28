@@ -274,9 +274,9 @@ RSpec.describe "Documents", type: :request do
       create(:entity_user_department, entity_user: eu, department: department)
       eu
     end
-    let!(:todo) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply") }
-    let!(:addressed_no_response) { create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me, no reply needed") }
-    let!(:cc_expecting_response) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me, expecting a reply") }
+    let!(:todo) { create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply") }
+    let!(:addressed_no_response) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me, no reply needed") }
+    let!(:cc_expecting_response) { create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me, expecting a reply") }
 
     before do
       create(:cc_recipient, document: cc_expecting_response, party: user)
@@ -291,6 +291,14 @@ RSpec.describe "Documents", type: :request do
       expect(response.body).not_to include(addressed_no_response.subject)
       expect(response.body).not_to include(cc_expecting_response.subject)
     end
+
+    it "excludes a matching document that is not yet finalized" do
+      not_finalized = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Not finalized yet")
+
+      get todo_entity_documents_path(entity)
+
+      expect(response.body).not_to include(not_finalized.subject)
+    end
   end
 
   describe "GET /entities/:entity_id/documents/waiting" do
@@ -299,9 +307,9 @@ RSpec.describe "Documents", type: :request do
       create(:entity_user_department, entity_user: eu, department: department)
       eu
     end
-    let!(:waiting) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting on a reply", created_by: user) }
-    let!(:mine_no_response) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "No reply needed", created_by: user) }
-    let!(:others_expecting_response) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Colleague is waiting") }
+    let!(:waiting) { create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting on a reply", created_by: user) }
+    let!(:mine_no_response) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "No reply needed", created_by: user) }
+    let!(:others_expecting_response) { create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Colleague is waiting") }
 
     before { sign_in user }
 
@@ -312,6 +320,14 @@ RSpec.describe "Documents", type: :request do
       expect(response.body).to include(waiting.subject)
       expect(response.body).not_to include(mine_no_response.subject)
       expect(response.body).not_to include(others_expecting_response.subject)
+    end
+
+    it "excludes a matching document that is not yet finalized" do
+      not_finalized = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Not finalized yet", created_by: user)
+
+      get waiting_entity_documents_path(entity)
+
+      expect(response.body).not_to include(not_finalized.subject)
     end
   end
 
@@ -363,11 +379,11 @@ RSpec.describe "Documents", type: :request do
       create(:entity_user_department, entity_user: eu, department: department)
       eu
     end
-    let!(:cc_to_me) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me") }
-    let!(:addressed_no_response) { create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me, no reply needed") }
-    let!(:mine_no_response) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "No reply needed", created_by: user) }
-    let!(:todo) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply") }
-    let!(:waiting) { create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting on a reply", created_by: user) }
+    let!(:cc_to_me) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me") }
+    let!(:addressed_no_response) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me, no reply needed") }
+    let!(:mine_no_response) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "No reply needed", created_by: user) }
+    let!(:todo) { create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply") }
+    let!(:waiting) { create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting on a reply", created_by: user) }
 
     before do
       create(:cc_recipient, document: cc_to_me, party: user)
@@ -383,6 +399,14 @@ RSpec.describe "Documents", type: :request do
       expect(response.body).to include(mine_no_response.subject)
       expect(response.body).not_to include(todo.subject)
       expect(response.body).not_to include(waiting.subject)
+    end
+
+    it "excludes a matching document that is not yet finalized" do
+      not_finalized = create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Not finalized yet")
+
+      get info_entity_documents_path(entity)
+
+      expect(response.body).not_to include(not_finalized.subject)
     end
   end
 
@@ -429,8 +453,8 @@ RSpec.describe "Documents", type: :request do
     end
 
     it "re-applies the 'todo' scope when searching" do
-      todo = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Todo supplier deal")
-      other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
+      todo = create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Todo supplier deal")
+      other = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
 
       get search_entity_documents_path(entity), params: { q: "supplier", scope: "todo" }
 
@@ -439,8 +463,8 @@ RSpec.describe "Documents", type: :request do
     end
 
     it "re-applies the 'waiting' scope when searching" do
-      waiting = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting supplier deal", created_by: user)
-      other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
+      waiting = create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting supplier deal", created_by: user)
+      other = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
 
       get search_entity_documents_path(entity), params: { q: "supplier", scope: "waiting" }
 
@@ -449,8 +473,8 @@ RSpec.describe "Documents", type: :request do
     end
 
     it "re-applies the 'info' scope when searching" do
-      info = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Info supplier deal", created_by: user)
-      todo = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Other supplier deal")
+      info = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Info supplier deal", created_by: user)
+      todo = create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Other supplier deal")
 
       get search_entity_documents_path(entity), params: { q: "supplier", scope: "info" }
 

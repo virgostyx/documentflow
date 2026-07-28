@@ -63,7 +63,13 @@ class Document < ApplicationRecord
     ).distinct
   }
   scope :todo_for, ->(user) {
+    replied_document_ids = Document.finalized
+                                    .where(created_by_id: user.id)
+                                    .where.not(in_reply_to_id: nil)
+                                    .select(:in_reply_to_id)
+
     where(addressee_type: "User", addressee_id: user.id, expects_response: true)
+      .where.not(id: replied_document_ids)
   }
   scope :pending_for, ->(user) {
     joins(:workflow_steps)

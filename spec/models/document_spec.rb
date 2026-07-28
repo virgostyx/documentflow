@@ -666,6 +666,45 @@ RSpec.describe Document, type: :model do
 
       expect(Document.todo_for(user)).to be_empty
     end
+
+    it "excludes a document once the addressee has posted a finalized reply to it" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      original = create(:document, :expecting_response, entity: entity, addressee: user)
+      create(:document, :finalized, entity: entity, created_by: user, in_reply_to: original)
+
+      expect(Document.todo_for(user)).to be_empty
+    end
+
+    it "keeps a document in the todo list if the addressee's reply is not yet finalized" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      original = create(:document, :expecting_response, entity: entity, addressee: user)
+      create(:document, entity: entity, created_by: user, in_reply_to: original)
+
+      expect(Document.todo_for(user)).to contain_exactly(original)
+    end
+
+    it "keeps a document in the todo list if a finalized reply exists but was created by someone else" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      original = create(:document, :expecting_response, entity: entity, addressee: user)
+      other_user = create(:user)
+      create(:entity_user, entity: entity, user: other_user)
+      create(:document, :finalized, entity: entity, created_by: other_user, in_reply_to: original)
+
+      expect(Document.todo_for(user)).to contain_exactly(original)
+    end
+
+    it "excludes a document when only one of several replies from the addressee is finalized" do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user)
+      original = create(:document, :expecting_response, entity: entity, addressee: user)
+      create(:document, entity: entity, created_by: user, in_reply_to: original)
+      create(:document, :finalized, entity: entity, created_by: user, in_reply_to: original)
+
+      expect(Document.todo_for(user)).to be_empty
+    end
   end
 
   describe ".pending_for" do

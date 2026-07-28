@@ -319,6 +319,15 @@ RSpec.describe "Documents", type: :request do
 
       expect(response.body).not_to include(not_finalized.subject)
     end
+
+    it "excludes a document once the user has posted a finalized reply to it" do
+      create(:document, :finalized, entity: entity, department: department, sender: sender,
+                         created_by: user, in_reply_to: todo, subject: "My finalized reply")
+
+      get todo_entity_documents_path(entity)
+
+      expect(response.body).not_to include(todo.subject)
+    end
   end
 
   describe "GET /entities/:entity_id/documents/waiting" do

@@ -762,6 +762,31 @@ RSpec.describe Document, type: :model do
 
       expect(Document.waiting_for(user)).to be_empty
     end
+
+    it "excludes a document once it has received a finalized reply" do
+      user = create(:user)
+      original = create(:document, :expecting_response, entity: entity, created_by: user)
+      create(:document, :finalized, entity: entity, in_reply_to: original)
+
+      expect(Document.waiting_for(user)).to be_empty
+    end
+
+    it "keeps a document in the waiting list if the reply is not yet finalized" do
+      user = create(:user)
+      original = create(:document, :expecting_response, entity: entity, created_by: user)
+      create(:document, entity: entity, in_reply_to: original)
+
+      expect(Document.waiting_for(user)).to contain_exactly(original)
+    end
+
+    it "excludes a document when only one of several replies is finalized" do
+      user = create(:user)
+      original = create(:document, :expecting_response, entity: entity, created_by: user)
+      create(:document, entity: entity, in_reply_to: original)
+      create(:document, :finalized, entity: entity, in_reply_to: original)
+
+      expect(Document.waiting_for(user)).to be_empty
+    end
   end
 
   describe ".info_for" do

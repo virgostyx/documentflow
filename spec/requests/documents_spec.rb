@@ -358,6 +358,15 @@ RSpec.describe "Documents", type: :request do
 
       expect(response.body).not_to include(not_finalized.subject)
     end
+
+    it "excludes a document once it has received a finalized reply" do
+      create(:document, :finalized, entity: entity, department: department, sender: addressee,
+                         addressee: sender, in_reply_to: waiting, subject: "A finalized reply")
+
+      get waiting_entity_documents_path(entity)
+
+      expect(response.body).not_to include(waiting.subject)
+    end
   end
 
   describe "GET /entities/:entity_id/documents/to_validate" do

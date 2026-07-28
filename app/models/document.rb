@@ -81,7 +81,10 @@ class Document < ApplicationRecord
       .distinct
   }
   scope :waiting_for, ->(user) {
+    replied_document_ids = Document.finalized.where.not(in_reply_to_id: nil).select(:in_reply_to_id)
+
     where(created_by: user, expects_response: true)
+      .where.not(id: replied_document_ids)
   }
   scope :info_for, ->(user) {
     left_joins(:cc_recipients).where(

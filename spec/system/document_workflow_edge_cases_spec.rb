@@ -57,8 +57,8 @@ RSpec.describe "Document validation circuit edge cases", type: :system do
   end
 
   describe "searching documents" do
-    let!(:matching_document) { create(:document, entity: entity, created_by: owner, subject: "Annual budget review") }
-    let!(:other_document) { create(:document, entity: entity, created_by: owner, subject: "Office lease renewal") }
+    let!(:matching_document) { create(:document, :finalized, entity: entity, created_by: owner, subject: "Annual budget review") }
+    let!(:other_document) { create(:document, :finalized, entity: entity, created_by: owner, subject: "Office lease renewal") }
 
     it "filters the document list by the search query" do
       sign_in_via_form(owner)

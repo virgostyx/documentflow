@@ -9,7 +9,7 @@ module Entities
     end
 
     def overview_count
-      documents_base_scope.count
+      documents_base_scope.finalized.count
     end
 
     def to_validate_count

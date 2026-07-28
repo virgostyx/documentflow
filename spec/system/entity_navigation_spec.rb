@@ -13,6 +13,7 @@ RSpec.describe "Entity sidebar navigation", type: :system do
   let!(:todo_document) { create(:document, :finalized, :expecting_response, entity: entity, sender: contact, addressee: user, subject: "Document needing my reply") }
   let!(:waiting_document) { create(:document, :finalized, :expecting_response, entity: entity, sender: contact, addressee: contact, subject: "Document awaiting a reply", created_by: user) }
   let!(:info_document) { create(:document, :finalized, entity: entity, sender: contact, addressee: contact, subject: "Finalized info document", created_by: user) }
+  let!(:overview_document) { create(:document, :finalized, entity: entity, sender: contact, addressee: contact, subject: "Finalized overview document") }
 
   before do
     sign_in_via_form(user)
@@ -20,8 +21,7 @@ RSpec.describe "Entity sidebar navigation", type: :system do
   end
 
   it "navigates between Documents, My Inbox, My Outbox, ToDo, Waiting, Info, Contacts and Settings" do
-    expect(page).to have_content("My contract")
-    expect(page).to have_content("Received contract")
+    expect(page).to have_content("Finalized overview document")
 
     click_link "My Outbox"
     expect(page).to have_current_path(mine_entity_documents_path(entity))
@@ -54,8 +54,7 @@ RSpec.describe "Entity sidebar navigation", type: :system do
 
     within("aside") { click_link(href: entity_documents_path(entity)) }
     expect(page).to have_current_path(entity_documents_path(entity))
-    expect(page).to have_content("My contract")
-    expect(page).to have_content("Received contract")
+    expect(page).to have_content("Finalized overview document")
 
     within("aside") { click_link(href: entity_contacts_path(entity)) }
     expect(page).to have_current_path(entity_contacts_path(entity))

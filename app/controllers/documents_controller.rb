@@ -8,7 +8,7 @@ class DocumentsController < ApplicationController
 
   def index
     @list_scope = "all"
-    @documents = load_documents(base_scope)
+    @documents = load_documents(base_scope.finalized)
   end
 
   def mine
@@ -175,7 +175,7 @@ class DocumentsController < ApplicationController
     when "waiting" then base_scope.waiting_for(current_user).finalized
     when "info" then base_scope.info_for(current_user).finalized
     when "to_validate" then current_entity.documents.outgoing.pending_for(current_user)
-    else base_scope
+    else base_scope.finalized
     end
   end
 

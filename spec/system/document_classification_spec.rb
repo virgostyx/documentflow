@@ -72,6 +72,7 @@ RSpec.describe "Document classification", type: :system, js: true do
   end
 
   it "filters the picker as the user types and keeps ancestors of a match visible" do
+    document.update!(status: "finalized")
     root = create(:classification_node, entity: entity, code: "1", name: "Contracts")
     create(:classification_node, entity: entity, parent: root, code: "1.1", name: "Drafts")
     create(:classification_node, entity: entity, code: "2", name: "Invoices")

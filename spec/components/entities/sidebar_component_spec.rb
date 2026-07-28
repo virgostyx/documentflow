@@ -203,7 +203,8 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       expect(link_text(unclassified_href)).to eq("Unclassified 1")
     end
 
-    it "counts all accessible documents as Overview" do
+    it "only counts finalized documents as Overview" do
+      create(:document, :finalized, entity: entity, created_by: user)
       create(:document, entity: entity, created_by: user)
 
       expect(link_text(entity_documents_path(entity))).to eq("Overview 1")

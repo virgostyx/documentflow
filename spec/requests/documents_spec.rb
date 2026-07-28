@@ -19,7 +19,7 @@ RSpec.describe "Documents", type: :request do
     end
 
     context "when the user is an active member" do
-      let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Supplier contract") }
+      let!(:document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Supplier contract") }
 
       before do
         eu = create(:entity_user, entity: entity, user: user)
@@ -42,7 +42,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "shows a response-expected badge for documents flagged as such" do
-        expecting = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Needs a reply")
+        expecting = create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Needs a reply")
 
         get entity_documents_path(entity)
 
@@ -51,7 +51,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "shows the response deadline for documents that have one" do
-        create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Needs a reply by deadline", response_deadline: Date.new(2026, 7, 1))
+        create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Needs a reply by deadline", response_deadline: Date.new(2026, 7, 1))
 
         get entity_documents_path(entity)
 
@@ -59,7 +59,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "does not show a deadline for documents without one" do
-        create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Needs a reply, no deadline")
+        create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Needs a reply, no deadline")
 
         get entity_documents_path(entity)
 
@@ -68,7 +68,7 @@ RSpec.describe "Documents", type: :request do
 
       it "shows the deadline in red when today is on or after the deadline" do
         travel_to Date.new(2026, 7, 1) do
-          create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Overdue reply", response_deadline: Date.new(2026, 7, 1))
+          create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Overdue reply", response_deadline: Date.new(2026, 7, 1))
 
           get entity_documents_path(entity)
 
@@ -78,7 +78,7 @@ RSpec.describe "Documents", type: :request do
 
       it "shows the deadline in yellow when today is the day before the deadline" do
         travel_to Date.new(2026, 7, 1) do
-          create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Reply due tomorrow", response_deadline: Date.new(2026, 7, 2))
+          create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Reply due tomorrow", response_deadline: Date.new(2026, 7, 2))
 
           get entity_documents_path(entity)
 
@@ -88,7 +88,7 @@ RSpec.describe "Documents", type: :request do
 
       it "shows the deadline without a color when it is further away" do
         travel_to Date.new(2026, 7, 1) do
-          create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Reply due later", response_deadline: Date.new(2026, 7, 10))
+          create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Reply due later", response_deadline: Date.new(2026, 7, 10))
 
           get entity_documents_path(entity)
 
@@ -98,7 +98,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "shows a Reply button for documents awaiting a response from the current user" do
-        awaiting = create(:document, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply")
+        awaiting = create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: user, subject: "Needs my reply")
 
         get entity_documents_path(entity)
 
@@ -113,7 +113,7 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "filters by the search query" do
-        other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Annual report")
+        other = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Annual report")
 
         get entity_documents_path(entity), params: { q: "Supplier" }
 
@@ -132,8 +132,8 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "sorts documents by document date, most recent first, by default" do
-        older = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Older contract", document_date: 5.days.ago.to_date)
-        newer = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Newer contract", document_date: Date.current)
+        older = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Older contract", document_date: 5.days.ago.to_date)
+        newer = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Newer contract", document_date: Date.current)
 
         get entity_documents_path(entity)
 
@@ -141,8 +141,8 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "sorts by an explicit column and direction" do
-        alpha = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Alpha contract")
-        beta = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Beta contract")
+        alpha = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Alpha contract")
+        beta = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Beta contract")
 
         get entity_documents_path(entity), params: { sort: "subject", direction: "asc" }
 
@@ -150,21 +150,34 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "filters by status" do
-        in_progress = create(:document, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee, subject: "In progress contract")
+        get entity_documents_path(entity), params: { status: "finalized" }
+
+        expect(response.body).to include(document.subject)
+      end
+
+      it "excludes documents that are not finalized, even when a non-finalized status is requested" do
+        create(:document, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee, subject: "In progress contract")
 
         get entity_documents_path(entity), params: { status: "in_progress" }
 
-        expect(response.body).to include(in_progress.subject)
-        expect(response.body).not_to include(document.subject)
+        expect(response.body).not_to include("In progress contract")
       end
 
       it "paginates the results" do
         allow(Kaminari.config).to receive(:default_per_page).and_return(1)
-        create_list(:document, 2, entity: entity, department: department, sender: sender, addressee: addressee)
+        create_list(:document, 2, :finalized, entity: entity, department: department, sender: sender, addressee: addressee)
 
         get entity_documents_path(entity)
 
         expect(response.body).to include("page=2")
+      end
+
+      it "excludes a document that is not yet finalized" do
+        not_finalized = create(:document, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Draft supplier contract")
+
+        get entity_documents_path(entity)
+
+        expect(response.body).not_to include(not_finalized.subject)
       end
     end
 
@@ -181,8 +194,8 @@ RSpec.describe "Documents", type: :request do
 
     context "when the user is a regular member of a single department" do
       let(:other_department) { create(:department, entity: entity) }
-      let!(:own_department_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Own department deal") }
-      let!(:other_department_document) { create(:document, entity: entity, department: other_department, sender: sender, addressee: addressee, subject: "Other department deal") }
+      let!(:own_department_document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Own department deal") }
+      let!(:other_department_document) { create(:document, :finalized, entity: entity, department: other_department, sender: sender, addressee: addressee, subject: "Other department deal") }
 
       before do
         eu = create(:entity_user, entity: entity, user: user, role: "member")
@@ -200,8 +213,8 @@ RSpec.describe "Documents", type: :request do
 
     context "when the user is an owner" do
       let(:other_department) { create(:department, entity: entity) }
-      let!(:department_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Department deal") }
-      let!(:other_department_document) { create(:document, entity: entity, department: other_department, sender: sender, addressee: addressee, subject: "Other department deal") }
+      let!(:department_document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Department deal") }
+      let!(:other_department_document) { create(:document, :finalized, entity: entity, department: other_department, sender: sender, addressee: addressee, subject: "Other department deal") }
 
       before do
         create(:entity_user, entity: entity, user: user, role: "owner")
@@ -411,7 +424,7 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "GET /entities/:entity_id/documents/search" do
-    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Supplier contract") }
+    let!(:document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Supplier contract") }
 
     before do
       eu = create(:entity_user, entity: entity, user: user)
@@ -1256,7 +1269,7 @@ RSpec.describe "Documents", type: :request do
   end
 
   describe "right-click classify menu on the documents table" do
-    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee) }
+    let!(:document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee) }
 
     before do
       eu = create(:entity_user, entity: entity, user: user)

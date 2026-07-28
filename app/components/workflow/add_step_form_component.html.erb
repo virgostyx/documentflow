@@ -7,6 +7,6 @@
     <%= f.floating_select :actor_id, options_for_select(actor_options), { include_blank: "Unassigned" }, { label: "Actor" } %>
   </div>
   <div>
-    <%= render(Ui::ButtonComponent.new(variant: :secondary, class: "w-full")) { "Add step" } %>
+    <%= render(Ui::ButtonComponent.new(variant: :primary, class: "w-full")) { "Add step" } %>
   </div>
 <% end %>

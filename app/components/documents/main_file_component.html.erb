@@ -43,7 +43,7 @@
 <div class="mt-4 flex flex-wrap items-center gap-3">
   <% if show_check_out_button? %>
     <%= render(Ui::ButtonComponent.new(
-      href: entity_document_checkout_path(document.entity, document), variant: :secondary, method: :post,
+      href: entity_document_checkout_path(document.entity, document), variant: :primary, size: :sm, method: :post,
       data: { controller: "checkout", action: "click->checkout#openDownload", checkout_download_url_value: main_file_download_url }
     )) { "Check out" } %>
   <% end %>
@@ -51,14 +51,14 @@
   <% if show_check_in_button? %>
     <%= render(Ui::ButtonComponent.new(
       href: confirm_check_in_entity_document_checkout_path(document.entity, document),
-      variant: :primary, data: { turbo_frame: "modal", action: "click->modal#open" }
+      variant: :primary, size: :sm, data: { turbo_frame: "modal", action: "click->modal#open" }
     )) { "Check in" } %>
   <% end %>
 
   <% if show_cancel_check_out_button? %>
     <%= render(Ui::ButtonComponent.new(
       href: confirm_cancel_entity_document_checkout_path(document.entity, document),
-      variant: :secondary, data: { turbo_frame: "modal", action: "click->modal#open" }
+      variant: :danger, size: :sm, data: { turbo_frame: "modal", action: "click->modal#open" }
     )) { "Cancel checkout" } %>
   <% end %>
 </div>

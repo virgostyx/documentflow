@@ -17,6 +17,8 @@ RSpec.describe "Document classification", type: :system, js: true do
   end
 
   it "creates a root node and a child node through the modal, classifies a document into the child via right-click, then unclassifies it" do
+    document.update!(status: "finalized")
+
     visit entity_classification_nodes_path(entity)
 
     click_link "Add root node"

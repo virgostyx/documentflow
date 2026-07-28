@@ -110,7 +110,7 @@ module Entities
     end
 
     def classification_document_counts
-      @classification_document_counts ||= documents_base_scope.where.not(classification_node_id: nil).group(:classification_node_id).count
+      @classification_document_counts ||= documents_base_scope.finalized.where.not(classification_node_id: nil).group(:classification_node_id).count
     end
   end
 end

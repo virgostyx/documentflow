@@ -220,6 +220,7 @@ RSpec.describe "Documents", type: :request do
   describe "GET /entities/:entity_id/documents/mine" do
     let!(:mine) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "My contract", created_by: user) }
     let!(:others_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Colleague's contract") }
+    let!(:my_finalized_document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "My finalized contract", created_by: user) }
 
     before do
       eu = create(:entity_user, entity: entity, user: user)
@@ -233,6 +234,12 @@ RSpec.describe "Documents", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(mine.subject)
       expect(response.body).not_to include(others_document.subject)
+    end
+
+    it "excludes the current user's finalized documents" do
+      get mine_entity_documents_path(entity)
+
+      expect(response.body).not_to include(my_finalized_document.subject)
     end
   end
 
@@ -1186,8 +1193,8 @@ RSpec.describe "Documents", type: :request do
 
   describe "classification_node_id filtering" do
     let!(:node) { create(:classification_node, entity: entity, code: "1", name: "Contracts") }
-    let!(:classified_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Classified doc", classification_node: node) }
-    let!(:unclassified_document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Unclassified doc") }
+    let!(:classified_document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Classified doc", classification_node: node) }
+    let!(:unclassified_document) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Unclassified doc") }
 
     before do
       eu = create(:entity_user, entity: entity, user: user)
@@ -1213,6 +1220,14 @@ RSpec.describe "Documents", type: :request do
       get entity_documents_path(entity, classification_node_id: node.id)
 
       expect(response.body).to include(%(name="classification_node_id" value="#{node.id}"))
+    end
+
+    it "excludes a classified document that is not yet finalized" do
+      draft_classified = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Draft classified doc", classification_node: node, created_by: user)
+
+      get entity_documents_path(entity, classification_node_id: node.id)
+
+      expect(response.body).not_to include("Draft classified doc")
     end
   end
 

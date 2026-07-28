@@ -13,7 +13,7 @@ class DocumentsController < ApplicationController
 
   def mine
     @list_scope = "mine"
-    @documents = load_documents(base_scope.authored_by(current_user))
+    @documents = load_documents(base_scope.authored_by(current_user).not_finalized)
     render :index
   end
 
@@ -169,7 +169,7 @@ class DocumentsController < ApplicationController
 
   def scoped_base_for(list_scope)
     case list_scope
-    when "mine" then base_scope.authored_by(current_user)
+    when "mine" then base_scope.authored_by(current_user).not_finalized
     when "received" then base_scope.received_by(current_user)
     when "todo" then base_scope.todo_for(current_user)
     when "waiting" then base_scope.waiting_for(current_user)
@@ -194,9 +194,9 @@ class DocumentsController < ApplicationController
 
   def apply_classification_filter(documents)
     if params[:classification_node_id] == "unclassified"
-      documents.unclassified
+      documents.unclassified.finalized
     elsif params[:classification_node_id].present?
-      documents.in_classification_node(params[:classification_node_id])
+      documents.in_classification_node(params[:classification_node_id]).finalized
     else
       documents
     end

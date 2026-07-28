@@ -321,8 +321,8 @@ RSpec.describe Entities::SidebarComponent, type: :component do
 
       it "shows the count of accessible documents classified under each node" do
         department = create(:department, entity: entity)
-        create(:document, entity: entity, department: department, classification_node: root)
-        create(:document, entity: entity, department: department, classification_node: root)
+        create(:document, :finalized, entity: entity, department: department, classification_node: root)
+        create(:document, :finalized, entity: entity, department: department, classification_node: root)
 
         expect(rendered.css("a[href='#{entity_documents_path(entity, classification_node_id: root.id)}']").first.text.squish).to eq("1 Contracts 2")
       end

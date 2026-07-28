@@ -91,6 +91,8 @@ class Document < ApplicationRecord
   scope :outgoing, -> { where(direction: "outgoing") }
   scope :pending_triage_for, ->(user) { incoming.where(lead_user_id: user.id, routed_at: nil) }
   scope :with_status, ->(status) { status.present? ? where(status: status) : all }
+  scope :finalized, -> { where(status: "finalized") }
+  scope :not_finalized, -> { where.not(status: "finalized") }
   scope :in_classification_node, ->(node) { where(classification_node: node) }
   scope :unclassified, -> { where(classification_node_id: nil) }
   scope :sorted, ->(column, direction) {

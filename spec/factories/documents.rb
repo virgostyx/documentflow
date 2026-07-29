@@ -46,6 +46,15 @@ FactoryBot.define do
       end
     end
 
+    trait :routed do
+      routed_at { Time.current }
+      addressee do
+        user = create(:user)
+        create(:entity_user, entity: entity, user: user, status: "active")
+        user
+      end
+    end
+
     trait :with_workflow do
       after(:create) do |document|
         document.main_file.attach(io: StringIO.new("content"), filename: "main.pdf", content_type: "application/pdf")

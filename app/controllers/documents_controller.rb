@@ -25,19 +25,19 @@ class DocumentsController < ApplicationController
 
   def todo
     @list_scope = "todo"
-    @documents = load_documents(base_scope.todo_for(current_user).finalized)
+    @documents = load_documents(merged_base_scope.todo_for(current_user).settled)
     render :index
   end
 
   def waiting
     @list_scope = "waiting"
-    @documents = load_documents(base_scope.waiting_for(current_user).finalized)
+    @documents = load_documents(merged_base_scope.waiting_for(current_user).settled)
     render :index
   end
 
   def info
     @list_scope = "info"
-    @documents = load_documents(base_scope.info_for(current_user).finalized)
+    @documents = load_documents(merged_base_scope.info_for(current_user).settled)
     render :index
   end
 
@@ -156,9 +156,16 @@ class DocumentsController < ApplicationController
     policy_scope(Document).where(entity: current_entity).outgoing
   end
 
+  # Only for todo/waiting/info, which now include routed incoming mail.
+  # received/mine/to_validate/index must stay outgoing-only — do not reuse this there.
+  def merged_base_scope
+    policy_scope(Document).where(entity: current_entity)
+  end
+
   def apply_reply_prefill
-    original = base_scope.find_by(id: params[:reply_to])
+    original = merged_base_scope.find_by(id: params[:reply_to])
     return unless original
+    return if original.incoming? && !original.routed?
 
     @document.subject = "Re: #{original.subject}"
     @document.department_id = original.department_id
@@ -171,9 +178,9 @@ class DocumentsController < ApplicationController
     case list_scope
     when "mine" then base_scope.authored_by(current_user).not_finalized
     when "received" then base_scope.received_by(current_user).finalized
-    when "todo" then base_scope.todo_for(current_user).finalized
-    when "waiting" then base_scope.waiting_for(current_user).finalized
-    when "info" then base_scope.info_for(current_user).finalized
+    when "todo" then merged_base_scope.todo_for(current_user).settled
+    when "waiting" then merged_base_scope.waiting_for(current_user).settled
+    when "info" then merged_base_scope.info_for(current_user).settled
     when "to_validate" then current_entity.documents.outgoing.pending_for(current_user)
     else base_scope.finalized
     end
@@ -194,9 +201,9 @@ class DocumentsController < ApplicationController
 
   def apply_classification_filter(documents)
     if params[:classification_node_id] == "unclassified"
-      documents.unclassified.finalized
+      documents.unclassified.settled
     elsif params[:classification_node_id].present?
-      documents.in_classification_node(params[:classification_node_id]).finalized
+      documents.in_classification_node(params[:classification_node_id]).settled
     else
       documents
     end

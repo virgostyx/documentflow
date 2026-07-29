@@ -15,7 +15,7 @@
       <% documents.each do |document| %>
         <tr class="hover:bg-gray-50 transition-colors cursor-pointer"
             data-controller="row-link context-menu"
-            data-row-link-url-value="<%= entity_document_path(current_entity, document) %>"
+            data-row-link-url-value="<%= document_row_path(document) %>"
             data-action="click->row-link#navigate contextmenu->context-menu#open">
           <td class="px-4 py-3">
             <% if document.main_file.attached? %>
@@ -30,7 +30,7 @@
             <% end %>
           </td>
           <td class="px-4 py-3">
-            <%= link_to document.display_number, entity_document_path(current_entity, document), class: "font-mono text-primary-700 hover:text-primary-800", data: { turbo_frame: "_top" } %>
+            <%= link_to document.display_number, document_row_path(document), class: "font-mono text-primary-700 hover:text-primary-800", data: { turbo_frame: "_top" } %>
             <% if document.reference_number.blank? %>
               <%= render(Ui::BadgeComponent.new(color: :info)) { "Provisional" } %>
             <% end %>
@@ -38,7 +38,7 @@
           <td class="px-4 py-3 text-gray-900"><%= document.subject %></td>
           <td class="px-4 py-3 text-gray-500"><%= document.sender&.display_name %> &rarr; <%= document.addressee&.display_name %></td>
           <td class="px-4 py-3 text-gray-500"><%= l(document.document_date) %></td>
-          <td class="px-4 py-3"><%= render Documents::DocumentStatusBadgeComponent.new(status: document.status) %></td>
+          <td class="px-4 py-3"><%= render Documents::DocumentStateBadgeComponent.new(document: document) %></td>
           <td class="px-4 py-3">
             <div class="flex items-center gap-2">
               <% if document.expects_response? %>

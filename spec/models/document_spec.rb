@@ -705,6 +705,23 @@ RSpec.describe Document, type: :model do
 
       expect(Document.todo_for(user)).to be_empty
     end
+
+    it "returns a routed incoming document for the action assignee when a response is expected" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      routed = create(:document, :incoming, :routed, :expecting_response, entity: entity, lead_user: lead)
+
+      expect(Document.todo_for(routed.addressee)).to contain_exactly(routed)
+    end
+
+    it "excludes a routed incoming document from the assignee's todo list once their reply is finalized" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      routed = create(:document, :incoming, :routed, :expecting_response, entity: entity, lead_user: lead)
+      create(:document, :finalized, entity: entity, created_by: routed.addressee, in_reply_to: routed)
+
+      expect(Document.todo_for(routed.addressee)).to be_empty
+    end
   end
 
   describe ".pending_for" do
@@ -787,6 +804,33 @@ RSpec.describe Document, type: :model do
 
       expect(Document.waiting_for(user)).to be_empty
     end
+
+    it "returns a routed incoming document for the lead, not the registrant, when a response is expected" do
+      lead = create(:user)
+      registrant = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      routed = create(:document, :incoming, :routed, :expecting_response, entity: entity, lead_user: lead, created_by: registrant)
+
+      expect(Document.waiting_for(lead)).to contain_exactly(routed)
+      expect(Document.waiting_for(registrant)).to be_empty
+    end
+
+    it "excludes a routed incoming document from the lead's waiting list when no response is expected" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      create(:document, :incoming, :routed, entity: entity, lead_user: lead)
+
+      expect(Document.waiting_for(lead)).to be_empty
+    end
+
+    it "excludes a routed incoming document once a finalized reply exists" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      routed = create(:document, :incoming, :routed, :expecting_response, entity: entity, lead_user: lead)
+      create(:document, :finalized, entity: entity, in_reply_to: routed)
+
+      expect(Document.waiting_for(lead)).to be_empty
+    end
   end
 
   describe ".info_for" do
@@ -844,6 +888,30 @@ RSpec.describe Document, type: :model do
       create(:cc_recipient, document: document, party: user)
 
       expect(Document.info_for(user)).to contain_exactly(document)
+    end
+
+    it "returns a routed incoming document for the lead when no response is expected" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      routed = create(:document, :incoming, :routed, entity: entity, lead_user: lead)
+
+      expect(Document.info_for(lead)).to contain_exactly(routed)
+    end
+
+    it "returns a routed incoming document for the action assignee when no response is expected" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      routed = create(:document, :incoming, :routed, entity: entity, lead_user: lead)
+
+      expect(Document.info_for(routed.addressee)).to contain_exactly(routed)
+    end
+
+    it "excludes a routed incoming document from the lead's info list when a response is expected" do
+      lead = create(:user)
+      create(:entity_user, entity: entity, user: lead, status: "active")
+      create(:document, :incoming, :routed, :expecting_response, entity: entity, lead_user: lead)
+
+      expect(Document.info_for(lead)).to be_empty
     end
   end
 
@@ -915,6 +983,32 @@ RSpec.describe Document, type: :model do
 
       expect(Document.where(entity: entity).incoming).to contain_exactly(incoming)
       expect(Document.where(entity: entity).outgoing).to contain_exactly(outgoing)
+    end
+  end
+
+  describe ".settled" do
+    it "returns a finalized outgoing document" do
+      finalized = create(:document, :finalized, entity: entity)
+
+      expect(Document.where(entity: entity).settled).to contain_exactly(finalized)
+    end
+
+    it "excludes an outgoing document that is not finalized" do
+      create(:document, :in_progress, entity: entity)
+
+      expect(Document.where(entity: entity).settled).to be_empty
+    end
+
+    it "returns a routed incoming document" do
+      routed = create(:document, :incoming, :routed, entity: entity)
+
+      expect(Document.where(entity: entity).settled).to contain_exactly(routed)
+    end
+
+    it "excludes an unrouted incoming document even if its status is finalized" do
+      create(:document, :incoming, entity: entity, status: "finalized", routed_at: nil)
+
+      expect(Document.where(entity: entity).settled).to be_empty
     end
   end
 

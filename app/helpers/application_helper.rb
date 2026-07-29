@@ -37,4 +37,14 @@ module ApplicationHelper
 
     link_to content, "#{request.path}?#{new_query.to_query}", class: "inline-flex items-center gap-1 hover:text-gray-900"
   end
+
+  # Incoming mail is shown via IncomingMailsController#show, not DocumentsController#show,
+  # even when it appears merged into the outgoing ToDo/Waiting/Info tables.
+  def document_row_path(document)
+    if document.incoming?
+      entity_incoming_mail_path(current_entity, document)
+    else
+      entity_document_path(current_entity, document)
+    end
+  end
 end

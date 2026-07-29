@@ -1,0 +1,7 @@
+<% if document.outgoing? %>
+  <%= render(Documents::DocumentStatusBadgeComponent.new(status: document.status)) %>
+<% elsif document.routed? %>
+  <%= render(Ui::BadgeComponent.new(color: :info)) { "Incoming" } %>
+<% else %>
+  <%= render(Ui::BadgeComponent.new(color: :gray)) { "Pending triage" } %>
+<% end %>

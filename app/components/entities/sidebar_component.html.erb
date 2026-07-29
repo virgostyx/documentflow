@@ -124,36 +124,16 @@
     </div>
     </div>
 
-    <div class="shrink-0 space-y-0.5 mt-3" data-controller="sidebar-section" data-sidebar-section-key-value="incoming-mail" data-sidebar-section-open-value="true" data-sidebar-section-active-value="<%= incoming_mail_section_active? %>">
-    <button type="button" data-action="sidebar-section#toggle" class="w-full flex items-center justify-between px-3 pb-1">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Incoming Mail</p>
-      <svg data-sidebar-section-target="chevron" class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-150" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
-      </svg>
-    </button>
-
-    <div data-sidebar-section-target="panel" class="space-y-0.5">
-    <%= link_to inbox_entity_incoming_mails_path(current_entity), class: helpers.nav_class(inbox_entity_incoming_mails_path(current_entity)) + " justify-between" do %>
+    <div class="shrink-0 space-y-0.5 mt-3">
+    <%= link_to entity_incoming_mails_path(current_entity), class: helpers.nav_class(entity_incoming_mails_path(current_entity)) + " justify-between" do %>
       <span class="flex items-center gap-3">
         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
         </svg>
-        Incoming Inbox
+        Incoming Mail
       </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= incoming_inbox_count %><% end %>
+      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= incoming_mail_count %><% end %>
     <% end %>
-
-    <%= link_to pending_triage_entity_incoming_mails_path(current_entity), class: helpers.nav_class(pending_triage_entity_incoming_mails_path(current_entity)) + " justify-between" do %>
-      <span class="flex items-center gap-3">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.75h.007v.008H12v-.008Z"/>
-        </svg>
-        Pending Triage
-      </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= pending_triage_count %><% end %>
-    <% end %>
-    </div>
     </div>
 
     <% nav_base = "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors" %>

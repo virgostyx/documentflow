@@ -34,6 +34,14 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).to include(document.subject)
       end
 
+      it "never lists incoming mail, even when routed" do
+        routed = create(:document, :incoming, :routed, entity: entity, department: department, subject: "Routed incoming mail")
+
+        get entity_documents_path(entity)
+
+        expect(response.body).not_to include(routed.subject)
+      end
+
       it "wraps the results in a turbo frame targeted by the search form" do
         get entity_documents_path(entity)
 
@@ -254,6 +262,14 @@ RSpec.describe "Documents", type: :request do
 
       expect(response.body).not_to include(my_finalized_document.subject)
     end
+
+    it "never lists incoming mail, even when routed and created by the current user" do
+      routed = create(:document, :incoming, :routed, entity: entity, department: department, created_by: user, subject: "Routed incoming mail")
+
+      get mine_entity_documents_path(entity)
+
+      expect(response.body).not_to include(routed.subject)
+    end
   end
 
   describe "GET /entities/:entity_id/documents/received" do
@@ -285,6 +301,14 @@ RSpec.describe "Documents", type: :request do
       get received_entity_documents_path(entity)
 
       expect(response.body).not_to include(not_finalized_addressed_to_me.subject)
+    end
+
+    it "never lists incoming mail, even when routed to the current user" do
+      routed = create(:document, :incoming, :routed, entity: entity, department: department, addressee: user, subject: "Routed incoming mail")
+
+      get received_entity_documents_path(entity)
+
+      expect(response.body).not_to include(routed.subject)
     end
   end
 
@@ -328,6 +352,30 @@ RSpec.describe "Documents", type: :request do
 
       expect(response.body).not_to include(todo.subject)
     end
+
+    it "includes a routed incoming document where the user is the action assignee expecting a response" do
+      assignee = create(:user)
+      assignee_membership = create(:entity_user, entity: entity, user: assignee, status: "active")
+      create(:entity_user_department, entity_user: assignee_membership, department: department)
+      routed = create(:document, :incoming, :routed, :expecting_response, entity: entity, department: department,
+                                  addressee: assignee, subject: "Routed mail needing action")
+
+      sign_out user
+      sign_in assignee
+      get todo_entity_documents_path(entity)
+
+      expect(response.body).to include(routed.subject)
+      expect(response.body).to include(%(href="#{entity_incoming_mail_path(entity, routed)}"))
+      expect(response.body).not_to include(%(href="#{entity_document_path(entity, routed)}"))
+    end
+
+    it "excludes an unrouted incoming document even when the user is its lead" do
+      pending_mail = create(:document, :incoming, entity: entity, department: department, lead_user: user, subject: "Awaiting triage")
+
+      get todo_entity_documents_path(entity)
+
+      expect(response.body).not_to include(pending_mail.subject)
+    end
   end
 
   describe "GET /entities/:entity_id/documents/waiting" do
@@ -366,6 +414,29 @@ RSpec.describe "Documents", type: :request do
       get waiting_entity_documents_path(entity)
 
       expect(response.body).not_to include(waiting.subject)
+    end
+
+    it "includes a routed incoming document for the lead when a response is expected, not for the registrant" do
+      registrant = create(:user)
+      create(:entity_user, entity: entity, user: registrant, status: "active")
+      routed = create(:document, :incoming, :routed, :expecting_response, entity: entity, department: department,
+                                  lead_user: user, created_by: registrant, subject: "Mail awaiting a reply")
+
+      get waiting_entity_documents_path(entity)
+      expect(response.body).to include(routed.subject)
+
+      sign_out user
+      sign_in registrant
+      get waiting_entity_documents_path(entity)
+      expect(response.body).not_to include(routed.subject)
+    end
+
+    it "excludes a routed incoming document from the lead's waiting list when no response is expected" do
+      routed = create(:document, :incoming, :routed, entity: entity, department: department, lead_user: user, subject: "Routed, no reply needed")
+
+      get waiting_entity_documents_path(entity)
+
+      expect(response.body).not_to include(routed.subject)
     end
   end
 
@@ -409,6 +480,14 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).to include(outside_department.subject)
       end
     end
+
+    it "never lists incoming mail, even when routed to the current user" do
+      routed = create(:document, :incoming, :routed, entity: entity, department: department, addressee: user, subject: "Routed incoming mail")
+
+      get to_validate_entity_documents_path(entity)
+
+      expect(response.body).not_to include(routed.subject)
+    end
   end
 
   describe "GET /entities/:entity_id/documents/info" do
@@ -445,6 +524,22 @@ RSpec.describe "Documents", type: :request do
       get info_entity_documents_path(entity)
 
       expect(response.body).not_to include(not_finalized.subject)
+    end
+
+    it "includes a routed incoming document for the lead when no response is expected" do
+      routed = create(:document, :incoming, :routed, entity: entity, department: department, lead_user: user, subject: "Routed, no reply needed")
+
+      get info_entity_documents_path(entity)
+
+      expect(response.body).to include(routed.subject)
+    end
+
+    it "excludes a routed incoming document from the lead's info list when a response is expected" do
+      routed = create(:document, :incoming, :routed, :expecting_response, entity: entity, department: department, lead_user: user, subject: "Routed, awaiting reply")
+
+      get info_entity_documents_path(entity)
+
+      expect(response.body).not_to include(routed.subject)
     end
   end
 
@@ -500,6 +595,14 @@ RSpec.describe "Documents", type: :request do
       expect(response.body).not_to include(other.subject)
     end
 
+    it "keeps a routed incoming document matching the 'todo' scope when searching" do
+      routed = create(:document, :incoming, :routed, :expecting_response, entity: entity, department: department, addressee: user, subject: "Routed supplier mail")
+
+      get search_entity_documents_path(entity), params: { q: "supplier", scope: "todo" }
+
+      expect(response.body).to include(routed.subject)
+    end
+
     it "re-applies the 'waiting' scope when searching" do
       waiting = create(:document, :finalized, :expecting_response, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Waiting supplier deal", created_by: user)
       other = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
@@ -553,6 +656,35 @@ RSpec.describe "Documents", type: :request do
         get new_entity_document_path(entity, reply_to: original.id)
 
         expect(response.body).to include(%(value="#{original.id}" name="document[in_reply_to_id]" id="document_in_reply_to_id"))
+      end
+    end
+
+    context "when replying to a routed incoming mail" do
+      let!(:entity_user) { create(:entity_user, :admin, entity: entity, user: user) }
+      let!(:incoming) { create(:document, :incoming, :routed, :expecting_response, entity: entity, department: department, addressee: user, subject: "Please respond to this mail") }
+
+      before { sign_in user }
+
+      it "pre-fills the reply addressed to the incoming mail's external sender" do
+        get new_entity_document_path(entity, reply_to: incoming.id)
+
+        expect(response.body).to include('value="Re: Please respond to this mail"')
+        expect(response.body).to include(%(selected="selected" value="User-#{user.id}"))
+        expect(response.body).to include(%(selected="selected" value="#{incoming.sender_type}-#{incoming.sender_id}"))
+        expect(response.body).to include(%(value="#{incoming.id}" name="document[in_reply_to_id]" id="document_in_reply_to_id"))
+      end
+    end
+
+    context "when replying to an incoming mail that has not been routed yet" do
+      let!(:entity_user) { create(:entity_user, :admin, entity: entity, user: user) }
+      let!(:incoming) { create(:document, :incoming, entity: entity, department: department, lead_user: user, subject: "Unrouted mail") }
+
+      before { sign_in user }
+
+      it "does not pre-fill the reply form" do
+        get new_entity_document_path(entity, reply_to: incoming.id)
+
+        expect(response.body).not_to include('value="Re: Unrouted mail"')
       end
     end
 

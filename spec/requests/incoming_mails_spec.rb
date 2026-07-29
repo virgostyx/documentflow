@@ -155,33 +155,20 @@ RSpec.describe "Incoming mails", type: :request do
     end
   end
 
-  describe "GET /entities/:entity_id/incoming_mails/inbox" do
-    let!(:received) { create(:document, :incoming, entity: entity, department: department, lead_user: lead, addressee: lead, subject: "Addressed to lead") }
-    let!(:not_received) { create(:document, :incoming, entity: entity, department: department, subject: "Addressed to someone else") }
-
-    before { sign_in lead }
-
-    it "lists incoming mail addressed to the current user" do
-      get inbox_entity_incoming_mails_path(entity)
-
-      expect(response).to have_http_status(:ok)
-      expect(response.body).to include(received.subject)
-      expect(response.body).not_to include(not_received.subject)
-    end
-  end
-
-  describe "GET /entities/:entity_id/incoming_mails/pending_triage" do
+  describe "GET /entities/:entity_id/incoming_mails" do
     let!(:pending) { create(:document, :incoming, entity: entity, department: department, lead_user: lead, addressee: lead, subject: "Needs triage") }
     let!(:routed) { create(:document, :incoming, entity: entity, department: department, lead_user: lead, addressee: lead, routed_at: Time.current, subject: "Already routed") }
+    let!(:not_lead) { create(:document, :incoming, entity: entity, department: department, subject: "Someone else's mail") }
 
     before { sign_in lead }
 
-    it "lists incoming mail awaiting the lead's triage" do
-      get pending_triage_entity_incoming_mails_path(entity)
+    it "lists incoming mail awaiting the current user's triage as lead" do
+      get entity_incoming_mails_path(entity)
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(pending.subject)
       expect(response.body).not_to include(routed.subject)
+      expect(response.body).not_to include(not_lead.subject)
     end
   end
 

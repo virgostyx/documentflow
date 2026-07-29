@@ -7,7 +7,6 @@
         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sender</th>
         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lead</th>
         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= sortable_column_header("Date", "document_date") %></th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
@@ -22,13 +21,6 @@
           <td class="px-4 py-3 text-gray-500"><%= document.sender&.display_name %></td>
           <td class="px-4 py-3 text-gray-500"><%= document.lead_user&.display_name %></td>
           <td class="px-4 py-3 text-gray-500"><%= l(document.document_date) %></td>
-          <td class="px-4 py-3">
-            <% if document.routed? %>
-              <%= render(Ui::BadgeComponent.new(color: :info)) { "Routed" } %>
-            <% else %>
-              <%= render(Ui::BadgeComponent.new(color: :gray)) { "Pending triage" } %>
-            <% end %>
-          </td>
         </tr>
       <% end %>
     </tbody>

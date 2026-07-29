@@ -257,67 +257,74 @@ RSpec.describe Entities::SidebarComponent, type: :component do
 
       expect(link_text(info_entity_documents_path(entity))).to eq("Info 0")
     end
+
+    it "counts a routed incoming document as ToDo for the action assignee expecting a response" do
+      create(:document, :incoming, :routed, :expecting_response, entity: entity, addressee: user)
+
+      expect(link_text(todo_entity_documents_path(entity))).to eq("ToDo 1")
+    end
+
+    it "counts a routed incoming document as Waiting for the lead expecting a response" do
+      create(:document, :incoming, :routed, :expecting_response, entity: entity, lead_user: user)
+
+      expect(link_text(waiting_entity_documents_path(entity))).to eq("Waiting 1")
+    end
+
+    it "counts a routed incoming document as Info for the lead when no response is expected" do
+      create(:document, :incoming, :routed, entity: entity, lead_user: user)
+
+      expect(link_text(info_entity_documents_path(entity))).to eq("Info 1")
+    end
+
+    it "excludes an unrouted incoming document from ToDo/Waiting/Info even for its lead" do
+      create(:document, :incoming, :expecting_response, entity: entity, lead_user: user, addressee: user)
+
+      expect(link_text(todo_entity_documents_path(entity))).to eq("ToDo 0")
+      expect(link_text(waiting_entity_documents_path(entity))).to eq("Waiting 0")
+      expect(link_text(info_entity_documents_path(entity))).to eq("Info 0")
+    end
   end
 
   describe "Incoming Mail section" do
-    it "links to the Incoming Inbox and Pending Triage views" do
-      expect(rendered).to have_link("Incoming Inbox", href: inbox_entity_incoming_mails_path(entity))
-      expect(rendered).to have_link("Pending Triage", href: pending_triage_entity_incoming_mails_path(entity))
+    it "links to the single Incoming Mail view" do
+      expect(rendered).to have_link("Incoming Mail", href: entity_incoming_mails_path(entity))
     end
 
-    context "when on the incoming inbox page" do
-      let(:current_path) { inbox_entity_incoming_mails_path(entity) }
+    context "when on the incoming mail page" do
+      let(:current_path) { entity_incoming_mails_path(entity) }
 
-      it "highlights only Incoming Inbox" do
-        expect(rendered).to have_css("a.bg-primary-100", text: "Incoming Inbox")
-        expect(rendered).not_to have_css("a.bg-primary-100", text: "Pending Triage")
+      it "highlights the Incoming Mail link" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "Incoming Mail")
       end
     end
 
-    context "when on the pending triage page" do
-      let(:current_path) { pending_triage_entity_incoming_mails_path(entity) }
-
-      it "highlights only Pending Triage" do
-        expect(rendered).to have_css("a.bg-primary-100", text: "Pending Triage")
-        expect(rendered).not_to have_css("a.bg-primary-100", text: "Incoming Inbox")
-      end
-    end
-
-    describe "count badges" do
+    describe "count badge" do
       let!(:entity_user) { create(:entity_user, :owner, entity: entity, user: user) }
 
       def link_text(href)
         rendered.css("a[href='#{href}']").first.text.squish
       end
 
-      it "shows zero counts when there is no incoming mail" do
-        expect(link_text(inbox_entity_incoming_mails_path(entity))).to eq("Incoming Inbox 0")
-        expect(link_text(pending_triage_entity_incoming_mails_path(entity))).to eq("Pending Triage 0")
+      it "shows zero when there is no incoming mail" do
+        expect(link_text(entity_incoming_mails_path(entity))).to eq("Incoming Mail 0")
       end
 
-      it "counts incoming mail addressed to the user as Incoming Inbox" do
+      it "counts incoming mail awaiting the user's triage as lead" do
         create(:document, :incoming, entity: entity, lead_user: user, addressee: user)
 
-        expect(link_text(inbox_entity_incoming_mails_path(entity))).to eq("Incoming Inbox 1")
+        expect(link_text(entity_incoming_mails_path(entity))).to eq("Incoming Mail 1")
       end
 
-      it "counts incoming mail awaiting the user's triage as Pending Triage" do
-        create(:document, :incoming, entity: entity, lead_user: user, addressee: user)
-
-        expect(link_text(pending_triage_entity_incoming_mails_path(entity))).to eq("Pending Triage 1")
-      end
-
-      it "does not count routed mail as Pending Triage" do
+      it "does not count routed mail" do
         create(:document, :incoming, entity: entity, lead_user: user, addressee: user, routed_at: Time.current)
 
-        expect(link_text(pending_triage_entity_incoming_mails_path(entity))).to eq("Pending Triage 0")
+        expect(link_text(entity_incoming_mails_path(entity))).to eq("Incoming Mail 0")
       end
 
-      it "does not count outgoing documents in either badge" do
+      it "does not count outgoing documents" do
         create(:document, entity: entity, addressee: user)
 
-        expect(link_text(inbox_entity_incoming_mails_path(entity))).to eq("Incoming Inbox 0")
-        expect(link_text(pending_triage_entity_incoming_mails_path(entity))).to eq("Pending Triage 0")
+        expect(link_text(entity_incoming_mails_path(entity))).to eq("Incoming Mail 0")
       end
     end
   end

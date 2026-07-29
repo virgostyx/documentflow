@@ -25,22 +25,18 @@ module Entities
     end
 
     def todo_count
-      documents_base_scope.todo_for(current_user).finalized.count
+      merged_base_scope.todo_for(current_user).settled.count
     end
 
     def waiting_count
-      documents_base_scope.waiting_for(current_user).finalized.count
+      merged_base_scope.waiting_for(current_user).settled.count
     end
 
     def info_count
-      documents_base_scope.info_for(current_user).finalized.count
+      merged_base_scope.info_for(current_user).settled.count
     end
 
-    def incoming_inbox_count
-      incoming_mails_base_scope.received_by(current_user).count
-    end
-
-    def pending_triage_count
+    def incoming_mail_count
       incoming_mails_base_scope.pending_triage_for(current_user).count
     end
 
@@ -72,10 +68,6 @@ module Entities
       request.path.start_with?(entity_documents_path(current_entity)) && !classification_section_active?
     end
 
-    def incoming_mail_section_active?
-      request.path.start_with?(entity_incoming_mails_path(current_entity))
-    end
-
     def classification_section_active?
       request.path.start_with?(entity_classification_nodes_path(current_entity)) ||
         (request.path == entity_documents_path(current_entity) && request.query_parameters["classification_node_id"].present?)
@@ -95,6 +87,11 @@ module Entities
 
     def documents_base_scope
       Pundit.policy_scope(current_user, Document).where(entity: current_entity).outgoing
+    end
+
+    # Only for todo/waiting/info, which now include routed incoming mail.
+    def merged_base_scope
+      Pundit.policy_scope(current_user, Document).where(entity: current_entity)
     end
 
     def incoming_mails_base_scope

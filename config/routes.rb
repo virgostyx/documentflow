@@ -73,14 +73,10 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :incoming_mails, only: %i[new create show] do
+    resources :incoming_mails, only: %i[index new create show] do
       member do
         get :route_form
         patch :route
-      end
-      collection do
-        get :inbox
-        get :pending_triage
       end
     end
 

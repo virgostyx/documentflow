@@ -5,16 +5,8 @@ class IncomingMailsController < ApplicationController
 
   before_action :set_document, only: %i[show route_form route]
 
-  def inbox
-    @list_scope = "inbox"
-    @documents = load_documents(base_scope.incoming.received_by(current_user))
-    render :index
-  end
-
-  def pending_triage
-    @list_scope = "pending_triage"
+  def index
     @documents = load_documents(base_scope.pending_triage_for(current_user))
-    render :index
   end
 
   def show

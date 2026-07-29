@@ -2,7 +2,7 @@
   <%= render Ui::PageHeaderComponent.new(
     title: "Register incoming mail",
     description: current_entity.name,
-    back_path: inbox_entity_incoming_mails_path(current_entity),
+    back_path: entity_incoming_mails_path(current_entity),
     back_text: "Incoming mail"
   ) %>
 

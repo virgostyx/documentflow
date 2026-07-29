@@ -41,7 +41,7 @@
   </div>
 
   <div class="mt-6 flex justify-end gap-3">
-    <%= render(Ui::ButtonComponent.new(href: inbox_entity_incoming_mails_path(current_entity), variant: :secondary)) { "Cancel" } %>
+    <%= render(Ui::ButtonComponent.new(href: entity_incoming_mails_path(current_entity), variant: :secondary)) { "Cancel" } %>
     <%= render(Ui::ButtonComponent.new) { "Register mail" } %>
   </div>
 <% end %>

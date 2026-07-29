@@ -83,14 +83,18 @@ class Document < ApplicationRecord
   scope :waiting_for, ->(user) {
     replied_document_ids = Document.finalized.where.not(in_reply_to_id: nil).select(:in_reply_to_id)
 
-    where(created_by: user, expects_response: true)
-      .where.not(id: replied_document_ids)
+    where(
+      "(documents.direction = 'outgoing' AND documents.created_by_id = :user_id) " \
+      "OR (documents.direction = 'incoming' AND documents.lead_user_id = :user_id)",
+      user_id: user.id
+    ).where(expects_response: true).where.not(id: replied_document_ids)
   }
   scope :info_for, ->(user) {
     left_joins(:cc_recipients).where(
       "(" \
         "(documents.addressee_type = 'User' AND documents.addressee_id = :user_id AND documents.expects_response = false) " \
-        "OR (documents.created_by_id = :user_id AND documents.expects_response = false) " \
+        "OR (documents.direction = 'outgoing' AND documents.created_by_id = :user_id AND documents.expects_response = false) " \
+        "OR (documents.direction = 'incoming' AND documents.lead_user_id = :user_id AND documents.expects_response = false) " \
         "OR (cc_recipients.party_type = 'User' AND cc_recipients.party_id = :user_id)" \
       ")",
       user_id: user.id
@@ -102,6 +106,14 @@ class Document < ApplicationRecord
   scope :with_status, ->(status) { status.present? ? where(status: status) : all }
   scope :finalized, -> { where(status: "finalized") }
   scope :not_finalized, -> { where.not(status: "finalized") }
+  # Incoming documents never leave AASM draft — `finalized` can never test
+  # "released into circulation" for them; `routed_at` is their equivalent signal.
+  scope :settled, -> {
+    where(
+      "(documents.direction = 'outgoing' AND documents.status = 'finalized') " \
+      "OR (documents.direction = 'incoming' AND documents.routed_at IS NOT NULL)"
+    )
+  }
   scope :in_classification_node, ->(node) { where(classification_node: node) }
   scope :unclassified, -> { where(classification_node_id: nil) }
   scope :sorted, ->(column, direction) {

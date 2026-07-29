@@ -46,7 +46,7 @@ RSpec.describe "Incoming mail", type: :system, js: true do
       sign_in_via_form(lead)
       expect(page).to have_link("Sign out")
 
-      visit pending_triage_entity_incoming_mails_path(entity)
+      visit entity_incoming_mails_path(entity)
       expect(page).to have_content("Tax notice")
 
       find("tr", text: "Tax notice").find("a").click
@@ -65,21 +65,28 @@ RSpec.describe "Incoming mail", type: :system, js: true do
       expect(page).to have_content("Mail routed successfully")
       expect(page).to have_content(action_user.display_name)
       expect(page).to have_content("Please handle this by Friday")
+
+      visit entity_incoming_mails_path(entity)
+      expect(page).not_to have_content("Tax notice")
+
+      visit waiting_entity_documents_path(entity)
+      expect(page).to have_content("Tax notice")
     end
 
     Capybara.using_session(:action_user) do
       sign_in_via_form(action_user)
       expect(page).to have_link("Sign out")
 
-      visit inbox_entity_incoming_mails_path(entity)
+      visit todo_entity_documents_path(entity)
       expect(page).to have_content("Tax notice")
+      expect(page).to have_link(href: entity_incoming_mail_path(entity, Document.find_by!(subject: "Tax notice")))
     end
 
     Capybara.using_session(:info_user) do
       sign_in_via_form(info_user)
       expect(page).to have_link("Sign out")
 
-      visit inbox_entity_incoming_mails_path(entity)
+      visit info_entity_documents_path(entity)
       expect(page).to have_content("Tax notice")
     end
   end

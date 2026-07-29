@@ -158,6 +158,12 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       rendered.css("a[href='#{href}']").first.text.squish
     end
 
+    it "gives each count badge a stable dom id for live updates" do
+      %w[overview to_validate received mine todo waiting info].each do |key|
+        expect(rendered).to have_css("span#sidebar-badge-#{key}")
+      end
+    end
+
     it "shows zero counts when the boxes are empty" do
       expect(link_text(entity_documents_path(entity))).to eq("Overview 0")
       expect(link_text(to_validate_entity_documents_path(entity))).to eq("To Validate 0")
@@ -303,6 +309,10 @@ RSpec.describe Entities::SidebarComponent, type: :component do
 
       def link_text(href)
         rendered.css("a[href='#{href}']").first.text.squish
+      end
+
+      it "gives the count badge a stable dom id for live updates" do
+        expect(rendered).to have_css("span#sidebar-badge-incoming_mail")
       end
 
       it "shows zero when there is no incoming mail" do

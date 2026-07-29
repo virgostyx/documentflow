@@ -8,6 +8,8 @@ Rails.application.routes.draw do
 
   devise_for :users
 
+  mount ActionCable.server => "/cable"
+
   # Authenticated application
   resources :entities do
     resources :entity_users, only: %i[index create update destroy] do

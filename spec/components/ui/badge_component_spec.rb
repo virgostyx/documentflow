@@ -32,4 +32,16 @@ RSpec.describe Ui::BadgeComponent, type: :component do
 
     expect(rendered).to have_css("span.bg-gray-100.text-gray-700")
   end
+
+  it "renders the given id when provided" do
+    rendered = render_inline(described_class.new(id: "sidebar-badge-todo")) { "3" }
+
+    expect(rendered).to have_css("span#sidebar-badge-todo")
+  end
+
+  it "renders no id attribute when none is given" do
+    rendered = render_inline(described_class.new) { "Active" }
+
+    expect(rendered.css("span").first["id"]).to be_nil
+  end
 end

@@ -57,7 +57,7 @@
         </svg>
         Overview
       </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= overview_count %><% end %>
+      <%= render(Ui::BadgeComponent.new(color: :gray, id: "sidebar-badge-overview")) do %><%= overview_count %><% end %>
     <% end %>
 
     <%= link_to to_validate_entity_documents_path(current_entity), class: helpers.nav_class(to_validate_entity_documents_path(current_entity)) + " justify-between" do %>
@@ -67,7 +67,7 @@
         </svg>
         To Validate
       </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= to_validate_count %><% end %>
+      <%= render(Ui::BadgeComponent.new(color: :gray, id: "sidebar-badge-to_validate")) do %><%= to_validate_count %><% end %>
     <% end %>
 
     <%= link_to received_entity_documents_path(current_entity), class: helpers.nav_class(received_entity_documents_path(current_entity)) + " justify-between" do %>
@@ -77,7 +77,7 @@
         </svg>
         My Inbox
       </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= received_count %><% end %>
+      <%= render(Ui::BadgeComponent.new(color: :gray, id: "sidebar-badge-received")) do %><%= received_count %><% end %>
     <% end %>
 
     <%= link_to mine_entity_documents_path(current_entity), class: helpers.nav_class(mine_entity_documents_path(current_entity)) + " justify-between" do %>
@@ -87,7 +87,7 @@
         </svg>
         My Outbox
       </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= mine_count %><% end %>
+      <%= render(Ui::BadgeComponent.new(color: :gray, id: "sidebar-badge-mine")) do %><%= mine_count %><% end %>
     <% end %>
 
     <%= link_to todo_entity_documents_path(current_entity), class: helpers.nav_class(todo_entity_documents_path(current_entity)) + " justify-between" do %>
@@ -97,7 +97,7 @@
         </svg>
         ToDo
       </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= todo_count %><% end %>
+      <%= render(Ui::BadgeComponent.new(color: :gray, id: "sidebar-badge-todo")) do %><%= todo_count %><% end %>
     <% end %>
 
     <%= link_to waiting_entity_documents_path(current_entity), class: helpers.nav_class(waiting_entity_documents_path(current_entity)) + " justify-between" do %>
@@ -107,7 +107,7 @@
         </svg>
         Waiting
       </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= waiting_count %><% end %>
+      <%= render(Ui::BadgeComponent.new(color: :gray, id: "sidebar-badge-waiting")) do %><%= waiting_count %><% end %>
     <% end %>
 
     <%= link_to info_entity_documents_path(current_entity), class: helpers.nav_class(info_entity_documents_path(current_entity)) + " justify-between" do %>
@@ -118,7 +118,7 @@
         </svg>
         Info
       </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= info_count %><% end %>
+      <%= render(Ui::BadgeComponent.new(color: :gray, id: "sidebar-badge-info")) do %><%= info_count %><% end %>
     <% end %>
 
     </div>
@@ -132,7 +132,7 @@
         </svg>
         Incoming Mail
       </span>
-      <%= render(Ui::BadgeComponent.new(color: :gray)) do %><%= incoming_mail_count %><% end %>
+      <%= render(Ui::BadgeComponent.new(color: :gray, id: "sidebar-badge-incoming_mail")) do %><%= incoming_mail_count %><% end %>
     <% end %>
     </div>
 

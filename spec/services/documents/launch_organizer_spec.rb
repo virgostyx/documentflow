@@ -35,6 +35,14 @@ RSpec.describe Documents::LaunchOrganizer do
         described_class.call(document: document, current_user: user)
       end
 
+      it "broadcasts the sidebar update to the RED actor" do
+        red_actor = document.workflow_steps.find_by(role: "RED").actor
+
+        expect(SidebarBroadcastJob).to receive(:perform_later).with(red_actor.id, document.entity_id)
+
+        described_class.call(document: document, current_user: user)
+      end
+
       it "enregistre un audit log" do
         expect {
           described_class.call(document: document, current_user: user)

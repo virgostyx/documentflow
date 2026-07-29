@@ -11,9 +11,12 @@ module Ui
       info: "bg-info-100 text-info-700"
     }.freeze
 
-    def initialize(color: :gray)
+    def initialize(color: :gray, id: nil)
       @color = color
+      @id = id
     end
+
+    attr_reader :id
 
     def color_classes
       COLORS[@color] || COLORS[:gray]

@@ -6,6 +6,7 @@ module Documents
                    Actions::ValidateHasSignStep,
                    Actions::ValidateHasMainFile,
                    Actions::LaunchDocument,
-                   Actions::NotifyFirstActor
+                   Actions::NotifyFirstActor,
+                   Actions::BroadcastSidebarToFirstActor
   end
 end

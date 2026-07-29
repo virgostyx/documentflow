@@ -38,6 +38,9 @@ RSpec.configure do |config|
   # FactoryBot
   config.include FactoryBot::Syntax::Methods
 
+  # ActionCable
+  config.include ActionCable::TestHelper, type: :job
+
   # Devise
   config.include Devise::Test::ControllerHelpers, type: :controller
   config.include Devise::Test::IntegrationHelpers, type: :request

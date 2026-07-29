@@ -5,6 +5,7 @@ module Workflow
     workflow_steps Actions::ValidateActorCanApprove,
                    Actions::ApproveStep,
                    Actions::AdvanceWorkflow,
-                   Actions::NotifyNextActor
+                   Actions::NotifyNextActor,
+                   Actions::BroadcastSidebarToNextActor
   end
 end

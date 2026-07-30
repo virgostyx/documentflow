@@ -34,4 +34,24 @@ RSpec.describe Entities::EntityCardComponent, type: :component do
       expect(subject).to have_css("span", text: "Guest")
     end
   end
+
+  context "when the entity has a logo" do
+    before do
+      entity.logo.attach(
+        io: StringIO.new("fake image content"),
+        filename: "logo.png",
+        content_type: "image/png"
+      )
+    end
+
+    it "displays the entity logo" do
+      expect(subject).to have_css("img")
+    end
+  end
+
+  context "when the entity has no logo" do
+    it "does not display an image" do
+      expect(subject).to have_no_css("img")
+    end
+  end
 end

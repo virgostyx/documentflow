@@ -59,6 +59,17 @@
                                     placeholder: " " %>
     </div>
 
+    <%# Two-factor authentication %>
+    <div class="mb-6 pt-6 border-t border-gray-200">
+      <h3 class="text-sm font-semibold text-gray-900 mb-2">Two-factor authentication</h3>
+      <p class="text-xs text-gray-500 mb-4">
+        <%= current_user.otp_required_for_login? ? "Enabled." : "Not enabled." %>
+        <%= current_user.two_factor_required? ? "Mandatory for your role." : "Optional." %>
+      </p>
+      <%= link_to "Manage two-factor authentication", two_factor_setup_path,
+                  class: "inline-block text-sm font-medium text-primary-600 hover:text-primary-500" %>
+    </div>
+
     <%# Current password %>
     <div class="mb-6 pt-6 border-t border-gray-200">
       <h3 class="text-sm font-semibold text-gray-900 mb-2">Confirm changes</h3>

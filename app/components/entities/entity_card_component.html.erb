@@ -2,7 +2,7 @@
   <div class="flex items-start justify-between gap-3">
     <div class="flex items-center gap-3 min-w-0">
       <% if entity.logo.attached? %>
-        <%= image_tag entity.logo.variant(resize_to_limit: [48, 48]), class: "w-12 h-12 rounded object-contain shrink-0" %>
+        <%= image_tag entity.logo.variant(resize_to_limit: [96, 96]), class: "w-24 h-24 rounded object-contain shrink-0" %>
       <% end %>
       <div class="min-w-0">
         <h3 class="text-lg font-semibold text-gray-900"><%= entity.name %></h3>

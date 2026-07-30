@@ -6,7 +6,14 @@ Rails.application.routes.draw do
   # Public landing page
   root "pages#home"
 
-  devise_for :users
+  devise_for :users, controllers: { sessions: "users/sessions" }
+
+  devise_scope :user do
+    resource :two_factor_authentication, only: %i[new create], controller: "users/two_factor_authentications"
+  end
+
+  resource :two_factor_setup, only: %i[show create destroy], controller: "users/two_factor_setups"
+  post "two_factor_setup/backup_codes", to: "users/two_factor_setups#backup_codes", as: :two_factor_setup_backup_codes
 
   mount ActionCable.server => "/cable"
 

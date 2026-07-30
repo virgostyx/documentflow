@@ -6,6 +6,7 @@ class SharedLinksController < ApplicationController
   layout "pages", only: %i[show renew]
 
   skip_before_action :authenticate_user!, only: %i[show renew]
+  skip_before_action :enforce_two_factor_setup, only: %i[show renew]
   skip_before_action :set_current_entity, only: %i[show renew]
   skip_before_action :authorize_entity_access!, only: %i[show renew]
 

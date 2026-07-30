@@ -10,6 +10,7 @@ module Wopi
   # flows stay consistent.
   class FilesController < ApplicationController
     skip_before_action :authenticate_user!
+    skip_before_action :enforce_two_factor_setup
     skip_before_action :verify_authenticity_token, raise: false
 
     before_action :authenticate_wopi_request!

@@ -1,0 +1,18 @@
+<%= render Auth::AuthLayoutComponent.new(
+  title: "Backup codes",
+  subtitle: "Save these codes somewhere safe"
+) do %>
+  <p class="text-xs text-gray-500 mb-4">
+    Each code can be used once to sign in if you lose access to your authenticator app.
+    They won't be shown again after you leave this page.
+  </p>
+
+  <ul class="mb-6 grid grid-cols-2 gap-2">
+    <% @backup_codes.each do |code| %>
+      <li class="font-mono text-sm text-center p-2 bg-gray-50 border border-gray-200 rounded"><%= code %></li>
+    <% end %>
+  </ul>
+
+  <%= link_to "Done", two_factor_setup_path,
+              class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors" %>
+<% end %>

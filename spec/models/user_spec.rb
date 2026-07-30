@@ -42,4 +42,54 @@ RSpec.describe User, type: :model do
       expect(user).not_to be_external
     end
   end
+
+  describe "#two_factor_required?" do
+    it "is false for a plain member" do
+      user = create(:user)
+      create(:entity_user, user: user, role: "member", status: "active")
+
+      expect(user).not_to be_two_factor_required
+    end
+
+    it "is true for a super admin" do
+      user = create(:user, :super_admin)
+
+      expect(user).to be_two_factor_required
+    end
+
+    it "is true for an active owner of an entity" do
+      user = create(:user)
+      create(:entity_user, :owner, user: user, status: "active")
+
+      expect(user).to be_two_factor_required
+    end
+
+    it "is true for an active admin of an entity" do
+      user = create(:user)
+      create(:entity_user, :admin, user: user, status: "active")
+
+      expect(user).to be_two_factor_required
+    end
+
+    it "is false for a pending admin membership" do
+      user = create(:user)
+      create(:entity_user, :admin, :pending, user: user)
+
+      expect(user).not_to be_two_factor_required
+    end
+
+    it "is false for a suspended owner membership" do
+      user = create(:user)
+      create(:entity_user, :owner, :suspended, user: user)
+
+      expect(user).not_to be_two_factor_required
+    end
+
+    it "is false for a guest" do
+      user = create(:user)
+      create(:entity_user, :guest, user: user, status: "active")
+
+      expect(user).not_to be_two_factor_required
+    end
+  end
 end

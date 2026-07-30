@@ -47,6 +47,8 @@ gem "aws-sdk-s3", require: false
 
 # Authentication
 gem "devise"
+gem "devise-two-factor"
+gem "rqrcode"
 
 # Authorization
 gem "pundit"

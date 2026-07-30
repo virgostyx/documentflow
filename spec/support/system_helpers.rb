@@ -6,6 +6,11 @@ module SystemHelpers
     fill_in "Email address", with: user.email
     fill_in "Password", with: password
     click_button "Sign in"
+
+    if user.otp_required_for_login?
+      fill_in "Authentication code", with: ROTP::TOTP.new(user.otp_secret).now
+      click_button "Verify"
+    end
   end
 
   def open_actions_menu

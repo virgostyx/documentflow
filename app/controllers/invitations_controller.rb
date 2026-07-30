@@ -3,6 +3,7 @@
 class InvitationsController < ApplicationController
   layout "pages"
   skip_before_action :authenticate_user!
+  skip_before_action :enforce_two_factor_setup
 
   before_action :load_invitation
   before_action :require_pending

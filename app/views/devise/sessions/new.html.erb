@@ -26,16 +26,8 @@
                                   autocomplete: "current-password",
                                   placeholder: " " %>
 
-    <%# Remember me %>
-    <div class="flex items-center justify-between mb-6">
-      <% if devise_mapping.rememberable? %>
-        <label class="flex items-center cursor-pointer">
-          <%= f.check_box :remember_me,
-                          class: "h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded" %>
-          <span class="ml-2 text-sm text-gray-700">Remember me</span>
-        </label>
-      <% end %>
-
+    <%# Forgot password %>
+    <div class="flex items-center justify-end mb-6">
       <%= link_to "Forgot your password?", new_user_password_path,
                   class: "text-sm font-medium text-primary-600 hover:text-primary-500" %>
     </div>

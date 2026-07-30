@@ -2,9 +2,9 @@ class User < ApplicationRecord
   include Party
 
   # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  # :confirmable, :lockable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :timeoutable, :validatable
 
   # Validations
   validates :first_name, presence: true

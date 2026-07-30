@@ -6,6 +6,8 @@ module Documents
       expects :document, :current_user
 
       executed do |ctx|
+        next if ctx[:skip_release]
+
         document = ctx.document.reload
         recipients = [ document.current_step&.actor, document.created_by ].compact.uniq
         recipients.delete(ctx.current_user)

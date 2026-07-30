@@ -70,6 +70,10 @@ RSpec.describe Documents::MainFileComponent, type: :component do
       expect(subject).not_to have_link("Check in")
       expect(subject).not_to have_link("Cancel checkout")
     end
+
+    it "does not show the edit-online control" do
+      expect(subject).not_to have_link("Edit online")
+    end
   end
 
   context "when the document has a main file attached and is not checked out" do
@@ -103,8 +107,14 @@ RSpec.describe Documents::MainFileComponent, type: :component do
     end
 
     it "shows check-in and cancel-checkout controls" do
-      expect(subject).to have_link("Check in")
+      expect(subject).to have_link("Check in manually")
       expect(subject).to have_link("Cancel checkout")
+    end
+
+    it "shows an edit-online control linking to the WOPI editor modal" do
+      expect(subject).to have_css(
+        "a[href='#{Rails.application.routes.url_helpers.edit_online_entity_document_checkout_path(document.entity, document)}']"
+      )
     end
 
     it "does not show a check-out control" do

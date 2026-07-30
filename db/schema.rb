@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_27_192559) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_30_052326) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -179,6 +179,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_27_192559) do
     t.string "subject", null: false
     t.string "temporary_number"
     t.datetime "updated_at", null: false
+    t.string "wopi_lock_id"
     t.index ["addressee_type", "addressee_id"], name: "index_documents_on_addressee_type_and_addressee_id"
     t.index ["checked_out_by_id"], name: "index_documents_on_checked_out_by_id"
     t.index ["classification_node_id"], name: "index_documents_on_classification_node_id"

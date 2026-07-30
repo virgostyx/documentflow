@@ -56,6 +56,7 @@ Rails.application.routes.draw do
       resource :checkout, only: %i[create update destroy], controller: "document_checkouts" do
         get :confirm_check_in, on: :member
         get :confirm_cancel, on: :member
+        get :edit_online, on: :member
       end
 
       member do
@@ -93,6 +94,14 @@ Rails.application.routes.draw do
   get  "/invitations/:token",          to: "invitations#show",           as: :invitation
   get  "/invitations/:token/register", to: "invitations#register",       as: :invitation_register
   post "/invitations/:token/register", to: "invitations#create_account", as: :invitation_create_account
+
+  # WOPI host endpoints for Collabora Online (token-based, called server-to-server, no session auth)
+  namespace :wopi do
+    get  "files/:id",          to: "files#check_file_info", as: :file
+    get  "files/:id/contents", to: "files#get_file",         as: :file_contents
+    post "files/:id/contents", to: "files#put_file"
+    post "files/:id",          to: "files#lock_dispatch"
+  end
 
   # Global dashboard (list of the user's entities)
   get "dashboard", to: "dashboard#index"

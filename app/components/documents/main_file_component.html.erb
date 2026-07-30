@@ -48,11 +48,18 @@
     )) { "Check out" } %>
   <% end %>
 
+  <% if show_edit_online_button? %>
+    <%= render(Ui::ButtonComponent.new(
+      href: edit_online_entity_document_checkout_path(document.entity, document),
+      variant: :primary, size: :sm, data: { turbo_frame: "modal", action: "click->modal#open" }
+    )) { "Edit online" } %>
+  <% end %>
+
   <% if show_check_in_button? %>
     <%= render(Ui::ButtonComponent.new(
       href: confirm_check_in_entity_document_checkout_path(document.entity, document),
-      variant: :primary, size: :sm, data: { turbo_frame: "modal", action: "click->modal#open" }
-    )) { "Check in" } %>
+      variant: :secondary, size: :sm, data: { turbo_frame: "modal", action: "click->modal#open" }
+    )) { "Check in manually" } %>
   <% end %>
 
   <% if show_cancel_check_out_button? %>

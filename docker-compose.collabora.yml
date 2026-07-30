@@ -1,0 +1,22 @@
+# Local Collabora Online instance for manually verifying the WOPI/in-browser
+# editing flow (see docs/wopi_local_dev.md). Not used by the test suite,
+# CI, or production — production infra for Collabora is a separate,
+# not-yet-made decision (box upsize vs. dedicated VPS; see the project plan).
+#
+# Usage:
+#   docker compose -f docker-compose.collabora.yml up
+#   COLLABORA_BASE_URL=http://localhost:9980 bin/rails server
+services:
+  collabora:
+    image: collabora/code:latest
+    ports:
+      - "9980:9980"
+    environment:
+      aliasgroup1: "http://localhost:3000"
+      DONT_GEN_SSL_CERT: "true"
+      extra_params: >-
+        --o:ssl.enable=false
+        --o:num_prespawn_children=1
+        --o:per_document.max_concurrency=1
+    cap_add:
+      - MKNOD

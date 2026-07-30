@@ -64,6 +64,9 @@ env:
     SMTP_DOMAIN: documentflowmanagement.com
     DEFAULT_FROM_EMAIL: no-reply@documentflowmanagement.com
 
+    # Collabora Online (WOPI in-browser document editing, accessory below)
+    COLLABORA_BASE_URL: https://office.documentflowmanagement.com
+
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
 # "bin/kamal logs -r job" will tail logs from the first server in the job section.
 aliases:
@@ -114,3 +117,36 @@ accessories:
       health-interval: "10s"
       health-timeout: "5s"
       health-retries: 5
+
+  # Collabora Online (WOPI editor for "Edit online"). Runs on the same box
+  # as the main app. Pinned to the latest stable tag as of 2026-07-30 —
+  # re-check Docker Hub before bumping; don't run :latest long-term.
+  collabora:
+    image: collabora/code:26.04.2.4.1
+    host: 187.55.230.3
+    port: "127.0.0.1:9980:9980" # local-only, for debugging; public access goes through the proxy block below
+    proxy:
+      ssl: true
+      host: office.documentflowmanagement.com
+      app_port: 9980
+      # Collabora has no /up endpoint (Rails convention kamal-proxy defaults
+      # to) — it 404s there, so the default healthcheck never passes.
+      healthcheck:
+        path: /hosting/discovery
+    env:
+      clear:
+        # WOPI host allowlist: Collabora only accepts requests originating
+        # this app's domain — the main anti-SSRF control for the WOPI flow.
+        aliasgroup1: "https://documentflowmanagement.com:443"
+        DONT_GEN_SSL_CERT: "true" # TLS is terminated by kamal-proxy, not coolwsd
+        extra_params: >-
+          --o:ssl.enable=false
+          --o:num_prespawn_children=1
+          --o:per_document.max_concurrency=1
+          --o:memproportion=50
+      secret:
+        - COLLABORA_ADMIN_USERNAME
+        - COLLABORA_ADMIN_PASSWORD
+    options:
+      cap-add:
+        - MKNOD

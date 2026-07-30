@@ -13,6 +13,12 @@ class DocumentCheckoutsController < ApplicationController
     authorize @document, :cancel_check_out?
   end
 
+  def edit_online
+    authorize @document, :check_in?
+
+    @edit_url = build_edit_url
+  end
+
   def create
     authorize @document, :check_out?
 
@@ -47,6 +53,16 @@ class DocumentCheckoutsController < ApplicationController
   end
 
   private
+
+  # Collabora may not be configured/reachable yet (e.g. Phase 0 infra not
+  # deployed) — that must degrade to the "unavailable" state in the view,
+  # not a 500, since the manual check-in flow is still fully usable.
+  def build_edit_url
+    Wopi::EditUrl.for(document: @document, user: current_user)
+  rescue StandardError => e
+    Rails.logger.error("[Wopi::EditUrl] #{e.class}: #{e.message}")
+    nil
+  end
 
   def annex_files_param
     @document.annexes.each_with_object({}) do |annex, files|

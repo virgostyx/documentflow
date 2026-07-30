@@ -110,6 +110,21 @@ RSpec.describe Documents::CheckInOrganizer do
       end
     end
 
+    context "when checking in with skip_release (WOPI autosave)" do
+      it "keeps the document checked out and does not notify" do
+        expect(NotificationJob).not_to receive(:perform_later)
+
+        result = described_class.call(
+          document: document, current_user: visa_actor, main_file: new_file, comment: nil, skip_release: true
+        )
+
+        expect(result).to be_success
+        document.reload
+        expect(document.checked_out_by).to eq(visa_actor)
+        expect(document.checked_out_at).to be_present
+      end
+    end
+
     context "when checked in by someone other than the user who checked it out" do
       let(:other_user) { create(:user) }
 

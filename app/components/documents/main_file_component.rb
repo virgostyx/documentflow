@@ -36,6 +36,10 @@ module Documents
       @policy.check_in?
     end
 
+    def show_edit_online_button?
+      @policy.check_in?
+    end
+
     def show_cancel_check_out_button?
       @policy.cancel_check_out?
     end

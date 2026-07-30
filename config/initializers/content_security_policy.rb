@@ -27,3 +27,12 @@
 #   # Report violations without enforcing the policy.
 #   # config.content_security_policy_report_only = true
 # end
+
+# Scoped narrowly to just what the Collabora Online (WOPI) editor iframe
+# needs (see Wopi::EditUrl) — deliberately not a full CSP rollout, which
+# would be a separate decision. No-ops if COLLABORA_BASE_URL isn't set.
+Rails.application.configure do
+  config.content_security_policy do |policy|
+    policy.frame_src(*[ :self, ENV["COLLABORA_BASE_URL"] ].compact)
+  end
+end

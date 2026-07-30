@@ -132,6 +132,40 @@ RSpec.describe "DocumentCheckouts", type: :request do
     end
   end
 
+  describe "GET /entities/:entity_id/documents/:document_id/checkout/edit_online" do
+    before do
+      document.update!(checked_out_by: visa_actor, checked_out_at: Time.current)
+      sign_in visa_actor
+    end
+
+    it "renders the online editor when Collabora is reachable" do
+      allow(Wopi::EditUrl).to receive(:for).and_return("https://office.example.com/browser/1234/cool.html?WOPISrc=x")
+
+      get edit_online_entity_document_checkout_path(entity, document)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("https://office.example.com/browser/1234/cool.html?WOPISrc=x")
+    end
+
+    it "falls back gracefully when Collabora is unreachable" do
+      allow(Wopi::EditUrl).to receive(:for).and_raise(SocketError, "getaddrinfo failed")
+
+      get edit_online_entity_document_checkout_path(entity, document)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Online editor unavailable")
+    end
+
+    it "is not accessible to a user who has not checked out the document" do
+      other_user = create(:user).tap { |u| create(:entity_user, entity: entity, user: u, status: "active") }
+      sign_in other_user
+
+      get edit_online_entity_document_checkout_path(entity, document)
+
+      expect(response).to redirect_to(root_path)
+    end
+  end
+
   describe "GET /entities/:entity_id/documents/:document_id/checkout/confirm_cancel" do
     before do
       document.update!(checked_out_by: visa_actor, checked_out_at: Time.current)

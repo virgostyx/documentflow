@@ -24,7 +24,7 @@ export default class extends Controller {
   applyWidth(frame) {
     const wide = frame.querySelector("[data-modal-wide]") !== null
     this.dialogTarget.classList.toggle("max-w-4xl", !wide)
-    this.dialogTarget.classList.toggle("max-w-[67.2rem]", wide)
+    this.dialogTarget.classList.toggle("max-w-[80.64rem]", wide)
   }
 
   show() {

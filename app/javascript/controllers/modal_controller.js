@@ -15,6 +15,16 @@ export default class extends Controller {
 
   frameLoaded(event) {
     if (event.target.src) this.show()
+    this.applyWidth(event.target)
+  }
+
+  // Most modal content (forms, confirmations) is comfortable at the default
+  // width. A few (the WOPI online editor) opt into a wider dialog by
+  // including a `[data-modal-wide]` marker in their content.
+  applyWidth(frame) {
+    const wide = frame.querySelector("[data-modal-wide]") !== null
+    this.dialogTarget.classList.toggle("max-w-4xl", !wide)
+    this.dialogTarget.classList.toggle("max-w-[67.2rem]", wide)
   }
 
   show() {

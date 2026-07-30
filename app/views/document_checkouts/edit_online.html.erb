@@ -1,6 +1,6 @@
 <%= turbo_frame_tag "modal" do %>
   <% if @edit_url %>
-    <div class="p-4" data-controller="wopi-editor" data-wopi-editor-origin-value="<%= URI.parse(@edit_url).origin %>">
+    <div class="p-4" data-controller="wopi-editor" data-wopi-editor-origin-value="<%= URI.parse(@edit_url).origin %>" data-modal-wide>
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-900 truncate">Edit online — <%= @document.main_file.filename %></h2>
         <%= render(Ui::ButtonComponent.new(

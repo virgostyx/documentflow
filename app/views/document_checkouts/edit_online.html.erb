@@ -5,7 +5,7 @@
         <h2 class="text-lg font-semibold text-gray-900 truncate">Edit online — <%= @document.main_file.filename %></h2>
         <%= render(Ui::ButtonComponent.new(
           href: entity_document_checkout_path(current_entity, @document), variant: :secondary, size: :sm, method: :delete,
-          data: { "wopi-editor-target": "doneLink" }
+          data: { "wopi-editor-target": "doneLink", turbo_frame: "_top" }
         )) { "Done editing" } %>
       </div>
       <iframe src="<%= @edit_url %>" title="Edit <%= @document.main_file.filename %>"

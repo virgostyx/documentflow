@@ -16,6 +16,11 @@ proxy:
   host: documentflowmanagement.com
   app_port: 3000
 
+# Default (10s) is too short for the Collabora accessory, which takes ~50s
+# to spawn its first LibreOffice kit process on a cold container start.
+# Applies globally (main app deploys well within this, no downside there).
+deploy_timeout: 90
+
 # IMPORTANT: Activez aussi config.assume_ssl et config.force_ssl dans config/environments/production.rb
 
 # Where you keep your container images.
@@ -144,6 +149,7 @@ accessories:
           --o:num_prespawn_children=1
           --o:per_document.max_concurrency=1
           --o:memproportion=50
+          --o:net.frame_ancestors=documentflowmanagement.com
       secret:
         - COLLABORA_ADMIN_USERNAME
         - COLLABORA_ADMIN_PASSWORD

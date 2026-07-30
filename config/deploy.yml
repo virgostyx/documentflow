@@ -146,6 +146,7 @@ accessories:
         DONT_GEN_SSL_CERT: "true" # TLS is terminated by kamal-proxy, not coolwsd
         extra_params: >-
           --o:ssl.enable=false
+          --o:ssl.termination=true
           --o:num_prespawn_children=1
           --o:per_document.max_concurrency=1
           --o:memproportion=50

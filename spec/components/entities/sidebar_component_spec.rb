@@ -447,11 +447,11 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
 
     it "renders sign out as a link with turbo_method delete" do
-      expect(rendered).to have_css("a[data-turbo-method='delete']", text: "Sign out")
+      expect(rendered).to have_css("a[data-turbo-method='delete']", text: "Sign out", visible: :all)
     end
 
     it "links to the account profile page, above sign out" do
-      expect(rendered).to have_link("My account", href: edit_user_registration_path)
+      expect(rendered).to have_link("My account", href: edit_user_registration_path, visible: :all)
 
       links = rendered.css("a").map { |a| a.text.squish }
       expect(links.index("My account")).to be < links.index("Sign out")

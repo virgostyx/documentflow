@@ -56,7 +56,7 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     within("[data-role='VISA']") { expect(page).to have_content("Approved") }
     within("[data-role='SIGN']") { expect(page).to have_content("Pending") }
 
-    click_link "Sign out"
+    sign_out_via_ui(visa_actor)
     expect(page).to have_content("Sign in")
     sign_in_via_form(sign_actor)
     expect(page).to have_current_path(entity_documents_path(entity))

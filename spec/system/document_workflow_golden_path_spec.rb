@@ -44,7 +44,7 @@ RSpec.describe "Document validation circuit golden path", type: :system do
     within("[data-role='RED']") { expect(page).to have_content("Approved") }
     within("[data-role='VISA']") { expect(page).to have_content("Pending") }
 
-    click_link "Sign out"
+    sign_out_via_ui(owner)
     sign_in_via_form(visa_actor)
     visit entity_document_path(entity, document)
     open_actions_menu
@@ -53,7 +53,7 @@ RSpec.describe "Document validation circuit golden path", type: :system do
     within("[data-role='VISA']") { expect(page).to have_content("Approved") }
     within("[data-role='SIGN']") { expect(page).to have_content("Pending") }
 
-    click_link "Sign out"
+    sign_out_via_ui(visa_actor)
     sign_in_via_form(sign_actor)
     visit entity_document_path(entity, document)
     open_actions_menu
@@ -61,7 +61,7 @@ RSpec.describe "Document validation circuit golden path", type: :system do
     within("[data-role='SIGN']") { expect(page).to have_content("Approved") }
     within("[data-role='EXP']") { expect(page).to have_content("Pending") }
 
-    click_link "Sign out"
+    sign_out_via_ui(sign_actor)
     sign_in_via_form(exp_actor)
     visit entity_document_path(entity, document)
     open_actions_menu

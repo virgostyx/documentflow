@@ -16,6 +16,11 @@ module SystemHelpers
   def open_actions_menu
     find("summary", text: "Actions").click
   end
+
+  def sign_out_via_ui(user)
+    find("summary", text: user.email).click
+    click_link "Sign out"
+  end
 end
 
 RSpec.configure do |config|

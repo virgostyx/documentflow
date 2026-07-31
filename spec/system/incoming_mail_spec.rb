@@ -21,7 +21,7 @@ RSpec.describe "Incoming mail", type: :system, js: true do
   it "registers an incoming mail, assigns a lead, and routes it for action and info" do
     Capybara.using_session(:registrant) do
       sign_in_via_form(registrant)
-      expect(page).to have_link("Sign out")
+      expect(page).to have_content(registrant.email)
 
       visit new_entity_incoming_mail_path(entity)
       expect(page).to have_content("Register incoming mail")
@@ -44,7 +44,7 @@ RSpec.describe "Incoming mail", type: :system, js: true do
 
     Capybara.using_session(:lead) do
       sign_in_via_form(lead)
-      expect(page).to have_link("Sign out")
+      expect(page).to have_content(lead.email)
 
       visit entity_incoming_mails_path(entity)
       expect(page).to have_content("Tax notice")
@@ -75,7 +75,7 @@ RSpec.describe "Incoming mail", type: :system, js: true do
 
     Capybara.using_session(:action_user) do
       sign_in_via_form(action_user)
-      expect(page).to have_link("Sign out")
+      expect(page).to have_content(action_user.email)
 
       visit todo_entity_documents_path(entity)
       expect(page).to have_content("Tax notice")
@@ -84,7 +84,7 @@ RSpec.describe "Incoming mail", type: :system, js: true do
 
     Capybara.using_session(:info_user) do
       sign_in_via_form(info_user)
-      expect(page).to have_link("Sign out")
+      expect(page).to have_content(info_user.email)
 
       visit info_entity_documents_path(entity)
       expect(page).to have_content("Tax notice")

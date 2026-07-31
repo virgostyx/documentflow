@@ -216,6 +216,14 @@
       </div>
     </div>
 
+    <%= link_to edit_user_registration_path,
+          class: "flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-500 hover:text-primary-700 hover:bg-primary-50 transition-colors" do %>
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+      </svg>
+      My account
+    <% end %>
+
     <%= link_to destroy_user_session_path, data: { turbo_method: :delete },
           class: "flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-500 hover:text-danger-600 hover:bg-danger-50 transition-colors" do %>
       <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">

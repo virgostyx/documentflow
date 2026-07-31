@@ -7,3 +7,4 @@ pin "@hotwired/stimulus", to: "stimulus.min.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
 pin_all_from "app/javascript/controllers", under: "controllers"
 pin "sortablejs" # @1.15.7
+pin "@github/webauthn-json", to: "@github--webauthn-json.js" # @2.1.1

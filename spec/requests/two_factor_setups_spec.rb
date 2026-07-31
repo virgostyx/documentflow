@@ -31,6 +31,14 @@ RSpec.describe "Two-factor setup", type: :request do
 
       expect(response.body).to include("enabled")
     end
+
+    it "redirects passwordless users to passkey management instead" do
+      create_webauthn_credential_for(user)
+
+      get two_factor_setup_path
+
+      expect(response).to redirect_to(passkeys_path)
+    end
   end
 
   describe "POST /two_factor_setup" do
@@ -74,6 +82,16 @@ RSpec.describe "Two-factor setup", type: :request do
 
       expect(response).to redirect_to(two_factor_setup_path)
     end
+
+    it "regenerates recovery codes for a passwordless user with no TOTP configured" do
+      create_webauthn_credential_for(user)
+      old_codes = user.reload.otp_backup_codes
+
+      post two_factor_setup_backup_codes_path
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload.otp_backup_codes).not_to eq(old_codes)
+    end
   end
 
   describe "DELETE /two_factor_setup" do
@@ -105,6 +123,14 @@ RSpec.describe "Two-factor setup", type: :request do
         delete two_factor_setup_path, params: { current_password: "password123" }
 
         expect(user.reload.otp_required_for_login).to be true
+      end
+
+      it "allows disabling it when the user has also gone passwordless" do
+        create_webauthn_credential_for(user)
+
+        delete two_factor_setup_path, params: { current_password: "password123" }
+
+        expect(user.reload.otp_required_for_login).to be false
       end
     end
   end

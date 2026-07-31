@@ -8,6 +8,11 @@ module Users
     def create
       user = User.find_by(email: credentials_params[:email])
 
+      if user&.passwordless?
+        return redirect_to new_user_session_path,
+          alert: "This account signs in with a passkey. Use “Sign in with a passkey” below, or “Lost your passkey?” if it's no longer available."
+      end
+
       if user&.valid_password?(credentials_params[:password]) && user.otp_required_for_login?
         session[:otp_user_id] = user.id
         redirect_to new_two_factor_authentication_path

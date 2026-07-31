@@ -9,6 +9,7 @@ class User < ApplicationRecord
          :recoverable, :timeoutable, :validatable
 
   has_many :entity_users
+  has_many :webauthn_credentials, dependent: :destroy
 
   # Validations
   validates :first_name, presence: true
@@ -21,5 +22,20 @@ class User < ApplicationRecord
 
   def two_factor_required?
     super_admin? || entity_users.active.where(role: MANDATORY_TWO_FACTOR_ROLES).exists?
+  end
+
+  # Registering a passkey IS "going passwordless" - not a separate flag.
+  # Removing the last credential naturally restores password sign-in.
+  def passwordless?
+    webauthn_credentials.exists?
+  end
+
+  # Lazily generated, stable WebAuthn user handle.
+  def webauthn_id
+    self[:webauthn_id] || begin
+      id = WebAuthn.generate_user_id
+      update_column(:webauthn_id, id) # rubocop:disable Rails/SkipsModelValidations
+      id
+    end
   end
 end

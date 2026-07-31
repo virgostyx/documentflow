@@ -37,50 +37,67 @@
                                  placeholder: " " %>
     </div>
 
-    <%# Password %>
+    <% unless current_user.passwordless? %>
+      <%# Password %>
+      <div class="mb-6 pt-6 border-t border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-2">Change password</h3>
+        <p class="text-xs text-gray-500 mb-4">Leave blank if you don't want to change it</p>
+
+        <%= f.floating_password_field :password,
+                                      label: "New password (optional)",
+                                      autocomplete: "new-password",
+                                      placeholder: " " %>
+
+        <% if @minimum_password_length %>
+          <p class="text-xs text-gray-500 -mt-2 mb-4">
+            Minimum <%= @minimum_password_length %> characters
+          </p>
+        <% end %>
+
+        <%= f.floating_password_field :password_confirmation,
+                                      label: "Confirm new password",
+                                      autocomplete: "new-password",
+                                      placeholder: " " %>
+      </div>
+    <% end %>
+
+    <%# Passkeys %>
     <div class="mb-6 pt-6 border-t border-gray-200">
-      <h3 class="text-sm font-semibold text-gray-900 mb-2">Change password</h3>
-      <p class="text-xs text-gray-500 mb-4">Leave blank if you don't want to change it</p>
-
-      <%= f.floating_password_field :password,
-                                    label: "New password (optional)",
-                                    autocomplete: "new-password",
-                                    placeholder: " " %>
-
-      <% if @minimum_password_length %>
-        <p class="text-xs text-gray-500 -mt-2 mb-4">
-          Minimum <%= @minimum_password_length %> characters
-        </p>
-      <% end %>
-
-      <%= f.floating_password_field :password_confirmation,
-                                    label: "Confirm new password",
-                                    autocomplete: "new-password",
-                                    placeholder: " " %>
+      <h3 class="text-sm font-semibold text-gray-900 mb-2">Passkeys</h3>
+      <p class="text-xs text-gray-500 mb-4">
+        <%= current_user.passwordless? ? "Enabled — you sign in with a passkey instead of a password." : "Sign in without a password using a fingerprint, face, or security key." %>
+      </p>
+      <%= link_to "Manage passkeys", passkeys_path, class: "inline-block text-sm font-medium text-primary-600 hover:text-primary-500" %>
     </div>
 
     <%# Two-factor authentication %>
     <div class="mb-6 pt-6 border-t border-gray-200">
       <h3 class="text-sm font-semibold text-gray-900 mb-2">Two-factor authentication</h3>
       <p class="text-xs text-gray-500 mb-4">
-        <%= current_user.otp_required_for_login? ? "Enabled." : "Not enabled." %>
-        <%= current_user.two_factor_required? ? "Mandatory for your role." : "Optional." %>
+        <% if current_user.passwordless? %>
+          Not needed — your passkey already satisfies two-factor authentication.
+        <% else %>
+          <%= current_user.otp_required_for_login? ? "Enabled." : "Not enabled." %>
+          <%= current_user.two_factor_required? ? "Mandatory for your role." : "Optional." %>
+        <% end %>
       </p>
       <%= link_to "Manage two-factor authentication", two_factor_setup_path,
                   class: "inline-block text-sm font-medium text-primary-600 hover:text-primary-500" %>
     </div>
 
-    <%# Current password %>
-    <div class="mb-6 pt-6 border-t border-gray-200">
-      <h3 class="text-sm font-semibold text-gray-900 mb-2">Confirm changes</h3>
-      <p class="text-xs text-gray-500 mb-4">Enter your current password to save the changes</p>
+    <% unless current_user.passwordless? %>
+      <%# Current password %>
+      <div class="mb-6 pt-6 border-t border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-2">Confirm changes</h3>
+        <p class="text-xs text-gray-500 mb-4">Enter your current password to save the changes</p>
 
-      <%= f.floating_password_field :current_password,
-                                    label: "Current password",
-                                    required: true,
-                                    autocomplete: "current-password",
-                                    placeholder: " " %>
-    </div>
+        <%= f.floating_password_field :current_password,
+                                      label: "Current password",
+                                      required: true,
+                                      autocomplete: "current-password",
+                                      placeholder: " " %>
+      </div>
+    <% end %>
 
     <%# Button %>
     <%= f.submit "Update profile",

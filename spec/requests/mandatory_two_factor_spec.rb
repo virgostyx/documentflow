@@ -73,4 +73,19 @@ RSpec.describe "Mandatory two-factor authentication", type: :request do
       expect(response).to redirect_to(two_factor_setup_path)
     end
   end
+
+  context "when the signed-in user is an owner with only a passkey (no TOTP)" do
+    before do
+      create(:entity_user, :owner, entity: entity, user: user)
+      user.update!(otp_required_for_login: false, otp_secret: nil)
+      create_webauthn_credential_for(user)
+      login_as(user, scope: :user)
+    end
+
+    it "does not redirect to the two-factor setup page" do
+      get dashboard_path
+
+      expect(response).not_to redirect_to(two_factor_setup_path)
+    end
+  end
 end

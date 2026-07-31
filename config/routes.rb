@@ -6,14 +6,28 @@ Rails.application.routes.draw do
   # Public landing page
   root "pages#home"
 
-  devise_for :users, controllers: { sessions: "users/sessions" }
+  devise_for :users, controllers: {
+    sessions: "users/sessions",
+    passwords: "users/passwords",
+    registrations: "users/registrations"
+  }
 
   devise_scope :user do
     resource :two_factor_authentication, only: %i[new create], controller: "users/two_factor_authentications"
+
+    get  "passkey_session/options", to: "users/passkey_sessions#options", as: :passkey_session_options
+    post "passkey_session",         to: "users/passkey_sessions#create",  as: :passkey_session
+
+    get  "recovery_code_session/new", to: "users/recovery_code_sessions#new",    as: :new_recovery_code_session
+    post "recovery_code_session",     to: "users/recovery_code_sessions#create", as: :recovery_code_session
   end
 
   resource :two_factor_setup, only: %i[show create destroy], controller: "users/two_factor_setups"
   post "two_factor_setup/backup_codes", to: "users/two_factor_setups#backup_codes", as: :two_factor_setup_backup_codes
+
+  resources :passkeys, only: %i[index create destroy], controller: "users/passkeys" do
+    get :options, on: :collection
+  end
 
   mount ActionCable.server => "/cable"
 

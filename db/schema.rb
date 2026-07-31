@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_30_174746) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_31_052023) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -265,8 +265,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_30_174746) do
     t.string "reset_password_token"
     t.boolean "super_admin", default: false, null: false
     t.datetime "updated_at", null: false
+    t.string "webauthn_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["webauthn_id"], name: "index_users_on_webauthn_id", unique: true
+  end
+
+  create_table "webauthn_credentials", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "external_id", null: false
+    t.datetime "last_used_at"
+    t.string "nickname", null: false
+    t.string "public_key", null: false
+    t.bigint "sign_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["external_id"], name: "index_webauthn_credentials_on_external_id", unique: true
+    t.index ["user_id", "nickname"], name: "index_webauthn_credentials_on_user_id_and_nickname", unique: true
+    t.index ["user_id"], name: "index_webauthn_credentials_on_user_id"
   end
 
   create_table "workflow_steps", force: :cascade do |t|
@@ -315,6 +331,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_30_174746) do
   add_foreign_key "entity_users", "users"
   add_foreign_key "entity_users", "users", column: "invited_by_id"
   add_foreign_key "shared_links", "documents"
+  add_foreign_key "webauthn_credentials", "users"
   add_foreign_key "workflow_steps", "documents"
   add_foreign_key "workflow_steps", "users", column: "actor_id"
 end

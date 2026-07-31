@@ -49,6 +49,7 @@ gem "aws-sdk-s3", require: false
 gem "devise"
 gem "devise-two-factor"
 gem "rqrcode"
+gem "webauthn", "~> 3.4"
 
 # Authorization
 gem "pundit"

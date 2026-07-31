@@ -11,6 +11,8 @@ module Users
     skip_before_action :enforce_two_factor_setup
 
     def show
+      return redirect_to passkeys_path if current_user.passwordless?
+
       build_pending_secret unless current_user.otp_required_for_login?
     end
 
@@ -32,7 +34,9 @@ module Users
     end
 
     def backup_codes
-      return redirect_to(two_factor_setup_path, alert: "Set up two-factor authentication first.") unless current_user.otp_required_for_login?
+      unless current_user.otp_required_for_login? || current_user.passwordless?
+        return redirect_to(two_factor_setup_path, alert: "Set up two-factor authentication first.")
+      end
 
       @backup_codes = current_user.generate_otp_backup_codes!
       current_user.save!
@@ -40,7 +44,7 @@ module Users
     end
 
     def destroy
-      if current_user.two_factor_required?
+      if current_user.two_factor_required? && !current_user.passwordless?
         return redirect_to two_factor_setup_path,
                             alert: "Two-factor authentication is mandatory for your account and cannot be disabled."
       end

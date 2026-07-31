@@ -8,47 +8,69 @@
     <% end %>
   </div>
 
-  <%= form_for(resource, as: resource_name, url: session_path(resource_name),
-               builder: FloatingLabelsRails::FormBuilder) do |f| %>
+  <div data-controller="passkey-login"
+       data-passkey-login-options-url-value="<%= passkey_session_options_path %>"
+       data-passkey-login-verify-url-value="<%= passkey_session_path %>">
+    <p data-passkey-login-target="status" class="hidden mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700"></p>
 
-    <%# Email %>
-    <%= f.floating_email_field :email,
-                               label: "Email address",
-                               required: true,
-                               autocomplete: "email",
-                               autofocus: true,
-                               placeholder: " " %>
+    <button type="button" data-action="passkey-login#authenticate"
+            class="w-full mb-3 flex justify-center items-center gap-2 py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+      Sign in with a passkey
+    </button>
 
-    <%# Password %>
-    <%= f.floating_password_field :password,
-                                  label: "Password",
-                                  required: true,
-                                  autocomplete: "current-password",
-                                  placeholder: " " %>
-
-    <%# Forgot password %>
-    <div class="flex items-center justify-end mb-6">
-      <%= link_to "Forgot your password?", new_user_password_path,
-                  class: "text-sm font-medium text-primary-600 hover:text-primary-500" %>
+    <div class="mb-6 text-center text-sm">
+      <%= link_to "Lost your passkey? Use a recovery code", new_recovery_code_session_path,
+                  class: "font-medium text-primary-600 hover:text-primary-500" %>
     </div>
 
-    <%# Button %>
-    <%= f.submit "Sign in",
-                 class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors" %>
-
-    <%# Links %>
-    <div class="mt-6 text-center text-sm">
-      <p class="text-gray-600">
-        Don't have an account yet?
-        <%= link_to "Create a free account", new_user_registration_path,
-                    class: "font-medium text-primary-600 hover:text-primary-500" %>
-      </p>
+    <div class="relative mb-6 text-center">
+      <span class="bg-white px-2 text-xs text-gray-400 relative z-10">or use your password</span>
+      <div class="absolute inset-x-0 top-1/2 border-t border-gray-200"></div>
     </div>
 
-    <div class="mt-8 pt-6 border-t border-gray-200">
-      <div class="text-center text-xs text-gray-500">
-        <p>🔒 Secure sign-in with SSL encryption</p>
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name),
+                 builder: FloatingLabelsRails::FormBuilder) do |f| %>
+
+      <%# Email %>
+      <%= f.floating_email_field :email,
+                                 label: "Email address",
+                                 required: true,
+                                 autocomplete: "username webauthn",
+                                 autofocus: true,
+                                 placeholder: " ",
+                                 data: { "passkey-login-target": "email" } %>
+
+      <%# Password %>
+      <%= f.floating_password_field :password,
+                                    label: "Password",
+                                    required: true,
+                                    autocomplete: "current-password",
+                                    placeholder: " " %>
+
+      <%# Forgot password %>
+      <div class="flex items-center justify-end mb-6">
+        <%= link_to "Forgot your password?", new_user_password_path,
+                    class: "text-sm font-medium text-primary-600 hover:text-primary-500" %>
       </div>
-    </div>
-  <% end %>
+
+      <%# Button %>
+      <%= f.submit "Sign in",
+                   class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors" %>
+
+      <%# Links %>
+      <div class="mt-6 text-center text-sm">
+        <p class="text-gray-600">
+          Don't have an account yet?
+          <%= link_to "Create a free account", new_user_registration_path,
+                      class: "font-medium text-primary-600 hover:text-primary-500" %>
+        </p>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <div class="text-center text-xs text-gray-500">
+          <p>🔒 Secure sign-in with SSL encryption</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
 <% end %>

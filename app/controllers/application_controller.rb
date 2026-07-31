@@ -23,7 +23,7 @@ class ApplicationController < ActionController::Base
     return unless user_signed_in?
     return if devise_controller?
     return unless current_user.two_factor_required?
-    return if current_user.otp_required_for_login?
+    return if current_user.otp_required_for_login? || current_user.passwordless?
 
     redirect_to two_factor_setup_path, alert: "Two-factor authentication is mandatory for your account. Please set it up to continue."
   end

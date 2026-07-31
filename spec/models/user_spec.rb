@@ -92,4 +92,29 @@ RSpec.describe User, type: :model do
       expect(user).not_to be_two_factor_required
     end
   end
+
+  describe "#passwordless?" do
+    it "is false when the user has no webauthn credentials" do
+      expect(create(:user)).not_to be_passwordless
+    end
+
+    it "is true when the user has at least one webauthn credential" do
+      user = create(:user)
+      create(:webauthn_credential, user: user)
+
+      expect(user).to be_passwordless
+    end
+  end
+
+  describe "#webauthn_id" do
+    it "lazily generates and persists a stable user handle" do
+      user = create(:user)
+      expect(user[:webauthn_id]).to be_nil
+
+      id = user.webauthn_id
+      expect(id).to be_present
+      expect(user.reload[:webauthn_id]).to eq(id)
+      expect(user.webauthn_id).to eq(id)
+    end
+  end
 end

@@ -1,4 +1,4 @@
-<dialog data-modal-target="dialog" data-action="click->modal#closeBackdrop"
+<dialog data-modal-target="dialog" data-action="click->modal#closeBackdrop close->modal#exitFullscreen"
         class="m-auto rounded-lg shadow-xl p-0 w-full max-w-4xl max-h-[90vh] overflow-y-auto backdrop:bg-gray-900/50">
   <%= helpers.turbo_frame_tag @id, data: { action: "turbo:frame-load->modal#frameLoaded" } do %>
     <div role="status" class="flex items-center justify-center p-12">

@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["dialog"]
+  static targets = ["dialog", "editorFrame", "fullscreenExpandIcon", "fullscreenCollapseIcon"]
 
   // Opens immediately on click, for the common case. `frameLoaded` is a
   // fallback for when this click action hasn't been (re)bound yet by the
@@ -15,6 +15,7 @@ export default class extends Controller {
 
   frameLoaded(event) {
     if (event.target.src) this.show()
+    this.currentFrame = event.target
     this.applyWidth(event.target)
   }
 
@@ -37,5 +38,40 @@ export default class extends Controller {
 
   closeBackdrop(event) {
     if (event.target === this.dialogTarget) this.close()
+  }
+
+  toggleFullscreen() {
+    if (this.dialogTarget.classList.contains("h-screen")) {
+      this.exitFullscreen()
+    } else {
+      this.enterFullscreen()
+    }
+  }
+
+  enterFullscreen() {
+    this.dialogTarget.classList.remove("max-w-4xl", "max-w-[80.64rem]", "max-h-[90vh]", "rounded-lg", "m-auto")
+    this.dialogTarget.classList.add("max-w-none", "max-h-none", "h-screen", "rounded-none", "m-0")
+    if (this.hasEditorFrameTarget) this.editorFrameTarget.classList.replace("h-[80vh]", "h-[calc(100vh-8rem)]")
+    this.setFullscreenIcon(true)
+  }
+
+  // Wired to the dialog's native `close` event so every close path (backdrop
+  // click, Escape, or `.close()`) resets fullscreen for the next open — not
+  // just the explicit toggle. Guard against unrelated `close` events since
+  // that event doesn't bubble but this action is bound directly on the
+  // dialog element itself.
+  exitFullscreen(event) {
+    if (event && event.target !== this.dialogTarget) return
+
+    this.dialogTarget.classList.remove("max-w-none", "max-h-none", "h-screen", "rounded-none", "m-0")
+    this.dialogTarget.classList.add("max-h-[90vh]", "rounded-lg", "m-auto")
+    if (this.currentFrame) this.applyWidth(this.currentFrame)
+    if (this.hasEditorFrameTarget) this.editorFrameTarget.classList.replace("h-[calc(100vh-8rem)]", "h-[80vh]")
+    this.setFullscreenIcon(false)
+  }
+
+  setFullscreenIcon(fullscreen) {
+    if (this.hasFullscreenExpandIconTarget) this.fullscreenExpandIconTarget.classList.toggle("hidden", fullscreen)
+    if (this.hasFullscreenCollapseIconTarget) this.fullscreenCollapseIconTarget.classList.toggle("hidden", !fullscreen)
   }
 }

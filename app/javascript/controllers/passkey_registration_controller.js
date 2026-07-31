@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { create } from "@github/webauthn-json"
 
 export default class extends Controller {
-  static targets = ["form", "nickname", "error", "backupCodes", "backupCodesList"]
+  static targets = ["form", "nickname", "error", "backupCodes", "backupCodesList", "downloadLink"]
   static values = { optionsUrl: String, createUrl: String }
 
   async register() {
@@ -73,6 +73,17 @@ export default class extends Controller {
         return li
       })
     )
+
+    const today = new Date().toISOString().slice(0, 10)
+    const fileBody = [
+      "DocumentFlow account recovery codes",
+      `Generated: ${today}`,
+      "Each code can be used once to sign in if you lose access to your authenticator app or passkey.",
+      "", ...codes
+    ].join("\n")
+    this.downloadLinkTarget.href = `data:text/plain;charset=utf-8,${encodeURIComponent(fileBody)}`
+    this.downloadLinkTarget.download = `documentflow-backup-codes-${today}.txt`
+
     this.backupCodesTarget.classList.remove("hidden")
   }
 

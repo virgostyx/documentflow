@@ -8,10 +8,12 @@
     </div>
   <% end %>
 
-  <%= form_with url: two_factor_authentication_path, method: :post, local: true do %>
+  <%= form_with url: two_factor_authentication_path, method: :post, local: true,
+                data: { controller: "otp-auto-submit" } do %>
     <div class="mb-2">
       <%= label_tag "otp_attempt", "Authentication code", class: "block text-sm font-medium text-gray-700 mb-1" %>
       <%= text_field_tag "otp_attempt", nil, required: true, autofocus: true, autocomplete: "one-time-code",
+            data: { action: "input->otp-auto-submit#submit" },
             class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
     </div>
 

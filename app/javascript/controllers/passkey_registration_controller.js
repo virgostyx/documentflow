@@ -19,8 +19,9 @@ export default class extends Controller {
     let credential
     try {
       credential = await create({ publicKey: options })
-    } catch {
-      this.showError("Passkey registration was cancelled or failed.")
+    } catch (error) {
+      console.error("Passkey registration failed:", error.name, error.message)
+      this.showError(this.errorMessageFor(error))
       return
     }
 
@@ -44,6 +45,21 @@ export default class extends Controller {
       this.showBackupCodes(result.backup_codes)
     } else {
       window.Turbo.visit(window.location.pathname)
+    }
+  }
+
+  errorMessageFor(error) {
+    switch (error.name) {
+      case "NotAllowedError":
+        return "Passkey registration was cancelled, timed out, or no authenticator responded."
+      case "NotSupportedError":
+        return "No authenticator on this device supports the required security options (biometric/PIN or a FIDO2 security key)."
+      case "SecurityError":
+        return "This page's address doesn't match the one passkeys are registered for."
+      case "InvalidStateError":
+        return "A passkey for this account is already registered on this authenticator."
+      default:
+        return "Passkey registration was cancelled or failed."
     }
   }
 

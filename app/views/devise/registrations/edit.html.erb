@@ -70,6 +70,15 @@
       <%= link_to "Manage passkeys", passkeys_path, class: "inline-block text-sm font-medium text-primary-600 hover:text-primary-500" %>
     </div>
 
+    <%# Signature %>
+    <div class="mb-6 pt-6 border-t border-gray-200">
+      <h3 class="text-sm font-semibold text-gray-900 mb-2">Signature</h3>
+      <p class="text-xs text-gray-500 mb-4">
+        <%= current_user.signature_image.present? ? "Registered — used to stamp documents you sign." : "Register the image stamped onto documents you sign." %>
+      </p>
+      <%= link_to "Manage signature", signature_path, class: "inline-block text-sm font-medium text-primary-600 hover:text-primary-500" %>
+    </div>
+
     <%# Two-factor authentication %>
     <div class="mb-6 pt-6 border-t border-gray-200">
       <h3 class="text-sm font-semibold text-gray-900 mb-2">Two-factor authentication</h3>

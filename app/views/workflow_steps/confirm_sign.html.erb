@@ -1,0 +1,35 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Sign document</h2>
+
+    <% if current_user.signature_image.blank? %>
+      <p class="text-sm text-gray-500 mb-6">
+        You need to register your signature before you can sign this document.
+      </p>
+      <div class="flex justify-end gap-3">
+        <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Cancel" } %>
+        <%= render(Ui::ButtonComponent.new(href: signature_path)) { "Register signature" } %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-500 mb-4">
+        Verify your identity with your passkey to apply your signature to this document.
+      </p>
+
+      <div data-controller="step-up"
+           data-step-up-options-url-value="<%= step_up_options_entity_document_workflow_step_path(current_entity, @document, @workflow_step) %>"
+           data-step-up-verify-url-value="<%= step_up_verify_entity_document_workflow_step_path(current_entity, @document, @workflow_step) %>">
+        <div data-step-up-target="status" class="hidden mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700"></div>
+
+        <%= form_with url: approve_entity_document_workflow_step_path(current_entity, @document, @workflow_step),
+                      method: :post, local: true, data: { turbo_frame: "_top", step_up_target: "form" } do %>
+          <input type="hidden" name="step_up_token" data-step-up-target="tokenField">
+
+          <div class="flex justify-end gap-3">
+            <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Cancel" } %>
+            <%= render(Ui::ButtonComponent.new(type: "button", data: { action: "click->step-up#verify" })) { "Verify & Sign" } %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

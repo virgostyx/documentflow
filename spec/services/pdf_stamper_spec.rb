@@ -82,5 +82,52 @@ RSpec.describe PdfStamper do
 
       expect(described_class.stamp(pdf_path, document)).to eq(pdf_path)
     end
+
+    context "with an approved SIGN step" do
+      it "stamps the signer's image on the last page only" do
+        document = create(:document, :finalized)
+        signer = create(:user)
+        create(:signature_image, user: signer)
+        create(:workflow_step, :sign, :approved, document: document, actor: signer)
+        pdf_path = build_pdf(pages: 2)
+
+        output_path = described_class.stamp(pdf_path, document)
+
+        reader = PDF::Reader.new(output_path)
+        first_page_images = reader.pages[0].xobjects.values.count { |x| x.hash[:Subtype] == :Image }
+        last_page_images = reader.pages[1].xobjects.values.count { |x| x.hash[:Subtype] == :Image }
+        expect(first_page_images).to eq(0)
+        expect(last_page_images).to eq(1)
+        expect(reader.pages[1].text).to include(signer.full_name)
+      end
+
+      it "stacks a signature block per signer for a parallel SIGN group" do
+        document = create(:document, :finalized)
+        first_signer = create(:user)
+        second_signer = create(:user)
+        create(:signature_image, user: first_signer)
+        create(:signature_image, user: second_signer)
+        create(:workflow_step, :sign, :approved, :parallel, document: document, actor: first_signer, order: 1, parallel_group: 1)
+        create(:workflow_step, :sign, :approved, :parallel, document: document, actor: second_signer, order: 2, parallel_group: 1)
+        pdf_path = build_pdf(pages: 1)
+
+        output_path = described_class.stamp(pdf_path, document)
+
+        reader = PDF::Reader.new(output_path)
+        image_count = reader.pages[0].xobjects.values.count { |x| x.hash[:Subtype] == :Image }
+        expect(image_count).to eq(2)
+      end
+
+      it "raises instead of silently skipping when a signer has no registered signature image" do
+        document = create(:document, :finalized)
+        signer = create(:user)
+        create(:workflow_step, :sign, :approved, document: document, actor: signer)
+        pdf_path = build_pdf
+
+        expect {
+          described_class.stamp(pdf_path, document)
+        }.to raise_error(PdfStamper::SignatureStampingError)
+      end
+    end
   end
 end

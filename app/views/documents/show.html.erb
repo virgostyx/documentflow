@@ -9,7 +9,14 @@
   <%= render Documents::DocumentStatusBadgeComponent.new(status: @document.status) %>
   <%= render(Ui::ActionsMenuComponent.new) do |menu| %>
     <% if policy(@document).approve? %>
-      <% menu.with_item(href: approve_entity_document_workflow_step_path(current_entity, @document, @document.current_step), method: :post) { "Approve" } %>
+      <% if @document.current_step.sign? %>
+        <% menu.with_item(
+          href: confirm_sign_entity_document_workflow_step_path(current_entity, @document, @document.current_step),
+          data: { turbo_frame: "modal", action: "click->modal#open" }
+        ) { "Approve" } %>
+      <% else %>
+        <% menu.with_item(href: approve_entity_document_workflow_step_path(current_entity, @document, @document.current_step), method: :post) { "Approve" } %>
+      <% end %>
     <% end %>
     <% if policy(@document).reject? %>
       <% menu.with_item(

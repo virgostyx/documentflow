@@ -77,6 +77,49 @@ RSpec.describe AuditLog, type: :model do
       expect(log.action).to eq("document_created")
       expect(log.change_data).to eq({ "status" => "draft" })
     end
+
+    it "accepts explicit ip_address/user_agent when no request object is available" do
+      user = create(:user)
+      document = create(:document)
+
+      described_class.log_event(
+        user: user, auditable: document, action: "sign_document",
+        ip_address: "203.0.113.9", user_agent: "BackgroundJob/1.0"
+      )
+
+      log = AuditLog.last
+      expect(log.ip_address).to eq("203.0.113.9")
+      expect(log.user_agent).to eq("BackgroundJob/1.0")
+    end
+
+    it "prefers the request object's IP/user agent over explicit kwargs when both are given" do
+      user = create(:user)
+      document = create(:document)
+      request = instance_double(ActionDispatch::Request, remote_ip: "198.51.100.1", user_agent: "FromRequest/1.0")
+
+      described_class.log_event(
+        user: user, auditable: document, action: "sign_document",
+        request: request, ip_address: "203.0.113.9", user_agent: "BackgroundJob/1.0"
+      )
+
+      log = AuditLog.last
+      expect(log.ip_address).to eq("198.51.100.1")
+      expect(log.user_agent).to eq("FromRequest/1.0")
+    end
+  end
+
+  describe "append-only invariant" do
+    it "raises when an existing audit log is updated" do
+      log = create(:audit_log)
+
+      expect { log.update!(action: "tampered") }.to raise_error(/append-only/i)
+    end
+
+    it "raises when an existing audit log is destroyed" do
+      log = create(:audit_log)
+
+      expect { log.destroy! }.to raise_error(/append-only/i)
+    end
   end
 
   # ── Instance methods ──────────────────────────────────────────────────────

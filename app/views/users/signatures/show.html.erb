@@ -1,0 +1,49 @@
+<%= render Auth::AuthLayoutComponent.new(
+  title: "Signature",
+  subtitle: "The image stamped onto documents you sign"
+) do %>
+  <div class="mb-6">
+    <%= link_to edit_user_registration_path, class: "inline-flex items-center text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors" do %>
+      ← Back to profile
+    <% end %>
+  </div>
+
+  <% if flash[:alert] %>
+    <div class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700"><%= flash[:alert] %></div>
+  <% end %>
+  <% if flash[:notice] %>
+    <div class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-sm text-green-700"><%= flash[:notice] %></div>
+  <% end %>
+
+  <% if @signature_image %>
+    <div class="mb-6 flex items-center gap-2 text-sm font-medium text-green-700">
+      <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+      Signature on file since <%= @signature_image.created_at.to_fs(:long) %>
+    </div>
+    <p class="text-xs text-gray-500 mb-6">
+      For security, your signature image is never displayed once registered - it is only used, encrypted, when you sign a document.
+    </p>
+  <% else %>
+    <p class="text-sm text-gray-500 mb-6">
+      No signature registered yet. You'll need one before you can approve a SIGN step on a document.
+    </p>
+  <% end %>
+
+  <div class="pt-6 border-t border-gray-200">
+    <h3 class="text-sm font-semibold text-gray-900 mb-2"><%= @signature_image ? "Replace your signature" : "Add your signature" %></h3>
+    <%= form_with url: signature_path, method: :post, multipart: true, class: "mb-3" do |f| %>
+      <input type="file" name="signature_image[file]" accept="image/png,image/jpeg"
+             class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-primary-500">
+      <button type="submit"
+              class="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 cursor-pointer">
+        <%= @signature_image ? "Replace signature" : "Save signature" %>
+      </button>
+    <% end %>
+
+    <% if @signature_image %>
+      <%= button_to "Remove signature", signature_path, method: :delete,
+                    class: "w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer",
+                    data: { turbo_confirm: "Remove your signature? You won't be able to approve SIGN steps until you register a new one." } %>
+    <% end %>
+  </div>
+<% end %>

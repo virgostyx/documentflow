@@ -7,7 +7,8 @@ module Workflow
 
       executed do |ctx|
         step = ctx.step
-        step.update!(status: "approved")
+        request = ctx[:request]
+        step.update!(status: "approved", ip_address: request&.remote_ip, user_agent: request&.user_agent)
 
         ctx[:user] = ctx.current_user
         ctx[:auditable] = step.document

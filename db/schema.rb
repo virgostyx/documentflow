@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_31_052023) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_01_172149) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -251,6 +251,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_31_052023) do
     t.index ["token"], name: "index_shared_links_on_token", unique: true
   end
 
+  create_table "signature_images", force: :cascade do |t|
+    t.integer "byte_size", null: false
+    t.string "content_type", null: false
+    t.datetime "created_at", null: false
+    t.text "image_data", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_signature_images_on_user_id", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.integer "consumed_timestep"
     t.datetime "created_at", null: false
@@ -290,12 +300,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_31_052023) do
     t.text "comment"
     t.datetime "created_at", null: false
     t.bigint "document_id", null: false
+    t.string "ip_address"
     t.boolean "is_parallel", default: false, null: false
     t.integer "order", null: false
     t.integer "parallel_group"
     t.string "role", null: false
     t.string "status", default: "pending", null: false
     t.datetime "updated_at", null: false
+    t.string "user_agent"
     t.index ["actor_id"], name: "index_workflow_steps_on_actor_id"
     t.index ["document_id", "order"], name: "index_workflow_steps_on_document_id_and_order", unique: true
     t.index ["document_id"], name: "index_workflow_steps_on_document_id"
@@ -331,6 +343,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_31_052023) do
   add_foreign_key "entity_users", "users"
   add_foreign_key "entity_users", "users", column: "invited_by_id"
   add_foreign_key "shared_links", "documents"
+  add_foreign_key "signature_images", "users"
   add_foreign_key "webauthn_credentials", "users"
   add_foreign_key "workflow_steps", "documents"
   add_foreign_key "workflow_steps", "users", column: "actor_id"

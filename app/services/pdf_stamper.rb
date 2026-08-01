@@ -1,12 +1,33 @@
 # frozen_string_literal: true
 
 class PdfStamper
+  # Raised when a signature image can't be embedded for an approved SIGN
+  # step. Deliberately NOT rescued here (unlike the cosmetic reference/logo
+  # stamp below): a document must never end up "signed" with no visible
+  # signature, so this propagates out of the async PdfConversionJob and fails
+  # the Solid Queue job (retryable) instead of silently degrading.
+  class SignatureStampingError < StandardError; end
+
   MARGIN = 20
   LOGO_SIZE = 24
+  SIGNATURE_HEIGHT = 60
+  SIGNATURE_BLOCK_SPACING = 8
   FONT_SIZE = 8
 
   class << self
     def stamp(pdf_path, document)
+      stamped_path = stamp_reference_and_logo(pdf_path, document)
+      return stamped_path if stamped_path == pdf_path
+
+      signers = document.workflow_steps.where(role: "SIGN", status: "approved").includes(:actor)
+      apply_signatures(stamped_path, signers) if signers.any?
+
+      stamped_path
+    end
+
+    private
+
+    def stamp_reference_and_logo(pdf_path, document)
       output_path = "#{pdf_path.sub(/\.pdf\z/i, '')}-stamped.pdf"
       logo_path = rasterized_logo_path(document)
 
@@ -24,8 +45,6 @@ class PdfStamper
     ensure
       logo_path&.unlink if logo_path.respond_to?(:unlink)
     end
-
-    private
 
     def draw_stamp(pdf, reference_number, logo_path)
       pdf.canvas do
@@ -67,6 +86,41 @@ class PdfStamper
     rescue StandardError => e
       Rails.logger.warn("PdfStamper: failed to rasterize logo for document #{document.id} (#{e.class}: #{e.message})")
       nil
+    end
+
+    # Embeds each signer's decrypted signature image on the last page,
+    # stacked one block per signer (the common case is a single signer; a
+    # parallel SIGN group just repeats the block). Bytes are decrypted
+    # straight into an in-memory StringIO and never written to disk.
+    def apply_signatures(stamped_path, signers)
+      pdf = Prawn::Document.new(template: stamped_path)
+      pdf.go_to_page(pdf.page_count)
+
+      signers.each_with_index do |step, index|
+        signature_image = step.actor.signature_image
+        unless signature_image
+          raise SignatureStampingError, "WorkflowStep##{step.id}: actor has no registered signature image"
+        end
+
+        draw_signature_block(pdf, step, signature_image, index)
+      end
+
+      pdf.render_file(stamped_path)
+    rescue SignatureStampingError
+      raise
+    rescue StandardError => e
+      raise SignatureStampingError, "Failed to stamp signature(s) onto #{stamped_path}: #{e.message}"
+    end
+
+    def draw_signature_block(pdf, step, signature_image, index)
+      block_height = SIGNATURE_HEIGHT + (FONT_SIZE * 2) + SIGNATURE_BLOCK_SPACING
+      bottom = MARGIN + (index * (block_height + SIGNATURE_BLOCK_SPACING))
+
+      pdf.canvas do
+        pdf.image StringIO.new(signature_image.decoded_bytes), at: [ MARGIN, bottom + SIGNATURE_HEIGHT ], height: SIGNATURE_HEIGHT
+        pdf.draw_text step.actor.full_name, at: [ MARGIN, bottom ], size: FONT_SIZE
+        pdf.draw_text "Signed #{step.updated_at.strftime('%Y-%m-%d %H:%M')}", at: [ MARGIN, bottom - FONT_SIZE - 2 ], size: FONT_SIZE
+      end
     end
   end
 end

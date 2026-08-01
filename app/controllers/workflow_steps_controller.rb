@@ -3,6 +3,7 @@
 class WorkflowStepsController < ApplicationController
   include EntityScoped
   include WorkflowActions
+  include StepUpChallenge
 
   before_action :set_document
   before_action :set_workflow_step, except: %i[create apply_template]

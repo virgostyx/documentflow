@@ -29,6 +29,8 @@ Rails.application.routes.draw do
     get :options, on: :collection
   end
 
+  resource :signature, only: %i[show create destroy], controller: "users/signatures"
+
   mount ActionCable.server => "/cable"
 
   # Authenticated application
@@ -57,6 +59,9 @@ Rails.application.routes.draw do
           post :move_up
           post :move_down
           patch :reassign
+          get :confirm_sign
+          get :step_up_options
+          post :step_up_verify
         end
         collection do
           post :apply_template

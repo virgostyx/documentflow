@@ -6,9 +6,15 @@ module WorkflowActions
   def approve
     handle_workflow_action(
       organizer: Workflow::ApproveStepOrganizer,
-      organizer_params: { step: @workflow_step, current_user: current_user },
+      organizer_params: {
+        step: @workflow_step,
+        current_user: current_user,
+        request: request,
+        step_up_token: params[:step_up_token],
+        step_up_tokens: session[:step_up_tokens] || {}
+      },
       success_message: "Step approved successfully."
-    )
+    ) { session[:step_up_tokens]&.delete(@workflow_step.id.to_s) }
   end
 
   def reject
@@ -33,6 +39,7 @@ module WorkflowActions
 
   def handle_workflow_action(organizer:, organizer_params:, success_message:)
     result = organizer.call(**organizer_params)
+    yield result if block_given?
 
     redirect_target = entity_document_path(current_entity, @workflow_step.document)
 

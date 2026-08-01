@@ -9,6 +9,14 @@ RSpec.describe Workflow::ApproveStepOrganizer do
     document.workflow_steps.find_by(role: "RED")&.update!(status: "approved")
   end
 
+  def step_up_params_for(step)
+    token = SecureRandom.hex(32)
+    {
+      step_up_token: token,
+      step_up_tokens: { step.id.to_s => { "token" => token, "expires_at" => 2.minutes.from_now.to_i } }
+    }
+  end
+
   describe ".call" do
     context "quand l'utilisateur n'est pas l'acteur de l'étape" do
       let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
@@ -104,22 +112,25 @@ RSpec.describe Workflow::ApproveStepOrganizer do
     context "approbation de l'étape SIGN" do
       let(:sign_step) { document.workflow_steps.find_by(role: "SIGN") }
 
-      before { document.workflow_steps.find_by(role: "VISA").update!(status: "approved") }
+      before do
+        document.workflow_steps.find_by(role: "VISA").update!(status: "approved")
+        create(:signature_image, user: sign_step.actor)
+      end
 
       it "fait passer le document au statut signed" do
-        described_class.call(step: sign_step, current_user: sign_step.actor)
+        described_class.call(step: sign_step, current_user: sign_step.actor, **step_up_params_for(sign_step))
 
         expect(document.reload).to be_signed
       end
 
       it "fait passer l'étape courante à EXP" do
-        described_class.call(step: sign_step, current_user: sign_step.actor)
+        described_class.call(step: sign_step, current_user: sign_step.actor, **step_up_params_for(sign_step))
 
         expect(document.reload.current_step.role).to eq("EXP")
       end
 
       it "gèle le document" do
-        described_class.call(step: sign_step, current_user: sign_step.actor)
+        described_class.call(step: sign_step, current_user: sign_step.actor, **step_up_params_for(sign_step))
 
         expect(document.reload.frozen?).to be true
       end
@@ -127,7 +138,88 @@ RSpec.describe Workflow::ApproveStepOrganizer do
       it "planifie la conversion PDF" do
         expect(PdfConversionJob).to receive(:perform_later).with(document.id)
 
-        described_class.call(step: sign_step, current_user: sign_step.actor)
+        described_class.call(step: sign_step, current_user: sign_step.actor, **step_up_params_for(sign_step))
+      end
+
+      it "records the approving actor's IP and user agent when a request is provided" do
+        request = instance_double(ActionDispatch::Request, remote_ip: "203.0.113.5", user_agent: "TestAgent/1.0")
+
+        described_class.call(step: sign_step, current_user: sign_step.actor, request: request, **step_up_params_for(sign_step))
+
+        expect(sign_step.reload.ip_address).to eq("203.0.113.5")
+        expect(sign_step.reload.user_agent).to eq("TestAgent/1.0")
+      end
+
+      context "without a registered signature image" do
+        before do
+          sign_step.actor.signature_image.destroy!
+          sign_step.actor.association(:signature_image).reset
+        end
+
+        it "fails and does not approve the step" do
+          result = described_class.call(step: sign_step, current_user: sign_step.actor, **step_up_params_for(sign_step))
+
+          expect(result).not_to be_success
+          expect(sign_step.reload).to be_pending
+        end
+      end
+
+      context "without a step-up token" do
+        it "fails and does not approve the step" do
+          result = described_class.call(step: sign_step, current_user: sign_step.actor)
+
+          expect(result).not_to be_success
+          expect(sign_step.reload).to be_pending
+        end
+      end
+
+      context "with an expired step-up token" do
+        it "fails and does not approve the step" do
+          token = "expired-token"
+          result = described_class.call(
+            step: sign_step, current_user: sign_step.actor,
+            step_up_token: token,
+            step_up_tokens: { sign_step.id.to_s => { "token" => token, "expires_at" => 1.minute.ago.to_i } }
+          )
+
+          expect(result).not_to be_success
+          expect(sign_step.reload).to be_pending
+        end
+      end
+
+      context "with a step-up token minted for a different step" do
+        it "fails and does not approve the step" do
+          other_step = create(:workflow_step, :sign, document: document, order: 99, actor: sign_step.actor)
+          result = described_class.call(step: sign_step, current_user: sign_step.actor, **step_up_params_for(other_step))
+
+          expect(result).not_to be_success
+          expect(sign_step.reload).to be_pending
+        end
+      end
+
+      context "with a mismatched token value" do
+        it "fails and does not approve the step" do
+          valid_params = step_up_params_for(sign_step)
+          result = described_class.call(
+            step: sign_step, current_user: sign_step.actor,
+            step_up_token: "wrong-token",
+            step_up_tokens: valid_params[:step_up_tokens]
+          )
+
+          expect(result).not_to be_success
+          expect(sign_step.reload).to be_pending
+        end
+      end
+    end
+
+    context "RED/VISA/EXP approvals require neither a signature image nor a step-up token" do
+      it "approves a VISA step with no step_up_token/step_up_tokens passed at all" do
+        visa_step = document.workflow_steps.find_by(role: "VISA")
+
+        result = described_class.call(step: visa_step, current_user: visa_step.actor)
+
+        expect(result).to be_success
+        expect(visa_step.reload).to be_approved
       end
     end
 

@@ -25,6 +25,8 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     create(:workflow_step, :visa, document: document, order: 2, actor: visa_actor)
     create(:workflow_step, :sign, document: document, order: 3, actor: sign_actor)
     create(:workflow_step, :exp,  document: document, order: 4, actor: exp_actor)
+
+    create(:signature_image, user: sign_actor)
   end
 
   it "lets the VISA actor check out, replace the file with a new version, and check back in" do
@@ -64,7 +66,22 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
     open_actions_menu
     click_link "Approve"
 
-    expect(page).to have_content("approved")
+    # SIGN approval requires a real WebAuthn step-up ceremony (covered end to
+    # end in spec/requests/workflow_steps/step_up_challenges_spec.rb); here we
+    # only confirm the confirmation modal opens, then complete the approval
+    # directly to continue the golden path.
+    expect(page).to have_content("Sign document")
+    expect(page).to have_button("Verify & Sign")
+
+    sign_step = document.reload.workflow_steps.find_by(role: "SIGN")
+    token = SecureRandom.hex(32)
+    Workflow::ApproveStepOrganizer.call(
+      step: sign_step, current_user: sign_actor,
+      step_up_token: token,
+      step_up_tokens: { sign_step.id.to_s => { "token" => token, "expires_at" => 2.minutes.from_now.to_i } }
+    )
+
+    visit entity_document_path(entity, document)
     within("[data-role='SIGN']") { expect(page).to have_content("Approved") }
   end
 

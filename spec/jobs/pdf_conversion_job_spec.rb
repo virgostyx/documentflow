@@ -48,6 +48,40 @@ RSpec.describe PdfConversionJob do
       end
     end
 
+    context "signature audit trail" do
+      it "logs one AuditLog per approved SIGN step with the stamped PDF's SHA-256" do
+        document.main_file.attach(io: StringIO.new("%PDF-1.4 content"), filename: "report.pdf", content_type: "application/pdf")
+        signer = create(:user)
+        step = create(:workflow_step, :sign, :approved, document: document, actor: signer)
+
+        stamped_path = Rails.root.join("tmp", "report-stamped-#{SecureRandom.hex(4)}.pdf").to_s
+        File.write(stamped_path, "%PDF-1.4 stamped content")
+        allow(PdfStamper).to receive(:stamp).and_return(stamped_path)
+        expected_sha256 = Digest::SHA256.hexdigest("%PDF-1.4 stamped content")
+
+        expect {
+          described_class.new.perform(document.id)
+        }.to change(AuditLog, :count).by(1)
+
+        log = AuditLog.last
+        expect(log.user).to eq(signer)
+        expect(log.auditable).to eq(document)
+        expect(log.action).to eq("sign_document")
+        expect(log.change_data["workflow_step_id"]).to eq(step.id)
+        expect(log.change_data["pdf_sha256"]).to eq(expected_sha256)
+      end
+
+      it "logs nothing when the document has no approved SIGN step" do
+        document.main_file.attach(io: StringIO.new("%PDF-1.4 content"), filename: "report.pdf", content_type: "application/pdf")
+
+        stamped_path = Rails.root.join("tmp", "report-stamped-#{SecureRandom.hex(4)}.pdf").to_s
+        File.write(stamped_path, "%PDF-1.4 stamped content")
+        allow(PdfStamper).to receive(:stamp).and_return(stamped_path)
+
+        expect { described_class.new.perform(document.id) }.not_to change(AuditLog, :count)
+      end
+    end
+
     context "annexes" do
       it "skips annexes that are already PDFs" do
         annex = create(:annex, document: document)

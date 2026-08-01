@@ -10,6 +10,7 @@ class User < ApplicationRecord
 
   has_many :entity_users
   has_many :webauthn_credentials, dependent: :destroy
+  has_one :signature_image, dependent: :destroy
 
   # Validations
   validates :first_name, presence: true

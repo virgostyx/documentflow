@@ -3,6 +3,8 @@
 module Workflow
   class ApproveStepOrganizer < ApplicationService
     workflow_steps Actions::ValidateActorCanApprove,
+                   Actions::ValidateSignerHasSignatureImage,
+                   Actions::ValidateStepUpChallenge,
                    Actions::ApproveStep,
                    Actions::AdvanceWorkflow,
                    Actions::NotifyNextActor,

@@ -928,6 +928,23 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).not_to include("Document chain")
       end
 
+      it "does not show an activity history section when there are no audit logs" do
+        get entity_document_path(entity, document)
+
+        expect(response.body).not_to include("Activity history")
+      end
+
+      context "when the document has audit logs" do
+        before { create(:audit_log, auditable: document, user: user, action: "launch") }
+
+        it "shows the activity history section" do
+          get entity_document_path(entity, document)
+
+          expect(response.body).to include("Activity history")
+          expect(response.body).to include("launched the validation circuit")
+        end
+      end
+
       context "when the document is part of a reply chain" do
         let!(:reply) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, in_reply_to: document, subject: "Re: original") }
 

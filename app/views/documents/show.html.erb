@@ -130,6 +130,17 @@
           </div>
         </details>
       <% end %>
+
+      <% if @document.audit_logs.any? %>
+        <details class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <summary class="cursor-pointer select-none border-b border-gray-200 px-6 py-4 font-medium text-gray-900">
+            Activity history
+          </summary>
+          <div class="p-6">
+            <%= render Documents::AuditLogListComponent.new(document: @document) %>
+          </div>
+        </details>
+      <% end %>
     </div>
 
     <div class="space-y-6 lg:sticky lg:top-20">

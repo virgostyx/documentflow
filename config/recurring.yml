@@ -18,6 +18,10 @@ development:
     class: CleanupExpiredLinksJob
     schedule: every day at 2am
 
+  cleanup_stale_wopi_checkouts:
+    class: CleanupStaleWopiCheckoutsJob
+    schedule: every hour
+
 production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
@@ -30,3 +34,7 @@ production:
   cleanup_expired_links:
     class: CleanupExpiredLinksJob
     schedule: every day at 2am
+
+  cleanup_stale_wopi_checkouts:
+    class: CleanupStaleWopiCheckoutsJob
+    schedule: every hour

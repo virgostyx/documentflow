@@ -8,8 +8,11 @@ module SystemHelpers
     click_button "Sign in"
 
     if user.otp_required_for_login?
+      # A 6-digit code auto-submits the form (see otp_auto_submit_controller.js),
+      # which disables/removes the "Verify" button almost immediately - only
+      # click it if it's still there and enabled by the time fill_in returns.
       fill_in "Authentication code", with: ROTP::TOTP.new(user.otp_secret).now
-      click_button "Verify"
+      click_button "Verify" if page.has_button?("Verify", disabled: false, wait: 0.5)
     end
   end
 

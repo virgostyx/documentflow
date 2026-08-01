@@ -21,6 +21,13 @@ module Workflow
         next if stage_steps.to_a.any?(&:pending?)
 
         ctx.stage_advanced = true
+
+        # A step reactivated by ReturnToPreviousStep stays rejected forever otherwise:
+        # current_step only looks for "pending", so once this stage clears, the next
+        # step in order must be woken back up if a prior rejection left it "rejected".
+        next_step = document.workflow_steps.where("\"order\" > ?", stage_steps.to_a.map(&:order).max).ordered.first
+        next_step.update!(status: "pending") if next_step&.rejected?
+
         if step.role == "SIGN" && document.may_sign?
           document.sign!
           PdfConversionJob.perform_later(document.id)

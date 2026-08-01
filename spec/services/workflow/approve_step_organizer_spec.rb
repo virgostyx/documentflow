@@ -148,6 +148,28 @@ RSpec.describe Workflow::ApproveStepOrganizer do
       end
     end
 
+    context "après un rejet et retour à l'étape précédente" do
+      let(:red_step) { document.workflow_steps.find_by(role: "RED") }
+      let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
+
+      before do
+        Workflow::RejectStepOrganizer.call(step: visa_step, current_user: visa_step.actor, reason: "Pièce manquante")
+      end
+
+      it "remet VISA en pending au lieu de sauter directement à SIGN" do
+        described_class.call(step: red_step.reload, current_user: red_step.actor)
+
+        expect(visa_step.reload).to be_pending
+        expect(document.reload.current_step).to eq(visa_step)
+      end
+
+      it "ne signe pas le document tant que VISA n'a pas été re-validée" do
+        described_class.call(step: red_step.reload, current_user: red_step.actor)
+
+        expect(document.reload).to be_in_progress
+      end
+    end
+
     context "when the document is checked out by another user" do
       let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
 

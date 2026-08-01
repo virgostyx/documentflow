@@ -35,6 +35,15 @@ RSpec.configure do |config|
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
 
+  # Specs that exercise real multi-connection concurrency (multiple threads,
+  # each with its own DB connection) need truncation instead of the default
+  # transaction strategy: the default wraps each example in one uncommitted
+  # transaction on the main thread's connection, which would make any other
+  # thread's `with_lock` block forever waiting on it. Excluded by default
+  # since truncation is slower and these specs are inherently timing-sensitive;
+  # run them explicitly with `bundle exec rspec --tag concurrency`.
+  config.filter_run_excluding concurrency: true
+
   # FactoryBot
   config.include FactoryBot::Syntax::Methods
 
@@ -64,6 +73,10 @@ RSpec.configure do |config|
   end
 
   config.before(:each, js: true) do
+    DatabaseCleaner.strategy = :truncation
+  end
+
+  config.before(:each, concurrency: true) do
     DatabaseCleaner.strategy = :truncation
   end
 

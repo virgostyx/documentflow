@@ -58,4 +58,23 @@ RSpec.describe Workflow::StepsComponent, type: :component do
       expect(subject).not_to have_link("Remove")
     end
   end
+
+  context "when the document is in progress (not manageable) but the user can reassign" do
+    let(:document) { create(:document, :with_workflow, :in_progress) }
+    let(:user) { document.created_by }
+
+    it "still displays a reassign form for each pending step" do
+      expect(subject).to have_css("select[name='actor_id']", count: 4)
+    end
+  end
+
+  context "when the document is in progress and the user has no special rights" do
+    let(:document) { create(:document, :with_workflow, :in_progress) }
+
+    before { create(:entity_user, entity: document.entity, user: user, status: "active") }
+
+    it "does not display any reassign form" do
+      expect(subject).not_to have_css("select[name='actor_id']")
+    end
+  end
 end

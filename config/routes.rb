@@ -56,6 +56,7 @@ Rails.application.routes.draw do
           post :reject
           post :move_up
           post :move_down
+          patch :reassign
         end
         collection do
           post :apply_template

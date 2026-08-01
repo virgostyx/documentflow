@@ -12,6 +12,10 @@ module Workflow
       document.draft? && @policy.update?
     end
 
+    def reassignable?(step)
+      Pundit.policy!(current_user, step).reassign?
+    end
+
     private
 
     attr_reader :document, :current_user

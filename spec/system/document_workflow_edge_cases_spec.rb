@@ -36,6 +36,49 @@ RSpec.describe "Document validation circuit edge cases", type: :system do
     end
   end
 
+  describe "reassigning a step whose actor was removed from the entity" do
+    let(:visa_actor) { create(:user) }
+    let(:new_colleague) { create(:user) }
+    let(:document) { create(:document, :in_progress, entity: entity, created_by: owner) }
+
+    before do
+      create(:entity_user, entity: entity, user: visa_actor, status: "active")
+      new_colleague_membership = create(:entity_user, entity: entity, user: new_colleague, status: "active")
+      create(:workflow_step, :red,  :approved, document: document, order: 1, actor: owner)
+      create(:workflow_step, :visa, document: document, order: 2, actor: visa_actor)
+      create(:workflow_step, :sign, document: document, order: 3, actor: create(:user))
+      create(:workflow_step, :exp,  document: document, order: 4, actor: create(:user))
+
+      # The VISA actor leaves the entity: their membership is destroyed, so they
+      # can no longer access it, but the workflow step still points at them.
+      EntityUser.find_by(entity: entity, user: visa_actor).destroy
+      new_colleague_membership
+    end
+
+    it "lets the owner reassign the stuck step, and the new actor can then approve it" do
+      sign_in_via_form(owner)
+      visit entity_document_path(entity, document)
+
+      within("[data-role='VISA']") do
+        select new_colleague.display_name, from: "actor_id"
+        click_button "Reassign"
+      end
+
+      expect(page).to have_content("Step reassigned successfully.")
+      within("[data-role='VISA']") { expect(page).to have_content(new_colleague.email) }
+
+      sign_out_via_ui(owner)
+      sign_in_via_form(new_colleague)
+      visit entity_document_path(entity, document)
+
+      open_actions_menu
+      click_link "Approve"
+
+      expect(page).to have_content("Step approved successfully.")
+      within("[data-role='VISA']") { expect(page).to have_content("Approved") }
+    end
+  end
+
   describe "share links" do
     let(:document) { create(:document, :finalized, entity: entity, created_by: owner) }
 

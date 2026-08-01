@@ -29,6 +29,13 @@ class WorkflowStepPolicy < ApplicationPolicy
     manageable?
   end
 
+  def reassign?
+    return false unless record.pending?
+    return false if record.document.finalized? || record.document.cancelled?
+
+    entity_owner? || entity_admin? || record.document.created_by == user
+  end
+
   private
 
   def entity

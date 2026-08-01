@@ -310,6 +310,91 @@ RSpec.describe "WorkflowSteps", type: :request do
     end
   end
 
+  describe "PATCH /entities/:entity_id/documents/:document_id/workflow_steps/:id/reassign" do
+    let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
+    let(:new_actor) { create(:user) }
+
+    context "as entity owner" do
+      let(:owner) { create(:user) }
+
+      before do
+        create(:entity_user, :owner, entity: entity, user: owner, status: "active")
+        create(:entity_user, entity: entity, user: new_actor, status: "active")
+        sign_in owner
+      end
+
+      it "reassigns the step to the selected active member" do
+        patch reassign_entity_document_workflow_step_path(entity, document, visa_step), params: { actor_id: new_actor.id }
+
+        expect(visa_step.reload.actor).to eq(new_actor)
+        expect(response).to redirect_to(entity_document_path(entity, document))
+        expect(flash[:notice]).to be_present
+      end
+
+      it "does not reassign to a user who is not an active member of the entity" do
+        outsider = create(:user)
+
+        patch reassign_entity_document_workflow_step_path(entity, document, visa_step), params: { actor_id: outsider.id }
+
+        expect(visa_step.reload.actor).not_to eq(outsider)
+        expect(response).to redirect_to(entity_document_path(entity, document))
+        expect(flash[:alert]).to be_present
+      end
+    end
+
+    context "as the document's author" do
+      let(:document) { create(:document, :with_workflow, :in_progress, entity: entity, created_by: author) }
+      let(:author) { create(:user) }
+
+      before do
+        create(:entity_user, entity: entity, user: author, status: "active")
+        create(:entity_user, entity: entity, user: new_actor, status: "active")
+        sign_in author
+      end
+
+      it "reassigns the step" do
+        patch reassign_entity_document_workflow_step_path(entity, document, visa_step), params: { actor_id: new_actor.id }
+
+        expect(visa_step.reload.actor).to eq(new_actor)
+      end
+    end
+
+    context "as a member without special rights" do
+      let(:other_user) { create(:user) }
+
+      before do
+        create(:entity_user, entity: entity, user: other_user, status: "active")
+        create(:entity_user, entity: entity, user: new_actor, status: "active")
+        sign_in other_user
+      end
+
+      it "does not reassign the step" do
+        patch reassign_entity_document_workflow_step_path(entity, document, visa_step), params: { actor_id: new_actor.id }
+
+        expect(visa_step.reload.actor).not_to eq(new_actor)
+        expect(response).to redirect_to(root_path)
+      end
+    end
+
+    context "when the step is not pending" do
+      let(:owner) { create(:user) }
+      let(:red_step) { document.workflow_steps.find_by(role: "RED") }
+
+      before do
+        create(:entity_user, :owner, entity: entity, user: owner, status: "active")
+        create(:entity_user, entity: entity, user: new_actor, status: "active")
+        sign_in owner
+      end
+
+      it "does not reassign an already approved step" do
+        patch reassign_entity_document_workflow_step_path(entity, document, red_step), params: { actor_id: new_actor.id }
+
+        expect(red_step.reload.actor).not_to eq(new_actor)
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
   describe "POST /entities/:entity_id/documents/:document_id/workflow_steps/apply_template" do
     let(:author) { create(:user) }
     let(:document) { create(:document, entity: entity, created_by: author) }

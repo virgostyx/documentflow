@@ -19,6 +19,18 @@
     <% if step.comment.present? %>
       <p class="mt-1 text-sm text-gray-500 italic truncate">&ldquo;<%= step.comment %>&rdquo;</p>
     <% end %>
+    <% if reassignable? %>
+      <%= form_with url: reassign_entity_document_workflow_step_path(step.document.entity, step.document, step),
+            method: :patch, local: true, class: "mt-2 flex items-center gap-2" do %>
+        <select name="actor_id" class="rounded-md border-gray-300 text-xs" required>
+          <option value="">Reassign to&hellip;</option>
+          <% reassignment_options.each do |label, value| %>
+            <option value="<%= value %>"><%= label %></option>
+          <% end %>
+        </select>
+        <%= render(Ui::ButtonComponent.new(variant: :secondary, size: :sm)) { "Reassign" } %>
+      <% end %>
+    <% end %>
   </div>
 
   <% if manageable? %>

@@ -19,6 +19,16 @@ module WorkflowActions
     )
   end
 
+  def reassign
+    authorize @workflow_step
+
+    handle_workflow_action(
+      organizer: Workflow::ReassignStepOrganizer,
+      organizer_params: { step: @workflow_step, new_actor: User.find_by(id: params[:actor_id]), current_user: current_user },
+      success_message: "Step reassigned successfully."
+    )
+  end
+
   private
 
   def handle_workflow_action(organizer:, organizer_params:, success_message:)

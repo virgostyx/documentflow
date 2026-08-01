@@ -63,4 +63,70 @@ RSpec.describe WorkflowStepPolicy, type: :policy do
       end
     end
   end
+
+  describe "#reassign?" do
+    let(:document) { create(:document, :with_workflow, :in_progress, entity: entity, created_by: author) }
+    let(:workflow_step) { document.workflow_steps.find_by(role: "VISA") }
+
+    context "as entity owner" do
+      let(:user) { owner }
+
+      it "permits reassigning a pending step even though the document is not a draft" do
+        expect(policy).to permit_action(:reassign)
+      end
+    end
+
+    context "as entity admin" do
+      let(:user) { admin }
+
+      it "permits reassigning a pending step" do
+        expect(policy).to permit_action(:reassign)
+      end
+    end
+
+    context "as the document's author" do
+      let(:user) { author }
+
+      it "permits reassigning a pending step" do
+        expect(policy).to permit_action(:reassign)
+      end
+    end
+
+    context "as another member" do
+      let(:user) { member }
+
+      it "does not permit reassigning" do
+        expect(policy).not_to permit_action(:reassign)
+      end
+    end
+
+    context "when the step is not pending" do
+      let(:user) { owner }
+
+      before { workflow_step.update!(status: "approved") }
+
+      it "does not permit reassigning" do
+        expect(policy).not_to permit_action(:reassign)
+      end
+    end
+
+    context "when the document is finalized" do
+      let(:document) { create(:document, :with_workflow, :finalized, entity: entity, created_by: author) }
+      let(:user) { owner }
+
+      it "does not permit reassigning" do
+        expect(policy).not_to permit_action(:reassign)
+      end
+    end
+
+    context "when the document is frozen but still signed (EXP step pending)" do
+      let(:document) { create(:document, :with_workflow, :signed, entity: entity, created_by: author) }
+      let(:workflow_step) { document.workflow_steps.find_by(role: "EXP") }
+      let(:user) { owner }
+
+      it "still permits reassigning" do
+        expect(policy).to permit_action(:reassign)
+      end
+    end
+  end
 end

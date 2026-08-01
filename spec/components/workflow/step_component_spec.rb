@@ -76,4 +76,30 @@ RSpec.describe Workflow::StepComponent, type: :component do
       expect(subject).to have_css(".drag-handle")
     end
   end
+
+  context "when not reassignable" do
+    it "does not display the reassign form" do
+      expect(subject).not_to have_css("select[name='actor_id']")
+    end
+  end
+
+  context "when reassignable" do
+    subject { render_inline(described_class.new(step: step, reassignable: true)) }
+
+    let(:colleague) { create(:user) }
+    let(:routes) { Rails.application.routes.url_helpers }
+
+    before { create(:entity_user, entity: step.document.entity, user: colleague, status: "active") }
+
+    it "displays a reassign form targeting the reassign endpoint" do
+      expect(subject).to have_css(
+        "form[action='#{routes.reassign_entity_document_workflow_step_path(step.document.entity, step.document, step)}']"
+      )
+    end
+
+    it "lists active entity members as reassignment options, excluding the current actor" do
+      expect(subject).to have_css("select[name='actor_id'] option", text: colleague.display_name)
+      expect(subject).not_to have_css("select[name='actor_id'] option", text: actor.display_name)
+    end
+  end
 end

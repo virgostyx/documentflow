@@ -6,7 +6,7 @@
     <%= tag.div class: "divide-y divide-gray-100", data: sortable_data do %>
       <% steps.each do |step| %>
         <div data-step-id="<%= step.id %>">
-          <%= render Workflow::StepComponent.new(step: step, manageable: manageable?) %>
+          <%= render Workflow::StepComponent.new(step: step, manageable: manageable?, reassignable: reassignable?(step)) %>
         </div>
       <% end %>
     <% end %>

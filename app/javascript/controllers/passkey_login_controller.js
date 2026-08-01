@@ -2,11 +2,15 @@ import { Controller } from "@hotwired/stimulus"
 import { get } from "@github/webauthn-json"
 
 export default class extends Controller {
-  static targets = ["email", "status"]
+  static targets = ["email", "status", "button"]
   static values = { optionsUrl: String, verifyUrl: String }
 
   async connect() {
-    if (await this.conditionalUiAvailable()) this.authenticate("conditional")
+    if (await this.conditionalUiAvailable()) {
+      this.authenticate("conditional")
+    } else if (this.webauthnAvailable()) {
+      this.showButton()
+    }
   }
 
   async conditionalUiAvailable() {
@@ -15,6 +19,14 @@ export default class extends Controller {
       window.PublicKeyCredential.isConditionalMediationAvailable &&
       (await PublicKeyCredential.isConditionalMediationAvailable())
     )
+  }
+
+  webauthnAvailable() {
+    return !!window.PublicKeyCredential
+  }
+
+  showButton() {
+    if (this.hasButtonTarget) this.buttonTarget.classList.remove("hidden")
   }
 
   async authenticate(mediation = "optional") {

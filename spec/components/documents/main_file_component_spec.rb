@@ -121,4 +121,26 @@ RSpec.describe Documents::MainFileComponent, type: :component do
       expect(subject).not_to have_link("Check out")
     end
   end
+
+  context "when rendered for a shared link (no authenticated user)" do
+    let(:shared_link) { create(:shared_link, document: document) }
+
+    subject { render_inline(described_class.new(document: document, current_user: nil, shared_link: shared_link)) }
+
+    before do
+      document.main_file.attach(io: StringIO.new("content"), filename: "contract.pdf", content_type: "application/pdf")
+    end
+
+    it "links to the public, token-based preview route instead of the authenticated one" do
+      expect(subject).to have_css("a[href='#{Rails.application.routes.url_helpers.preview_shared_document_path(shared_link.token)}']")
+    end
+
+    it "still links to download the file" do
+      expect(subject).to have_link("Download", href: Rails.application.routes.url_helpers.rails_blob_path(document.main_file, disposition: "attachment", only_path: true))
+    end
+
+    it "does not display a remove link" do
+      expect(subject).not_to have_link("Remove")
+    end
+  end
 end

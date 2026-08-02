@@ -57,4 +57,29 @@ RSpec.describe Documents::AnnexListComponent, type: :component do
       expect(subject).not_to have_link("Remove")
     end
   end
+
+  context "when rendered for a shared link (no authenticated user)" do
+    let(:shared_link) { create(:shared_link, document: document) }
+
+    subject { render_inline(described_class.new(document: document, current_user: nil, shared_link: shared_link)) }
+
+    before do
+      document.annexes.create!(
+        file: { io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf" }
+      )
+    end
+
+    it "links to the public, token-based preview route instead of the authenticated one" do
+      annex = document.annexes.first
+      expect(subject).to have_css("a[href='#{Rails.application.routes.url_helpers.preview_shared_document_annex_path(shared_link.token, annex)}']")
+    end
+
+    it "still links to download each annex" do
+      expect(subject).to have_link("Download", href: Rails.application.routes.url_helpers.rails_blob_path(document.annexes.first.file, disposition: "attachment", only_path: true))
+    end
+
+    it "does not display a remove link" do
+      expect(subject).not_to have_link("Remove")
+    end
+  end
 end

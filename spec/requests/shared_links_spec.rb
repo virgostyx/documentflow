@@ -204,4 +204,110 @@ RSpec.describe "SharedLinks", type: :request do
       end
     end
   end
+
+  describe "GET /share/:token/preview (public access)" do
+    let(:document) { create(:document, :finalized, entity: entity) }
+    let!(:shared_link) { create(:shared_link, document: document) }
+
+    context "with a main document attached" do
+      before { document.main_file.attach(io: StringIO.new("content"), filename: "main.pdf", content_type: "application/pdf") }
+
+      it "renders the inline preview without requiring authentication" do
+        get preview_shared_document_path(token: shared_link.token)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include(preview_content_shared_document_path(token: shared_link.token))
+      end
+    end
+
+    context "when no main document is attached" do
+      it "returns not found" do
+        get preview_shared_document_path(token: shared_link.token)
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "with an expired link" do
+      let!(:shared_link) { create(:shared_link, :expired, document: document) }
+
+      it "returns gone" do
+        get preview_shared_document_path(token: shared_link.token)
+
+        expect(response).to have_http_status(:gone)
+      end
+    end
+
+    context "with an unknown token" do
+      it "returns not found" do
+        get preview_shared_document_path(token: "unknown-token")
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "GET /share/:token/preview_content (public access)" do
+    let(:document) { create(:document, :finalized, entity: entity) }
+    let!(:shared_link) { create(:shared_link, document: document) }
+
+    context "when the main file is already a PDF" do
+      before { document.main_file.attach(io: StringIO.new("%PDF-1.4 content"), filename: "main.pdf", content_type: "application/pdf") }
+
+      it "streams the file inline without converting or requiring authentication" do
+        expect(PdfConverter).not_to receive(:convert)
+
+        get preview_content_shared_document_path(token: shared_link.token)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.media_type).to eq("application/pdf")
+        expect(response.headers["Content-Disposition"]).to include("inline")
+      end
+    end
+
+    context "when no main document is attached" do
+      it "returns not found" do
+        get preview_content_shared_document_path(token: shared_link.token)
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "GET /share/:token/annexes/:id/preview (public access)" do
+    let(:document) { create(:document, :finalized, entity: entity) }
+    let!(:shared_link) { create(:shared_link, document: document) }
+    let!(:annex) { create(:annex, document: document) }
+
+    it "renders the inline preview without requiring authentication" do
+      get preview_shared_document_annex_path(token: shared_link.token, id: annex.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(preview_content_shared_document_annex_path(token: shared_link.token, id: annex.id))
+    end
+
+    context "with an expired link" do
+      let!(:shared_link) { create(:shared_link, :expired, document: document) }
+
+      it "returns gone" do
+        get preview_shared_document_annex_path(token: shared_link.token, id: annex.id)
+
+        expect(response).to have_http_status(:gone)
+      end
+    end
+  end
+
+  describe "GET /share/:token/annexes/:id/preview_content (public access)" do
+    let(:document) { create(:document, :finalized, entity: entity) }
+    let!(:shared_link) { create(:shared_link, document: document) }
+    let!(:annex) { create(:annex, document: document) }
+
+    it "streams the file inline without requiring authentication" do
+      get preview_content_shared_document_annex_path(token: shared_link.token, id: annex.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq("application/pdf")
+      expect(response.headers["Content-Disposition"]).to include("inline")
+    end
+  end
 end

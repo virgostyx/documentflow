@@ -4,7 +4,7 @@
       <li class="flex items-center justify-between py-2 text-sm">
         <span class="text-gray-900"><%= annex.file.filename %></span>
         <div class="flex items-center gap-3">
-          <%= link_to preview_entity_document_annex_path(document.entity, document, annex),
+          <%= link_to preview_url(annex),
                 data: { turbo_frame: "modal", action: "click->modal#open" },
                 class: "text-gray-400 hover:text-primary-600", title: "Preview" do %>
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

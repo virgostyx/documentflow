@@ -1,0 +1,5 @@
+<%= turbo_frame_tag "modal" do %>
+  <%= render "documents/file_preview",
+        preview_content_url: preview_content_shared_document_path(@shared_link.token),
+        title: @document.main_file.filename.to_s %>
+<% end %>

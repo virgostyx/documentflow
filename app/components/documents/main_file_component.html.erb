@@ -2,7 +2,7 @@
   <div class="flex items-center justify-between py-2 text-sm">
     <span class="text-gray-900"><%= document.main_file.filename %></span>
     <div class="flex items-center gap-3">
-      <%= link_to preview_entity_document_main_file_path(document.entity, document),
+      <%= link_to preview_url,
             data: { turbo_frame: "modal", action: "click->modal#open" },
             class: "text-gray-400 hover:text-primary-600", title: "Preview" do %>
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

@@ -119,6 +119,10 @@ Rails.application.routes.draw do
   # Public access to a shared document (no authentication)
   get "share/:token", to: "shared_links#show", as: :shared_document
   post "share/:token/renew", to: "shared_links#renew", as: :renew_shared_document
+  get "share/:token/preview", to: "shared_links#preview_main_file", as: :preview_shared_document
+  get "share/:token/preview_content", to: "shared_links#preview_main_file_content", as: :preview_content_shared_document
+  get "share/:token/annexes/:id/preview", to: "shared_links#preview_annex", as: :preview_shared_document_annex
+  get "share/:token/annexes/:id/preview_content", to: "shared_links#preview_annex_content", as: :preview_content_shared_document_annex
 
   # Public invitation acceptance (token-based, no authentication required)
   get  "/invitations/:token",          to: "invitations#show",           as: :invitation

@@ -4,6 +4,7 @@ module Workflow
   class ReassignStepOrganizer < ApplicationService
     workflow_steps Actions::ValidateActorForReassignment,
                    Actions::ReassignStep,
-                   Actions::NotifyReassignedActor
+                   Actions::NotifyReassignedActor,
+                   Actions::BroadcastWorkflowStepsToReassignedActor
   end
 end

@@ -53,6 +53,12 @@ RSpec.describe Workflow::RejectStepOrganizer do
         described_class.call(step: visa_step, current_user: visa_step.actor, reason: "Pièce manquante")
       end
 
+      it "diffuse la mise à jour de la carte de circuit à l'acteur précédent" do
+        expect(WorkflowStepsBroadcastJob).to receive(:perform_later).with(red_step.actor.id, document.id)
+
+        described_class.call(step: visa_step, current_user: visa_step.actor, reason: "Pièce manquante")
+      end
+
       it "enregistre un audit log" do
         expect {
           described_class.call(step: visa_step, current_user: visa_step.actor, reason: "Pièce manquante")

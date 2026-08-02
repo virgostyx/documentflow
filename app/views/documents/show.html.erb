@@ -188,7 +188,9 @@
         </div>
       <% end %>
 
-      <%= render Workflow::StepsComponent.new(document: @document, current_user: current_user) %>
+      <%= tag.div id: dom_id(@document, :workflow_steps) do %>
+        <%= render Workflow::StepsComponent.new(document: @document, current_user: current_user) %>
+      <% end %>
 
       <% if policy(@document.shared_links.new).create? || @document.shared_links.active.any? %>
         <%= render Ui::CardComponent.new do |card| %>

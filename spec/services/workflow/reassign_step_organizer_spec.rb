@@ -29,6 +29,12 @@ RSpec.describe Workflow::ReassignStepOrganizer do
         described_class.call(step: visa_step, new_actor: new_actor, current_user: owner)
       end
 
+      it "broadcasts the workflow steps update to the newly assigned actor" do
+        expect(WorkflowStepsBroadcastJob).to receive(:perform_later).with(new_actor.id, document.id)
+
+        described_class.call(step: visa_step, new_actor: new_actor, current_user: owner)
+      end
+
       it "records an audit log" do
         expect {
           described_class.call(step: visa_step, new_actor: new_actor, current_user: owner)
@@ -46,6 +52,12 @@ RSpec.describe Workflow::ReassignStepOrganizer do
 
       it "does not notify anyone" do
         expect(NotificationJob).not_to receive(:perform_later)
+
+        described_class.call(step: visa_step, new_actor: new_actor, current_user: owner)
+      end
+
+      it "does not broadcast a workflow steps update" do
+        expect(WorkflowStepsBroadcastJob).not_to receive(:perform_later)
 
         described_class.call(step: visa_step, new_actor: new_actor, current_user: owner)
       end

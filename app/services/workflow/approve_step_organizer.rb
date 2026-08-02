@@ -9,6 +9,7 @@ module Workflow
                    Actions::SetDispatchPreference,
                    Actions::AdvanceWorkflow,
                    Actions::NotifyNextActor,
-                   Actions::BroadcastSidebarToNextActor
+                   Actions::BroadcastSidebarToNextActor,
+                   Actions::BroadcastWorkflowStepsToNextActor
   end
 end

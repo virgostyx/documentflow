@@ -5,6 +5,7 @@ module Workflow
     workflow_steps Actions::ValidateActorCanReject,
                    Actions::RejectStep,
                    Actions::ReturnToPreviousStep,
-                   Actions::NotifyPreviousActor
+                   Actions::NotifyPreviousActor,
+                   Actions::BroadcastWorkflowStepsToPreviousActor
   end
 end

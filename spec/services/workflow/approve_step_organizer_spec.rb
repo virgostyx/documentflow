@@ -67,6 +67,14 @@ RSpec.describe Workflow::ApproveStepOrganizer do
         described_class.call(step: visa_step, current_user: visa_step.actor)
       end
 
+      it "diffuse la mise à jour de la carte de circuit à l'acteur suivant" do
+        sign_actor = document.workflow_steps.find_by(role: "SIGN").actor
+
+        expect(WorkflowStepsBroadcastJob).to receive(:perform_later).with(sign_actor.id, document.id)
+
+        described_class.call(step: visa_step, current_user: visa_step.actor)
+      end
+
       it "enregistre un audit log" do
         expect {
           described_class.call(step: visa_step, current_user: visa_step.actor)

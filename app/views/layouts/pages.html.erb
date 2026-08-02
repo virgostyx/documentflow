@@ -13,9 +13,10 @@
   <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
 </head>
-<body class="bg-white antialiased">
+<body class="bg-white antialiased" data-controller="modal">
   <%= render "shared/flash" %>
   <%= yield %>
+  <%= render Ui::ModalComponent.new %>
   <%= render Ui::ConfirmModalComponent.new %>
 
 <!-- Cookie Consent Banner -->

@@ -66,6 +66,13 @@ class WorkflowStepsController < ApplicationController
     authorize @document, :reject?
   end
 
+  def confirm_exp
+    authorize @document, :approve?
+    return head :not_found unless @workflow_step.exp?
+
+    render "workflow_steps/confirm_exp"
+  end
+
   def apply_template
     authorize @document.workflow_steps.new, :apply_template?
 

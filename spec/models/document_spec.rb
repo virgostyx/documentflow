@@ -451,6 +451,37 @@ RSpec.describe Document, type: :model do
     end
   end
 
+  describe "#any_external_recipients?" do
+    let(:internal_user) do
+      user = create(:user)
+      create(:entity_user, entity: entity, user: user, status: "active")
+      user
+    end
+
+    it "is true when the addressee is external" do
+      document.addressee = create(:contact, entity: entity)
+      document.save!
+
+      expect(document.any_external_recipients?).to be true
+    end
+
+    it "is true when a cc recipient is external" do
+      document.addressee = internal_user
+      document.save!
+      create(:cc_recipient, document: document, party: create(:contact, entity: entity))
+
+      expect(document.any_external_recipients?).to be true
+    end
+
+    it "is false when every recipient is internal" do
+      document.addressee = internal_user
+      document.save!
+      create(:cc_recipient, document: document, party: internal_user)
+
+      expect(document.any_external_recipients?).to be false
+    end
+  end
+
   describe "#checked_out? and #checked_out_by? and #locked_for?" do
     let(:user) { create(:user) }
     let(:other_user) { create(:user) }

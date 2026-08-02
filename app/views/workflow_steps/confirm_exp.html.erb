@@ -1,0 +1,33 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Approve and dispatch</h2>
+    <p class="text-sm text-gray-500 mb-4">
+      Choose how each external recipient should receive the document. Internal
+      recipients always access it in the app.
+    </p>
+
+    <%= form_with url: approve_entity_document_workflow_step_path(current_entity, @document, @workflow_step),
+                  method: :post, local: true, data: { turbo_frame: "_top" } do %>
+      <div class="space-y-3 mb-6">
+        <% if @document.addressee.external? %>
+          <label class="flex items-start gap-2 text-sm text-gray-700">
+            <input type="checkbox" name="addressee_dispatch_as_attachment" value="true" class="mt-0.5 rounded border-gray-300">
+            Send as attachment to <%= @document.addressee.display_name %> (addressee)
+          </label>
+        <% end %>
+
+        <% @document.cc_recipients.select { |cc| cc.party.external? }.each do |cc| %>
+          <label class="flex items-start gap-2 text-sm text-gray-700">
+            <input type="checkbox" name="cc_dispatch_as_attachment_ids[]" value="<%= cc.id %>" class="mt-0.5 rounded border-gray-300">
+            Send as attachment to <%= cc.party.display_name %> (cc)
+          </label>
+        <% end %>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Cancel" } %>
+        <%= render(Ui::ButtonComponent.new(type: "submit")) { "Approve" } %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

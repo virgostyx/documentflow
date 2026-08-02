@@ -1039,6 +1039,48 @@ RSpec.describe "Documents", type: :request do
           expect(response.body).to include("Approve")
         end
       end
+
+      context "when the current step is EXP and there is an external recipient" do
+        let!(:document) { create(:document, :with_workflow, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
+
+        before do
+          document.workflow_steps.where(role: %w[RED VISA SIGN]).find_each { |s| s.update!(status: "approved") }
+          document.sign!
+          document.workflow_steps.find_by(role: "EXP").update!(actor: user)
+          sign_in user
+        end
+
+        it "links to the EXP dispatch confirmation instead of approving directly" do
+          get entity_document_path(entity, document)
+
+          exp_step = document.workflow_steps.find_by(role: "EXP")
+          expect(response.body).to include(confirm_exp_entity_document_workflow_step_path(entity, document, exp_step))
+        end
+      end
+
+      context "when the current step is EXP and every recipient is internal" do
+        let(:internal_addressee) do
+          internal_user = create(:user)
+          create(:entity_user, entity: entity, user: internal_user, status: "active")
+          internal_user
+        end
+        let!(:document) { create(:document, :with_workflow, :in_progress, entity: entity, department: department, sender: sender, addressee: internal_addressee, created_by: user) }
+
+        before do
+          document.workflow_steps.where(role: %w[RED VISA SIGN]).find_each { |s| s.update!(status: "approved") }
+          document.sign!
+          document.workflow_steps.find_by(role: "EXP").update!(actor: user)
+          sign_in user
+        end
+
+        it "links directly to approve, skipping the dispatch confirmation" do
+          get entity_document_path(entity, document)
+
+          exp_step = document.workflow_steps.find_by(role: "EXP")
+          expect(response.body).to include(approve_entity_document_workflow_step_path(entity, document, exp_step))
+          expect(response.body).not_to include(confirm_exp_entity_document_workflow_step_path(entity, document, exp_step))
+        end
+      end
     end
 
     context "when the user is a member of a different department" do

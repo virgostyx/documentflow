@@ -60,6 +60,7 @@ Rails.application.routes.draw do
           post :move_down
           patch :reassign
           get :confirm_sign
+          get :confirm_exp
           get :step_up_options
           post :step_up_verify
         end

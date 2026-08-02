@@ -171,6 +171,41 @@ RSpec.describe NotificationMailer do
         expect(mail.html_part.body.encoded).to include(expiry)
       end
     end
+
+    context "with an external contact recipient and attachment dispatch enabled" do
+      let(:document) { create(:document, :finalized, addressee_dispatch_as_attachment: true) }
+      let(:contact) { create(:contact, entity: document.entity) }
+      let(:mail) { described_class.document_addressed(contact, document) }
+
+      before do
+        document.main_file.attach(io: StringIO.new("%PDF-1.4 main content"), filename: "main.pdf", content_type: "application/pdf")
+      end
+
+      it "attaches the main file instead of linking, and creates no shared link" do
+        mail.message
+
+        expect(mail.attachments.map(&:filename)).to eq([ "main.pdf" ])
+        expect(document.shared_links.count).to eq(0)
+      end
+
+      it "mentions the attachment instead of a link, with no expiration" do
+        expect(mail.text_part.body.encoded).to include("enclosed")
+        expect(mail.html_part.body.encoded).to include("enclosed")
+        expect(mail.text_part.body.encoded).not_to include("expire")
+      end
+
+      it "converts non-PDF annexes to PDF and disambiguates colliding filenames" do
+        annex = create(:annex, document: document)
+        annex.file.attach(io: StringIO.new("plain text"), filename: "main.docx", content_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        converted_path = Rails.root.join("tmp", "annex-#{SecureRandom.hex(4)}.pdf").to_s
+        File.write(converted_path, "%PDF-1.4 converted content")
+        allow(PdfConverter).to receive(:convert).and_return(converted_path)
+
+        mail.message
+
+        expect(mail.attachments.map(&:filename)).to contain_exactly("main.pdf", "main (2).pdf")
+      end
+    end
   end
 
   describe "#cc_notification" do
@@ -230,6 +265,36 @@ RSpec.describe NotificationMailer do
 
         expect(mail.text_part.body.encoded).to include(expiry)
         expect(mail.html_part.body.encoded).to include(expiry)
+      end
+    end
+
+    context "with an external contact recipient whose cc_recipient has attachment dispatch enabled" do
+      let(:contact) { create(:contact, entity: document.entity) }
+      let!(:cc_recipient) { create(:cc_recipient, document: document, party: contact, dispatch_as_attachment: true) }
+      let(:mail) { described_class.cc_notification(contact, document) }
+
+      before do
+        document.main_file.attach(io: StringIO.new("%PDF-1.4 main content"), filename: "main.pdf", content_type: "application/pdf")
+      end
+
+      it "attaches the main file instead of linking, and creates no shared link" do
+        mail.message
+
+        expect(mail.attachments.map(&:filename)).to eq([ "main.pdf" ])
+        expect(document.shared_links.count).to eq(0)
+      end
+    end
+
+    context "with an external contact recipient whose cc_recipient has attachment dispatch disabled" do
+      let(:contact) { create(:contact, entity: document.entity) }
+      let!(:cc_recipient) { create(:cc_recipient, document: document, party: contact, dispatch_as_attachment: false) }
+      let(:mail) { described_class.cc_notification(contact, document) }
+
+      it "still links to the shared link" do
+        mail.message
+
+        expect(mail.attachments).to be_empty
+        expect(document.shared_links.count).to eq(1)
       end
     end
   end

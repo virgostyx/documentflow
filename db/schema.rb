@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_01_172149) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_02_101150) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -68,6 +68,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_01_172149) do
 
   create_table "cc_recipients", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.boolean "dispatch_as_attachment", default: false, null: false
     t.bigint "document_id", null: false
     t.bigint "party_id", null: false
     t.string "party_type", null: false
@@ -153,6 +154,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_01_172149) do
   end
 
   create_table "documents", force: :cascade do |t|
+    t.boolean "addressee_dispatch_as_attachment", default: false, null: false
     t.bigint "addressee_id", null: false
     t.string "addressee_type", null: false
     t.datetime "checked_out_at"

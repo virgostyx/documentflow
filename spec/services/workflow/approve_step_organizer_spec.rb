@@ -240,6 +240,65 @@ RSpec.describe Workflow::ApproveStepOrganizer do
       end
     end
 
+    context "approving EXP with a per-recipient dispatch preference" do
+      let(:exp_step) { document.workflow_steps.find_by(role: "EXP") }
+      let(:internal_user) do
+        user = create(:user)
+        create(:entity_user, entity: document.entity, user: user, status: "active")
+        user
+      end
+
+      before do
+        document.workflow_steps.where(role: %w[VISA SIGN]).find_each { |s| s.update!(status: "approved") }
+        document.sign!
+      end
+
+      it "records the addressee's attachment preference when the addressee is external" do
+        described_class.call(step: exp_step, current_user: exp_step.actor, addressee_dispatch_as_attachment: "true")
+
+        expect(document.reload.addressee_dispatch_as_attachment).to be true
+      end
+
+      it "defaults the addressee's attachment preference to false when unchecked" do
+        described_class.call(step: exp_step, current_user: exp_step.actor)
+
+        expect(document.reload.addressee_dispatch_as_attachment).to be false
+      end
+
+      it "does not touch the addressee preference when the addressee is internal" do
+        document.update!(addressee: internal_user)
+
+        described_class.call(step: exp_step, current_user: exp_step.actor, addressee_dispatch_as_attachment: "true")
+
+        expect(document.reload.addressee_dispatch_as_attachment).to be false
+      end
+
+      it "records the attachment preference only for the checked external cc recipients" do
+        checked_cc = create(:cc_recipient, document: document, party: create(:contact, entity: document.entity))
+        unchecked_cc = create(:cc_recipient, document: document, party: create(:contact, entity: document.entity))
+        internal_cc = create(:cc_recipient, document: document, party: internal_user)
+
+        described_class.call(
+          step: exp_step, current_user: exp_step.actor,
+          cc_dispatch_as_attachment_ids: [ checked_cc.id.to_s ]
+        )
+
+        expect(checked_cc.reload.dispatch_as_attachment).to be true
+        expect(unchecked_cc.reload.dispatch_as_attachment).to be false
+        expect(internal_cc.reload.dispatch_as_attachment).to be false
+      end
+
+      it "does not set any dispatch preference for a non-EXP step" do
+        other_document = create(:document, :with_workflow, :in_progress)
+        other_document.workflow_steps.find_by(role: "RED").update!(status: "approved")
+        visa_step = other_document.workflow_steps.find_by(role: "VISA")
+
+        described_class.call(step: visa_step, current_user: visa_step.actor, addressee_dispatch_as_attachment: "true")
+
+        expect(other_document.reload.addressee_dispatch_as_attachment).to be false
+      end
+    end
+
     context "après un rejet et retour à l'étape précédente" do
       let(:red_step) { document.workflow_steps.find_by(role: "RED") }
       let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }

@@ -2,8 +2,12 @@
 
 <p>Document <strong><%= @document.reference_number %></strong> (<%= @document.subject %>) has been finalized.</p>
 
-<p><%= link_to "View the document", @document_url %></p>
+<% if @files_attached %>
+  <p>The document and its attachments are enclosed with this email as PDF files.</p>
+<% else %>
+  <p><%= link_to "View the document", @document_url %></p>
 
-<% if @shared_link %>
-  <p>This link will expire on <%= l(@shared_link.expires_at) %>.</p>
+  <% if @shared_link %>
+    <p>This link will expire on <%= l(@shared_link.expires_at) %>.</p>
+  <% end %>
 <% end %>

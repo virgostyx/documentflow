@@ -169,6 +169,10 @@ class Document < ApplicationRecord
     reference_number.presence || temporary_number
   end
 
+  def any_external_recipients?
+    addressee.external? || cc_recipients.any? { |cc| cc.party.external? }
+  end
+
   def active_shared_link
     shared_links.active.first || shared_links.create!
   end

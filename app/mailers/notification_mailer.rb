@@ -62,7 +62,9 @@ class NotificationMailer < ApplicationMailer
     @recipient_name = party.display_name
     @document = document
 
-    if party.external?
+    if party.external? && document.addressee_dispatch_as_attachment?
+      attach_document_files(document)
+    elsif party.external?
       @shared_link = document.active_shared_link
       @document_url = shared_document_url(@shared_link.token)
     else
@@ -75,8 +77,11 @@ class NotificationMailer < ApplicationMailer
   def cc_notification(party, document)
     @recipient_name = party.display_name
     @document = document
+    cc_recipient = document.cc_recipients.find_by(party_type: party.class.name, party_id: party.id)
 
-    if party.external?
+    if party.external? && cc_recipient&.dispatch_as_attachment?
+      attach_document_files(document)
+    elsif party.external?
       @shared_link = document.active_shared_link
       @document_url = shared_document_url(@shared_link.token)
     else
@@ -84,5 +89,29 @@ class NotificationMailer < ApplicationMailer
     end
 
     mail(to: party.email, subject: "Document finalized: #{document.reference_number}")
+  end
+
+  private
+
+  def attach_document_files(document)
+    used_names = Set.new
+    [ document.main_file, *document.annexes.map(&:file) ].each do |attached_file|
+      next unless attached_file.attached?
+
+      bytes = FilePreviewRenderer.pdf_bytes_for(attached_file)
+      filename = unique_filename("#{File.basename(attached_file.filename.to_s, ".*")}.pdf", used_names)
+      attachments[filename] = { mime_type: "application/pdf", content: bytes }
+    end
+    @files_attached = true
+  end
+
+  def unique_filename(filename, used_names)
+    return filename if used_names.add?(filename)
+
+    ext = File.extname(filename)
+    base = File.basename(filename, ext)
+    n = 2
+    n += 1 until used_names.add?("#{base} (#{n})#{ext}")
+    "#{base} (#{n})#{ext}"
   end
 end

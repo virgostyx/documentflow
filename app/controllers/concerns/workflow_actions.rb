@@ -11,7 +11,9 @@ module WorkflowActions
         current_user: current_user,
         request: request,
         step_up_token: params[:step_up_token],
-        step_up_tokens: session[:step_up_tokens] || {}
+        step_up_tokens: session[:step_up_tokens] || {},
+        addressee_dispatch_as_attachment: params[:addressee_dispatch_as_attachment],
+        cc_dispatch_as_attachment_ids: params[:cc_dispatch_as_attachment_ids]
       },
       success_message: "Step approved successfully."
     ) { session[:step_up_tokens]&.delete(@workflow_step.id.to_s) }

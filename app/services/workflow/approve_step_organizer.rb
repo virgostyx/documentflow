@@ -6,6 +6,7 @@ module Workflow
                    Actions::ValidateSignerHasSignatureImage,
                    Actions::ValidateStepUpChallenge,
                    Actions::ApproveStep,
+                   Actions::SetDispatchPreference,
                    Actions::AdvanceWorkflow,
                    Actions::NotifyNextActor,
                    Actions::BroadcastSidebarToNextActor

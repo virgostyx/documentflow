@@ -2,8 +2,12 @@ Hello <%= @recipient_name %>,
 
 Document <%= @document.reference_number %> (<%= @document.subject %>) has been addressed to you and is now finalized.
 
+<% if @files_attached %>
+The document and its attachments are enclosed with this email as PDF files.
+<% else %>
 View the document: <%= @document_url %>
 <% if @shared_link %>
 
 This link will expire on <%= l(@shared_link.expires_at) %>.
+<% end %>
 <% end %>

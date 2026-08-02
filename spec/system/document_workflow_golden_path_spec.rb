@@ -91,6 +91,12 @@ RSpec.describe "Document validation circuit golden path", type: :system do
     open_actions_menu
     click_link "Approve"
 
+    # The document's default addressee is an external contact, so approving
+    # EXP opens the dispatch confirmation modal (choose link vs attachment
+    # per external recipient) instead of finalizing directly.
+    expect(page).to have_content("Approve and dispatch")
+    click_button "Approve"
+
     expect(page).to have_content("Finalized")
     within("[data-role='EXP']") { expect(page).to have_content("Approved") }
   end

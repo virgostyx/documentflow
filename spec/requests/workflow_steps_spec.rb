@@ -86,6 +86,85 @@ RSpec.describe "WorkflowSteps", type: :request do
     end
   end
 
+  describe "GET /entities/:entity_id/documents/:document_id/workflow_steps/:id/confirm_exp" do
+    let(:exp_step) { document.workflow_steps.find_by(role: "EXP") }
+
+    before do
+      document.workflow_steps.where(role: %w[VISA SIGN]).find_each { |s| s.update!(status: "approved") }
+      document.sign!
+    end
+
+    context "as the EXP step's actor" do
+      before do
+        create(:entity_user, entity: entity, user: exp_step.actor)
+        sign_in exp_step.actor
+      end
+
+      it "renders the dispatch confirmation modal" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "as another user" do
+      let(:other_user) { create(:user) }
+
+      before do
+        create(:entity_user, entity: entity, user: other_user)
+        sign_in other_user
+      end
+
+      it "redirects with an authorization error" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+        expect(response).to redirect_to(root_path)
+      end
+    end
+
+    context "when the targeted step is not EXP" do
+      let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
+
+      before do
+        create(:entity_user, entity: entity, user: exp_step.actor)
+        sign_in exp_step.actor
+      end
+
+      it "returns not found" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, visa_step)
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "POST /entities/:entity_id/documents/:document_id/workflow_steps/:id/approve with EXP dispatch preference" do
+    let(:exp_step) { document.workflow_steps.find_by(role: "EXP") }
+
+    before do
+      document.workflow_steps.where(role: %w[VISA SIGN]).find_each { |s| s.update!(status: "approved") }
+      document.sign!
+      create(:entity_user, entity: entity, user: exp_step.actor)
+      sign_in exp_step.actor
+    end
+
+    it "persists the addressee attachment preference from the submitted checkbox" do
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { addressee_dispatch_as_attachment: "true" }
+
+      expect(document.reload.addressee_dispatch_as_attachment).to be true
+    end
+
+    it "persists the checked cc recipients' attachment preference" do
+      cc_recipient = create(:cc_recipient, document: document, party: create(:contact, entity: entity))
+
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { cc_dispatch_as_attachment_ids: [ cc_recipient.id.to_s ] }
+
+      expect(cc_recipient.reload.dispatch_as_attachment).to be true
+    end
+  end
+
   describe "POST /entities/:entity_id/documents/:document_id/workflow_steps/:id/reject" do
     let(:visa_step) { document.workflow_steps.find_by(role: "VISA") }
 

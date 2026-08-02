@@ -54,6 +54,7 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
 
     open_actions_menu
     click_link "Approve"
+    click_button "Confirm"
     expect(page).to have_content("approved")
     within("[data-role='VISA']") { expect(page).to have_content("Approved") }
     within("[data-role='SIGN']") { expect(page).to have_content("Pending") }
@@ -130,6 +131,7 @@ RSpec.describe "Document check-out / check-in golden path", type: :system, js: t
 
     open_actions_menu
     click_link "Approve"
+    click_button "Confirm"
     expect(page).to have_content("approved")
     within("[data-role='VISA']") { expect(page).to have_content("Approved") }
   end

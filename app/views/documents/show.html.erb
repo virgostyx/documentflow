@@ -20,7 +20,10 @@
           data: { turbo_frame: "modal", action: "click->modal#open" }
         ) { "Approve" } %>
       <% else %>
-        <% menu.with_item(href: approve_entity_document_workflow_step_path(current_entity, @document, @document.current_step), method: :post) { "Approve" } %>
+        <% menu.with_item(
+          href: approve_entity_document_workflow_step_path(current_entity, @document, @document.current_step), method: :post,
+          data: { turbo_confirm: "Approve this step?" }
+        ) { "Approve" } %>
       <% end %>
     <% end %>
     <% if policy(@document).reject? %>
@@ -40,14 +43,14 @@
     <% end %>
     <% if policy(@document).cancel? %>
       <% menu.with_item(
-        href: cancel_entity_document_path(current_entity, @document), method: :post, variant: :danger,
-        data: { turbo_confirm: "Are you sure you want to cancel this document?" }
+        href: confirm_cancel_entity_document_path(current_entity, @document), variant: :danger,
+        data: { turbo_frame: "modal", action: "click->modal#open" }
       ) { "Cancel document" } %>
     <% end %>
     <% if policy(@document).destroy? %>
       <% menu.with_item(
-        href: entity_document_path(current_entity, @document), method: :delete, variant: :danger,
-        data: { turbo_confirm: "Are you sure you want to delete this document? This cannot be undone." }
+        href: confirm_destroy_entity_document_path(current_entity, @document), variant: :danger,
+        data: { turbo_frame: "modal", action: "click->modal#open" }
       ) { "Delete" } %>
     <% end %>
   <% end %>

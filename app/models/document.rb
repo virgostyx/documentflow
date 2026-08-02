@@ -31,7 +31,7 @@ class Document < ApplicationRecord
   has_many :workflow_steps, dependent: :destroy
   has_many :shared_links, dependent: :destroy
   has_many :cc_recipients, dependent: :destroy
-  has_many :audit_logs, as: :auditable, dependent: :destroy
+  has_many :audit_logs, as: :auditable, dependent: :nullify
   has_many :document_file_versions, dependent: :destroy
   has_one_attached :main_file
   has_many :annexes, -> { order(:id) }, dependent: :destroy

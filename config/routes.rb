@@ -90,6 +90,8 @@ Rails.application.routes.draw do
       member do
         post :launch
         post :cancel
+        get :confirm_cancel
+        get :confirm_destroy
         get :classify_form
         patch :classify
       end

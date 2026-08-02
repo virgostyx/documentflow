@@ -3,7 +3,7 @@
 class DocumentsController < ApplicationController
   include EntityScoped
 
-  before_action :set_document, only: %i[show edit update destroy launch cancel classify_form classify]
+  before_action :set_document, only: %i[show edit update destroy launch cancel confirm_cancel confirm_destroy classify_form classify]
   before_action :load_classification_tree, only: %i[index mine received todo waiting info to_validate search classify_form]
 
   def index
@@ -101,8 +101,18 @@ class DocumentsController < ApplicationController
 
   def destroy
     authorize @document
-    @document.destroy
-    redirect_to entity_documents_path(current_entity), notice: "Document deleted successfully."
+
+    result = Documents::DestroyDocumentOrganizer.call(document: @document, current_user: current_user, reason: params[:reason])
+
+    if result.success?
+      redirect_to entity_documents_path(current_entity), notice: "Document deleted successfully."
+    else
+      redirect_to entity_document_path(current_entity, @document), alert: result.message
+    end
+  end
+
+  def confirm_destroy
+    authorize @document, :destroy?
   end
 
   def launch
@@ -120,11 +130,17 @@ class DocumentsController < ApplicationController
   def cancel
     authorize @document
 
-    if @document.may_cancel? && @document.cancel!
+    result = Documents::CancelDocumentOrganizer.call(document: @document, current_user: current_user, reason: params[:reason])
+
+    if result.success?
       redirect_to entity_document_path(current_entity, @document), notice: "Document cancelled successfully."
     else
-      redirect_to entity_document_path(current_entity, @document), alert: "This document cannot be cancelled in its current state"
+      redirect_to entity_document_path(current_entity, @document), alert: result.message
     end
+  end
+
+  def confirm_cancel
+    authorize @document, :cancel?
   end
 
   def classify_form

@@ -1038,6 +1038,12 @@ RSpec.describe "Documents", type: :request do
 
           expect(response.body).to include("Approve")
         end
+
+        it "requires confirmation before approving" do
+          get entity_document_path(entity, document)
+
+          expect(response.body).to include("data-turbo-confirm=\"Approve this step?\"")
+        end
       end
 
       context "when the current step is EXP and there is an external recipient" do
@@ -1261,10 +1267,17 @@ RSpec.describe "Documents", type: :request do
 
       it "destroys the document" do
         expect {
-          delete entity_document_path(entity, document)
+          delete entity_document_path(entity, document), params: { reason: "No longer needed" }
         }.to change(entity.documents, :count).by(-1)
 
         expect(response).to redirect_to(entity_documents_path(entity))
+      end
+
+      it "logs the deletion reason to the audit trail" do
+        delete entity_document_path(entity, document), params: { reason: "Duplicate entry" }
+
+        audit_log = AuditLog.find_by(action: "destroy_document")
+        expect(audit_log.change_data["reason"]).to eq("Duplicate entry")
       end
     end
 
@@ -1281,6 +1294,39 @@ RSpec.describe "Documents", type: :request do
         expect {
           delete entity_document_path(entity, document)
         }.not_to change(Document, :count)
+
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/:id/confirm_destroy" do
+    let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
+
+    context "as entity owner" do
+      before do
+        create(:entity_user, :owner, entity: entity, user: user)
+        sign_in user
+      end
+
+      it "renders the confirmation modal with a required reason field" do
+        get confirm_destroy_entity_document_path(entity, document)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('name="reason"')
+        expect(response.body).to include("required")
+      end
+    end
+
+    context "as a regular member" do
+      before do
+        eu = create(:entity_user, entity: entity, user: user)
+        create(:entity_user_department, entity_user: eu, department: department)
+        sign_in user
+      end
+
+      it "redirects with an authorization error" do
+        get confirm_destroy_entity_document_path(entity, document)
 
         expect(response).to redirect_to(root_path)
       end
@@ -1354,11 +1400,18 @@ RSpec.describe "Documents", type: :request do
       end
 
       it "cancels the document" do
-        post cancel_entity_document_path(entity, document)
+        post cancel_entity_document_path(entity, document), params: { reason: "Client withdrew the request" }
 
         expect(document.reload).to be_cancelled
         expect(response).to redirect_to(entity_document_path(entity, document))
         expect(flash[:notice]).to be_present
+      end
+
+      it "logs the cancellation reason to the audit trail" do
+        post cancel_entity_document_path(entity, document), params: { reason: "Client withdrew the request" }
+
+        audit_log = AuditLog.find_by(action: "cancel_document")
+        expect(audit_log.change_data["reason"]).to eq("Client withdrew the request")
       end
     end
 
@@ -1376,6 +1429,24 @@ RSpec.describe "Documents", type: :request do
         expect(document.reload).to be_finalized
         expect(response).to redirect_to(root_path)
       end
+    end
+  end
+
+  describe "GET /entities/:entity_id/documents/:id/confirm_cancel" do
+    let!(:document) { create(:document, :in_progress, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
+
+    before do
+      eu = create(:entity_user, entity: entity, user: user)
+      create(:entity_user_department, entity_user: eu, department: department)
+      sign_in user
+    end
+
+    it "renders the confirmation modal with a required reason field" do
+      get confirm_cancel_entity_document_path(entity, document)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('name="reason"')
+      expect(response.body).to include("required")
     end
   end
 

@@ -1,0 +1,21 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Cancel document</h2>
+
+    <p class="text-sm text-gray-500 mb-4">Please provide a reason for cancelling this document.</p>
+
+    <%= form_with url: cancel_entity_document_path(current_entity, @document),
+                  method: :post, local: true, data: { turbo_frame: "_top" } do |f| %>
+      <div>
+        <%= label_tag "reason", "Reason", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= text_area_tag "reason", nil, rows: 3, required: true,
+              class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-danger-500" %>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-3">
+        <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Close" } %>
+        <%= render(Ui::ButtonComponent.new(variant: :danger)) { "Cancel document" } %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

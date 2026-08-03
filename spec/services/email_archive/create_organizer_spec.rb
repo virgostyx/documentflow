@@ -66,6 +66,12 @@ RSpec.describe EmailArchive::CreateOrganizer do
           described_class.call(mail: mail, delivered_to: "sales.archive@example.com")
         }.to change(AuditLog, :count).by(1)
       end
+
+      it "broadcasts the new document row for the Overview list" do
+        expect(DocumentRowBroadcastJob).to receive(:perform_later)
+
+        described_class.call(mail: mail, delivered_to: "sales.archive@example.com")
+      end
     end
 
     context "when no department matches the delivered_to address" do

@@ -28,6 +28,12 @@ RSpec.describe Documents::FinalizeOrganizer do
         described_class.call(document: document, current_user: user)
       end
 
+      it "diffuse la nouvelle ligne du document pour la liste Overview" do
+        expect(DocumentRowBroadcastJob).to receive(:perform_later).with(document.id)
+
+        described_class.call(document: document, current_user: user)
+      end
+
       it "notifie le destinataire principal du document" do
         expect(AddresseeNotificationJob).to receive(:perform_later)
           .with(document.addressee_type, document.addressee_id, document.id)

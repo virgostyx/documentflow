@@ -44,7 +44,7 @@
 
 <%= turbo_frame_tag "documents_list" do %>
   <% if @documents.any? %>
-    <%= render "documents/table", documents: @documents %>
+    <%= render "documents/table", documents: @documents, list_scope: @list_scope %>
 
     <div class="mt-4">
       <%= paginate @documents %>

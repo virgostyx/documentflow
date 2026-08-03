@@ -7,6 +7,7 @@ module EmailArchive
                    Actions::ResolveExternalAddressee,
                    Actions::CreateArchivedDocument,
                    Actions::AttachEmailContent,
-                   Actions::CreateCcRecipients
+                   Actions::CreateCcRecipients,
+                   Documents::Actions::BroadcastDocumentRow
   end
 end

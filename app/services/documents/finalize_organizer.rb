@@ -3,6 +3,7 @@
 module Documents
   class FinalizeOrganizer < ApplicationService
     workflow_steps Actions::FinalizeDocument,
+                   Actions::BroadcastDocumentRow,
                    Actions::NotifyFinalization,
                    Actions::BroadcastSidebarToCreator,
                    Actions::NotifyAddressee,

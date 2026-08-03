@@ -6,7 +6,7 @@
 <% end %>
 
 <% content_for :actions do %>
-  <%= render Documents::DocumentStatusBadgeComponent.new(status: @document.status) %>
+  <%= render Documents::DocumentStatusBadgeComponent.new(status: @document.status, archived_from_email: @document.archived_from_email?) %>
   <%= render(Ui::ActionsMenuComponent.new) do |menu| %>
     <% if policy(@document).approve? %>
       <% if @document.current_step.sign? %>

@@ -25,11 +25,13 @@ class Entity < ApplicationRecord
                       length: { maximum: 8 },
                       format: { with: /\A[A-Z0-9]+\z/, message: "must contain only uppercase letters and digits" },
                       uniqueness: true
+  validates :incoming_archive_email, format: { with: URI::MailTo::EMAIL_REGEXP }, uniqueness: true, allow_blank: true
   validate :logo_must_be_a_valid_image
 
   # Callbacks
   before_validation :generate_code, on: :create
   before_validation :normalize_prefix
+  before_validation :normalize_incoming_archive_email
 
   # Scopes
   scope :active, -> { where(status: "active") }
@@ -61,6 +63,10 @@ class Entity < ApplicationRecord
 
   def normalize_prefix
     self.prefix = prefix.upcase if prefix.present?
+  end
+
+  def normalize_incoming_archive_email
+    self.incoming_archive_email = incoming_archive_email.strip.downcase if incoming_archive_email.present?
   end
 
   def logo_must_be_a_valid_image

@@ -604,7 +604,9 @@ DEPENDENCIES
   kaminari
   letter_opener
   light-service (~> 0.18)
+  mail
   mission_control-jobs
+  net-imap
   pdf-reader
   pg (~> 1.1)
   pg_search

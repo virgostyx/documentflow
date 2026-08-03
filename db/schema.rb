@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_02_105900) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_03_073556) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -128,12 +128,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_105900) do
   end
 
   create_table "departments", force: :cascade do |t|
+    t.string "archive_ingestion_email"
     t.datetime "created_at", null: false
     t.bigint "entity_id", null: false
     t.boolean "is_default", default: false, null: false
     t.string "name", null: false
     t.string "prefix", null: false
     t.datetime "updated_at", null: false
+    t.index ["archive_ingestion_email"], name: "index_departments_on_archive_ingestion_email", unique: true
     t.index ["entity_id", "name"], name: "index_departments_on_entity_id_and_name", unique: true
     t.index ["entity_id", "prefix"], name: "index_departments_on_entity_id_and_prefix", unique: true
     t.index ["entity_id"], name: "index_departments_on_entity_id"
@@ -157,6 +159,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_105900) do
     t.boolean "addressee_dispatch_as_attachment", default: false, null: false
     t.bigint "addressee_id", null: false
     t.string "addressee_type", null: false
+    t.boolean "archived_from_email", default: false, null: false
     t.datetime "checked_out_at"
     t.bigint "checked_out_by_id"
     t.bigint "classification_node_id"
@@ -200,11 +203,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_105900) do
     t.string "acronym"
     t.string "code", null: false
     t.datetime "created_at", null: false
+    t.string "incoming_archive_email"
     t.string "name", null: false
     t.string "prefix", null: false
     t.string "status", default: "active", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_entities_on_code", unique: true
+    t.index ["incoming_archive_email"], name: "index_entities_on_incoming_archive_email", unique: true
     t.index ["name"], name: "index_entities_on_name", unique: true
     t.index ["prefix"], name: "index_entities_on_prefix", unique: true
     t.index ["status"], name: "index_entities_on_status"
@@ -268,6 +273,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_105900) do
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
+    t.string "external_email"
     t.string "first_name", default: "", null: false
     t.string "last_name", default: "", null: false
     t.string "otp_backup_codes", default: [], array: true
@@ -279,6 +285,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_105900) do
     t.datetime "updated_at", null: false
     t.string "webauthn_id"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["external_email"], name: "index_users_on_external_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["webauthn_id"], name: "index_users_on_webauthn_id", unique: true
   end

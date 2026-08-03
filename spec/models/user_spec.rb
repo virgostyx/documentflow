@@ -7,6 +7,32 @@ RSpec.describe User, type: :model do
     it { should validate_presence_of(:email) }
     it { should validate_presence_of(:first_name) }
     it { should validate_presence_of(:last_name) }
+
+    describe "external_email" do
+      it "is optional" do
+        expect(build(:user, external_email: nil)).to be_valid
+      end
+
+      it "rejects an invalid format" do
+        user = build(:user, external_email: "not-an-email")
+        expect(user).not_to be_valid
+        expect(user.errors[:external_email]).to be_present
+      end
+
+      it "is unique across users" do
+        create(:user, external_email: "shared@outlook.com")
+        duplicate = build(:user, external_email: "shared@outlook.com")
+
+        expect(duplicate).not_to be_valid
+        expect(duplicate.errors[:external_email]).to be_present
+      end
+
+      it "is normalized to lowercase" do
+        user = build(:user, external_email: "  Someone@Outlook.com  ")
+        user.valid?
+        expect(user.external_email).to eq("someone@outlook.com")
+      end
+    end
   end
 
   describe "factory" do

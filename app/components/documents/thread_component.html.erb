@@ -14,7 +14,7 @@
       </div>
       <div class="flex items-center gap-3 shrink-0">
         <span class="text-sm text-gray-500"><%= l(document.document_date) %></span>
-        <%= render Documents::DocumentStatusBadgeComponent.new(status: document.status) %>
+        <%= render Documents::DocumentStatusBadgeComponent.new(status: document.status, archived_from_email: document.archived_from_email?) %>
       </div>
     </li>
   <% end %>

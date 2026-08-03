@@ -22,6 +22,10 @@ development:
     class: CleanupStaleWopiCheckoutsJob
     schedule: every hour
 
+  poll_email_archive_mailbox:
+    class: PollEmailArchiveMailboxJob
+    schedule: every 5 minutes
+
 production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
@@ -38,3 +42,7 @@ production:
   cleanup_stale_wopi_checkouts:
     class: CleanupStaleWopiCheckoutsJob
     schedule: every hour
+
+  poll_email_archive_mailbox:
+    class: PollEmailArchiveMailboxJob
+    schedule: every 5 minutes

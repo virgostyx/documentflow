@@ -35,6 +35,12 @@ FactoryBot.define do
       expects_response { true }
     end
 
+    trait :archived_from_email do
+      status { "finalized" }
+      is_frozen { true }
+      archived_from_email { true }
+    end
+
     trait :incoming do
       direction { "incoming" }
       addressee { lead_user }

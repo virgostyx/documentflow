@@ -3,7 +3,7 @@
 class PdfConverter
   class ConversionError < StandardError; end
 
-  LIBREOFFICE_EXTENSIONS = %w[.docx .xlsx .pptx .odt .rtf].freeze
+  LIBREOFFICE_EXTENSIONS = %w[.docx .xlsx .pptx .odt .rtf .html].freeze
   IMAGE_EXTENSIONS = %w[.jpg .jpeg .png].freeze
 
   class << self

@@ -128,9 +128,11 @@ class Document < ApplicationRecord
   # their definitive reference_number is assigned when the SIGN workflow step
   # is approved (see #assign_reference_number). Incoming mail does not go
   # through the sign/finalize workflow at all, so it keeps the legacy
-  # behavior of getting its reference_number immediately.
-  before_validation :generate_reference_number, on: :create, if: :incoming?
-  after_create :assign_temporary_number, unless: :incoming?
+  # behavior of getting its reference_number immediately. Email-archived
+  # outgoing documents (archived_from_email) are also created already
+  # "finalized" with no workflow_steps, so they need the same treatment.
+  before_validation :generate_reference_number, on: :create, if: -> { incoming? || archived_from_email? }
+  after_create :assign_temporary_number, unless: -> { incoming? || archived_from_email? }
   before_validation :clear_response_deadline_unless_expecting_response
 
   # State machine

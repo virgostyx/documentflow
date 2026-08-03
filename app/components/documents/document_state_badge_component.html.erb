@@ -1,5 +1,5 @@
 <% if document.outgoing? %>
-  <%= render(Documents::DocumentStatusBadgeComponent.new(status: document.status)) %>
+  <%= render(Documents::DocumentStatusBadgeComponent.new(status: document.status, archived_from_email: document.archived_from_email?)) %>
 <% elsif document.routed? %>
   <%= render(Ui::BadgeComponent.new(color: :info)) { "Incoming" } %>
 <% else %>

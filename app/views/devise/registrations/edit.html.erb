@@ -35,6 +35,11 @@
                                  required: true,
                                  autocomplete: "email",
                                  placeholder: " " %>
+
+      <%= f.floating_email_field :external_email,
+                                 label: "External email (e.g. Outlook, optional)",
+                                 autocomplete: "off",
+                                 placeholder: " " %>
     </div>
 
     <% unless current_user.passwordless? %>

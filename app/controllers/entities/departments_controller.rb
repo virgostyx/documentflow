@@ -59,7 +59,7 @@ module Entities
     end
 
     def department_params
-      params.require(:department).permit(:name, :prefix, :logo)
+      params.require(:department).permit(:name, :prefix, :logo, :archive_ingestion_email)
     end
   end
 end

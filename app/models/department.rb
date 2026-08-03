@@ -15,9 +15,11 @@ class Department < ApplicationRecord
                       length: { maximum: 8 },
                       format: { with: /\A[A-Z0-9]+\z/, message: "must contain only uppercase letters and digits" },
                       uniqueness: { scope: :entity_id }
+  validates :archive_ingestion_email, format: { with: URI::MailTo::EMAIL_REGEXP }, uniqueness: true, allow_blank: true
   validate :logo_must_be_a_valid_image
 
   before_validation :normalize_prefix
+  before_validation :normalize_archive_ingestion_email
 
   scope :default, -> { where(is_default: true) }
 
@@ -29,6 +31,10 @@ class Department < ApplicationRecord
 
   def normalize_prefix
     self.prefix = prefix.upcase if prefix.present?
+  end
+
+  def normalize_archive_ingestion_email
+    self.archive_ingestion_email = archive_ingestion_email.strip.downcase if archive_ingestion_email.present?
   end
 
   def logo_must_be_a_valid_image

@@ -68,6 +68,10 @@ gem "prawn-templates"
 # Recherche full-text
 gem "pg_search"
 
+# Email archive ingestion (IMAP polling + message parsing)
+gem "mail"
+gem "net-imap"
+
 # Pagination
 gem "kaminari"
 

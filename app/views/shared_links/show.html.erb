@@ -12,7 +12,7 @@
   <h1 class="text-2xl font-bold text-gray-900 mb-6"><%= @document.subject %></h1>
 
   <%= render Ui::CardComponent.new do |card| %>
-    <% card.with_header { render(Documents::DocumentStatusBadgeComponent.new(status: @document.status)) } %>
+    <% card.with_header { render(Documents::DocumentStatusBadgeComponent.new(status: @document.status, archived_from_email: @document.archived_from_email?)) } %>
 
     <%= render Documents::MetadataComponent.new(document: @document) %>
 

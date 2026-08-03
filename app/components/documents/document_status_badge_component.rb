@@ -10,20 +10,25 @@ module Documents
       "cancelled" => :danger
     }.freeze
 
-    def initialize(status:)
+    def initialize(status:, archived_from_email: false)
       @status = status
+      @archived_from_email = archived_from_email
     end
 
     private
 
     attr_reader :status
 
+    def archived_from_email?
+      @archived_from_email
+    end
+
     def color
-      COLORS.fetch(status, :gray)
+      archived_from_email? ? :info : COLORS.fetch(status, :gray)
     end
 
     def label
-      status.titleize
+      archived_from_email? ? "Archived from Outlook" : status.titleize
     end
   end
 end

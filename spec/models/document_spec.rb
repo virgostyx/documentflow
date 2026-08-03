@@ -214,6 +214,24 @@ RSpec.describe Document, type: :model do
     end
   end
 
+  describe "before_validation :generate_reference_number (archived_from_email outgoing documents)" do
+    it "assigns a reference number immediately, matching PREFIX(YYYY)#####" do
+      doc = create(:document, :archived_from_email, entity: entity)
+      expect(doc.reference_number).to match(/\A[A-Z0-9]{1,8}\(\d{4}\)\d{5}\z/)
+    end
+
+    it "does not assign a temporary_number" do
+      doc = create(:document, :archived_from_email, entity: entity)
+      expect(doc.temporary_number).to be_nil
+    end
+
+    it "does not affect a normal outgoing document" do
+      doc = create(:document, entity: entity)
+      expect(doc.reference_number).to be_nil
+      expect(doc.temporary_number).to be_present
+    end
+  end
+
   describe "#sign / after: :assign_reference_number" do
     it "assigns a reference number matching PREFIX(YYYY)##### when signed" do
       doc = create(:document, :in_progress, entity: entity)

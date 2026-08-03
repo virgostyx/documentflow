@@ -15,6 +15,10 @@ class User < ApplicationRecord
   # Validations
   validates :first_name, presence: true
   validates :last_name, presence: true
+  validates :external_email, format: { with: URI::MailTo::EMAIL_REGEXP }, uniqueness: true, allow_blank: true
+
+  # Callbacks
+  before_validation :normalize_external_email
 
   # Methods
   def full_name
@@ -38,5 +42,11 @@ class User < ApplicationRecord
       update_column(:webauthn_id, id) # rubocop:disable Rails/SkipsModelValidations
       id
     end
+  end
+
+  private
+
+  def normalize_external_email
+    self.external_email = external_email.strip.downcase if external_email.present?
   end
 end

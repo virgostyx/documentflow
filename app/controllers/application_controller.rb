@@ -37,7 +37,7 @@ class ApplicationController < ActionController::Base
   # Allow first_name/last_name on sign up and account update.
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: %i[first_name last_name])
-    devise_parameter_sanitizer.permit(:account_update, keys: %i[first_name last_name])
+    devise_parameter_sanitizer.permit(:account_update, keys: %i[first_name last_name external_email])
   end
 
   def user_not_authorized

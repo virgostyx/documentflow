@@ -69,6 +69,33 @@ RSpec.describe Department, type: :model do
       expect(department.errors[:prefix]).to be_present
     end
 
+    describe "archive_ingestion_email" do
+      it "is optional" do
+        expect(build(:department, entity: entity, archive_ingestion_email: nil)).to be_valid
+      end
+
+      it "rejects an invalid format" do
+        dept = build(:department, entity: entity, archive_ingestion_email: "nope")
+        expect(dept).not_to be_valid
+        expect(dept.errors[:archive_ingestion_email]).to be_present
+      end
+
+      it "is unique across departments, even across entities" do
+        create(:department, entity: entity, archive_ingestion_email: "hr@archive.example.com")
+
+        other_entity = create(:entity)
+        duplicate = build(:department, entity: other_entity, archive_ingestion_email: "hr@archive.example.com")
+        expect(duplicate).not_to be_valid
+        expect(duplicate.errors[:archive_ingestion_email]).to be_present
+      end
+
+      it "is normalized to lowercase" do
+        dept = build(:department, entity: entity, archive_ingestion_email: "  HR@Archive.Example.com  ")
+        dept.valid?
+        expect(dept.archive_ingestion_email).to eq("hr@archive.example.com")
+      end
+    end
+
     describe "logo content type" do
       it "accepts a PNG logo" do
         department.logo.attach(

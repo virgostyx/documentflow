@@ -41,6 +41,32 @@ RSpec.describe Entity, type: :model do
       end
     end
 
+    describe "incoming_archive_email" do
+      it "is optional" do
+        expect(build(:entity, incoming_archive_email: nil)).to be_valid
+      end
+
+      it "rejects an invalid format" do
+        e = build(:entity, incoming_archive_email: "nope")
+        expect(e).not_to be_valid
+        expect(e.errors[:incoming_archive_email]).to be_present
+      end
+
+      it "is unique across entities" do
+        create(:entity, incoming_archive_email: "incoming@archive.example.com")
+        duplicate = build(:entity, incoming_archive_email: "incoming@archive.example.com")
+
+        expect(duplicate).not_to be_valid
+        expect(duplicate.errors[:incoming_archive_email]).to be_present
+      end
+
+      it "is normalized to lowercase" do
+        e = build(:entity, incoming_archive_email: "  Incoming@Archive.Example.com  ")
+        e.valid?
+        expect(e.incoming_archive_email).to eq("incoming@archive.example.com")
+      end
+    end
+
     describe "logo content type" do
       it "accepts a PNG logo" do
         entity.logo.attach(

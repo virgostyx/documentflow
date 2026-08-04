@@ -6,11 +6,17 @@ export default class extends Controller {
   static values = { optionsUrl: String, verifyUrl: String }
 
   async connect() {
+    this.abortController = new AbortController()
+
     if (await this.conditionalUiAvailable()) {
       this.authenticate("conditional")
     } else if (this.webauthnAvailable()) {
       this.showButton()
     }
+  }
+
+  disconnect() {
+    this.abortController.abort()
   }
 
   async conditionalUiAvailable() {
@@ -36,7 +42,7 @@ export default class extends Controller {
 
     let credential
     try {
-      credential = await get({ mediation, publicKey: options })
+      credential = await get({ mediation, publicKey: options, signal: this.abortController.signal })
     } catch (error) {
       if (error.name !== "AbortError" && mediation !== "conditional") {
         this.showStatus("Passkey sign-in was cancelled or failed.")

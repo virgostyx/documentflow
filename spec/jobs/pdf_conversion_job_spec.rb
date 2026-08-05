@@ -49,7 +49,7 @@ RSpec.describe PdfConversionJob do
     end
 
     context "signature audit trail" do
-      it "logs one AuditLog per approved SIGN step with the stamped PDF's SHA-256" do
+      it "logs one AuditLog for the SIGN step matching the given step_id, with the stamped PDF's SHA-256" do
         document.main_file.attach(io: StringIO.new("%PDF-1.4 content"), filename: "report.pdf", content_type: "application/pdf")
         signer = create(:user)
         step = create(:workflow_step, :sign, :approved, document: document, actor: signer)
@@ -60,7 +60,7 @@ RSpec.describe PdfConversionJob do
         expected_sha256 = Digest::SHA256.hexdigest("%PDF-1.4 stamped content")
 
         expect {
-          described_class.new.perform(document.id)
+          described_class.new.perform(document.id, step.id)
         }.to change(AuditLog, :count).by(1)
 
         log = AuditLog.last
@@ -71,14 +71,38 @@ RSpec.describe PdfConversionJob do
         expect(log.change_data["pdf_sha256"]).to eq(expected_sha256)
       end
 
-      it "logs nothing when the document has no approved SIGN step" do
+      it "logs nothing when no step_id is given" do
         document.main_file.attach(io: StringIO.new("%PDF-1.4 content"), filename: "report.pdf", content_type: "application/pdf")
+        create(:workflow_step, :sign, :approved, document: document, actor: create(:user))
 
         stamped_path = Rails.root.join("tmp", "report-stamped-#{SecureRandom.hex(4)}.pdf").to_s
         File.write(stamped_path, "%PDF-1.4 stamped content")
         allow(PdfStamper).to receive(:stamp).and_return(stamped_path)
 
         expect { described_class.new.perform(document.id) }.not_to change(AuditLog, :count)
+      end
+
+      it "does not re-log a signer already audited in an earlier run, when a later SIGN stage's job runs" do
+        document.main_file.attach(io: StringIO.new("%PDF-1.4 content"), filename: "report.pdf", content_type: "application/pdf")
+        first_signer = create(:user)
+        second_signer = create(:user)
+        first_step = create(:workflow_step, :sign, :approved, document: document, actor: first_signer, order: 3)
+        second_step = create(:workflow_step, :sign, :approved, document: document, actor: second_signer, order: 4)
+
+        stamped_path = Rails.root.join("tmp", "report-stamped-#{SecureRandom.hex(4)}.pdf").to_s
+        allow(PdfStamper).to receive(:stamp) do
+          File.write(stamped_path, "%PDF-1.4 stamped content")
+          stamped_path
+        end
+
+        described_class.new.perform(document.id, first_step.id)
+
+        expect {
+          described_class.new.perform(document.id, second_step.id)
+        }.to change(AuditLog, :count).by(1)
+
+        expect(AuditLog.count).to eq(2)
+        expect(AuditLog.pluck(:user_id)).to contain_exactly(first_signer.id, second_signer.id)
       end
     end
 

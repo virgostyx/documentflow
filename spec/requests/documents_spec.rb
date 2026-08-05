@@ -1079,12 +1079,11 @@ RSpec.describe "Documents", type: :request do
           sign_in user
         end
 
-        it "links directly to approve, skipping the dispatch confirmation" do
+        it "still links to the EXP dispatch confirmation, since the message field applies to internal recipients too" do
           get entity_document_path(entity, document)
 
           exp_step = document.workflow_steps.find_by(role: "EXP")
-          expect(response.body).to include(approve_entity_document_workflow_step_path(entity, document, exp_step))
-          expect(response.body).not_to include(confirm_exp_entity_document_workflow_step_path(entity, document, exp_step))
+          expect(response.body).to include(confirm_exp_entity_document_workflow_step_path(entity, document, exp_step))
         end
       end
     end

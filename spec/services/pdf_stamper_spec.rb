@@ -118,6 +118,32 @@ RSpec.describe PdfStamper do
         expect(image_count).to eq(2)
       end
 
+      it "orders stacked signature blocks by the SIGN step's circuit order, not database insertion order" do
+        document = create(:document, :finalized)
+        first_signer = create(:user, first_name: "Amelie", last_name: "Girard")
+        second_signer = create(:user, first_name: "Baptiste", last_name: "Morel")
+        create(:signature_image, user: first_signer)
+        create(:signature_image, user: second_signer)
+
+        # Inserted in reverse order relative to their circuit `order`, so a
+        # query with no explicit ORDER BY could return them out of sequence.
+        create(:workflow_step, :sign, :approved, document: document, actor: second_signer, order: 4)
+        create(:workflow_step, :sign, :approved, document: document, actor: first_signer, order: 3)
+
+        pdf_path = build_pdf(pages: 1)
+
+        output_path = described_class.stamp(pdf_path, document)
+
+        runs = PDF::Reader.new(output_path).pages[0].runs
+        first_signer_y = runs.find { |r| r.text.include?(first_signer.full_name) }.y
+        second_signer_y = runs.find { |r| r.text.include?(second_signer.full_name) }.y
+
+        # Circuit order 3 (first_signer) must occupy stacking index 0, the
+        # bottom-most block (lowest y); circuit order 4 (second_signer) must
+        # be stacked above it.
+        expect(first_signer_y).to be < second_signer_y
+      end
+
       it "raises instead of silently skipping when a signer has no registered signature image" do
         document = create(:document, :finalized)
         signer = create(:user)

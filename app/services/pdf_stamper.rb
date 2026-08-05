@@ -19,7 +19,7 @@ class PdfStamper
       stamped_path = stamp_reference_and_logo(pdf_path, document)
       return stamped_path if stamped_path == pdf_path
 
-      signers = document.workflow_steps.where(role: "SIGN", status: "approved").includes(:actor)
+      signers = document.workflow_steps.where(role: "SIGN", status: "approved").order(:order, :id).includes(:actor)
       apply_signatures(stamped_path, signers) if signers.any?
 
       stamped_path

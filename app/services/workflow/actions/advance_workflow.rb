@@ -28,9 +28,9 @@ module Workflow
         next_step = document.workflow_steps.where("\"order\" > ?", stage_steps.to_a.map(&:order).max).ordered.first
         next_step.update!(status: "pending") if next_step&.rejected?
 
-        if step.role == "SIGN" && document.may_sign?
-          document.sign!
-          PdfConversionJob.perform_later(document.id)
+        if step.role == "SIGN"
+          document.sign! if document.may_sign?
+          PdfConversionJob.perform_later(document.id, step.id)
         end
 
         if document.workflow_steps.ordered.none?(&:pending?)

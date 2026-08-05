@@ -70,6 +70,8 @@ class WorkflowStepsController < ApplicationController
     authorize @document, :approve?
     return head :not_found unless @workflow_step.exp?
 
+    @document.dispatch_message ||= "Document #{@document.reference_number} (#{@document.subject}) has been finalized."
+
     render "workflow_steps/confirm_exp"
   end
 

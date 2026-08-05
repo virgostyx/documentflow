@@ -113,7 +113,7 @@ RSpec.describe NotificationMailer do
   end
 
   describe "#document_addressed" do
-    let(:document) { create(:document, :finalized) }
+    let(:document) { create(:document, :finalized, dispatch_message: "Please review the attached document.") }
 
     context "with an internal user recipient" do
       let(:mail) { described_class.document_addressed(user, document) }
@@ -123,14 +123,21 @@ RSpec.describe NotificationMailer do
         expect(mail.subject).to include(document.reference_number)
       end
 
-      it "renders a text and an html part linking to the authenticated document page" do
-        expect(mail.text_part.body.encoded).to include(user.display_name, document.reference_number, document.subject, document_url)
-        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(user.display_name), document.reference_number, document.subject, document_url)
+      it "renders a text and an html part with the dispatch message and a link to the authenticated document page" do
+        expect(mail.text_part.body.encoded).to include(user.display_name, document.dispatch_message, document_url)
+        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(user.display_name), document.dispatch_message, document_url)
       end
 
       it "does not mention any link expiration" do
         expect(mail.text_part.body.encoded).not_to include("expire")
         expect(mail.html_part.body.encoded).not_to include("expire")
+      end
+
+      it "renders the actor's edited message instead of the old static sentence" do
+        document.update!(dispatch_message: "A custom note from the EXP actor.")
+
+        expect(mail.text_part.body.encoded).to include("A custom note from the EXP actor.")
+        expect(mail.text_part.body.encoded).not_to include("has been addressed to you and is now finalized")
       end
     end
 
@@ -143,7 +150,7 @@ RSpec.describe NotificationMailer do
         expect(mail.subject).to include(document.reference_number)
       end
 
-      it "renders a text and an html part linking to an unauthenticated shared link" do
+      it "renders a text and an html part with the dispatch message and a link to an unauthenticated shared link" do
         mail.message
 
         shared_link = document.shared_links.active.sole
@@ -151,8 +158,8 @@ RSpec.describe NotificationMailer do
           shared_link.token, **Rails.application.config.action_mailer.default_url_options
         )
 
-        expect(mail.text_part.body.encoded).to include(contact.display_name, document.reference_number, document.subject, shared_url)
-        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(contact.display_name), document.reference_number, document.subject, shared_url)
+        expect(mail.text_part.body.encoded).to include(contact.display_name, document.dispatch_message, shared_url)
+        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(contact.display_name), document.dispatch_message, shared_url)
       end
 
       it "reuses an existing active shared link instead of creating a new one" do
@@ -173,7 +180,7 @@ RSpec.describe NotificationMailer do
     end
 
     context "with an external contact recipient and attachment dispatch enabled" do
-      let(:document) { create(:document, :finalized, addressee_dispatch_as_attachment: true) }
+      let(:document) { create(:document, :finalized, addressee_dispatch_as_attachment: true, dispatch_message: "Please review the attached document.") }
       let(:contact) { create(:contact, entity: document.entity) }
       let(:mail) { described_class.document_addressed(contact, document) }
 
@@ -209,7 +216,7 @@ RSpec.describe NotificationMailer do
   end
 
   describe "#cc_notification" do
-    let(:document) { create(:document, :finalized) }
+    let(:document) { create(:document, :finalized, dispatch_message: "Please review the attached document.") }
 
     context "with an internal user recipient" do
       let(:mail) { described_class.cc_notification(user, document) }
@@ -219,9 +226,9 @@ RSpec.describe NotificationMailer do
         expect(mail.subject).to include(document.reference_number)
       end
 
-      it "renders a text and an html part linking to the authenticated document page" do
-        expect(mail.text_part.body.encoded).to include(user.display_name, document.reference_number, document.subject, document_url)
-        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(user.display_name), document.reference_number, document.subject, document_url)
+      it "renders a text and an html part with the dispatch message and a link to the authenticated document page" do
+        expect(mail.text_part.body.encoded).to include(user.display_name, document.dispatch_message, document_url)
+        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(user.display_name), document.dispatch_message, document_url)
       end
 
       it "does not mention any link expiration" do
@@ -239,7 +246,7 @@ RSpec.describe NotificationMailer do
         expect(mail.subject).to include(document.reference_number)
       end
 
-      it "renders a text and an html part linking to an unauthenticated shared link" do
+      it "renders a text and an html part with the dispatch message and a link to an unauthenticated shared link" do
         mail.message
 
         shared_link = document.shared_links.active.sole
@@ -247,8 +254,8 @@ RSpec.describe NotificationMailer do
           shared_link.token, **Rails.application.config.action_mailer.default_url_options
         )
 
-        expect(mail.text_part.body.encoded).to include(contact.display_name, document.reference_number, document.subject, shared_url)
-        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(contact.display_name), document.reference_number, document.subject, shared_url)
+        expect(mail.text_part.body.encoded).to include(contact.display_name, document.dispatch_message, shared_url)
+        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(contact.display_name), document.dispatch_message, shared_url)
       end
 
       it "reuses an existing active shared link instead of creating a new one" do

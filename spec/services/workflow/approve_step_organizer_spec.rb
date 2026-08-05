@@ -144,7 +144,7 @@ RSpec.describe Workflow::ApproveStepOrganizer do
       end
 
       it "planifie la conversion PDF" do
-        expect(PdfConversionJob).to receive(:perform_later).with(document.id)
+        expect(PdfConversionJob).to receive(:perform_later).with(document.id, sign_step.id)
 
         described_class.call(step: sign_step, current_user: sign_step.actor, **step_up_params_for(sign_step))
       end
@@ -220,6 +220,49 @@ RSpec.describe Workflow::ApproveStepOrganizer do
       end
     end
 
+    context "a circuit with two sequential (non-parallel) SIGN stages" do
+      let(:document) { create(:document, :in_progress) }
+      let(:first_signer) { create(:user) }
+      let(:second_signer) { create(:user) }
+      let(:first_sign_step) { create(:workflow_step, :sign, document: document, order: 3, actor: first_signer) }
+      let(:second_sign_step) { create(:workflow_step, :sign, document: document, order: 4, actor: second_signer) }
+
+      before do
+        create(:workflow_step, :red, document: document, order: 1, status: "approved", actor: document.created_by)
+        create(:workflow_step, :visa, document: document, order: 2, status: "approved", actor: create(:user))
+        first_sign_step
+        second_sign_step
+        create(:workflow_step, :exp, document: document, order: 5, actor: create(:user))
+        create(:signature_image, user: first_signer)
+        create(:signature_image, user: second_signer)
+      end
+
+      it "schedules PDF conversion for the first SIGN stage" do
+        expect(PdfConversionJob).to receive(:perform_later).with(document.id, first_sign_step.id)
+
+        described_class.call(step: first_sign_step, current_user: first_signer, **step_up_params_for(first_sign_step))
+      end
+
+      it "also schedules PDF conversion for the second SIGN stage" do
+        allow(PdfConversionJob).to receive(:perform_later)
+        described_class.call(step: first_sign_step, current_user: first_signer, **step_up_params_for(first_sign_step))
+
+        expect(PdfConversionJob).to receive(:perform_later).with(document.id, second_sign_step.id)
+
+        described_class.call(step: second_sign_step, current_user: second_signer, **step_up_params_for(second_sign_step))
+      end
+
+      it "only transitions the document to signed once" do
+        allow(PdfConversionJob).to receive(:perform_later)
+        described_class.call(step: first_sign_step, current_user: first_signer, **step_up_params_for(first_sign_step))
+        expect(document.reload).to be_signed
+
+        described_class.call(step: second_sign_step, current_user: second_signer, **step_up_params_for(second_sign_step))
+
+        expect(document.reload).to be_signed
+      end
+    end
+
     context "RED/VISA/EXP approvals require neither a signature image nor a step-up token" do
       it "approves a VISA step with no step_up_token/step_up_tokens passed at all" do
         visa_step = document.workflow_steps.find_by(role: "VISA")
@@ -240,7 +283,7 @@ RSpec.describe Workflow::ApproveStepOrganizer do
       end
 
       it "finalise le document (gelé et statut finalized)" do
-        described_class.call(step: exp_step, current_user: exp_step.actor)
+        described_class.call(step: exp_step, current_user: exp_step.actor, dispatch_message: "Test message")
 
         document.reload
         expect(document).to be_finalized
@@ -262,13 +305,16 @@ RSpec.describe Workflow::ApproveStepOrganizer do
       end
 
       it "records the addressee's attachment preference when the addressee is external" do
-        described_class.call(step: exp_step, current_user: exp_step.actor, addressee_dispatch_as_attachment: "true")
+        described_class.call(
+          step: exp_step, current_user: exp_step.actor,
+          addressee_dispatch_as_attachment: "true", dispatch_message: "Test message"
+        )
 
         expect(document.reload.addressee_dispatch_as_attachment).to be true
       end
 
       it "defaults the addressee's attachment preference to false when unchecked" do
-        described_class.call(step: exp_step, current_user: exp_step.actor)
+        described_class.call(step: exp_step, current_user: exp_step.actor, dispatch_message: "Test message")
 
         expect(document.reload.addressee_dispatch_as_attachment).to be false
       end
@@ -276,7 +322,10 @@ RSpec.describe Workflow::ApproveStepOrganizer do
       it "does not touch the addressee preference when the addressee is internal" do
         document.update!(addressee: internal_user)
 
-        described_class.call(step: exp_step, current_user: exp_step.actor, addressee_dispatch_as_attachment: "true")
+        described_class.call(
+          step: exp_step, current_user: exp_step.actor,
+          addressee_dispatch_as_attachment: "true", dispatch_message: "Test message"
+        )
 
         expect(document.reload.addressee_dispatch_as_attachment).to be false
       end
@@ -288,7 +337,7 @@ RSpec.describe Workflow::ApproveStepOrganizer do
 
         described_class.call(
           step: exp_step, current_user: exp_step.actor,
-          cc_dispatch_as_attachment_ids: [ checked_cc.id.to_s ]
+          cc_dispatch_as_attachment_ids: [ checked_cc.id.to_s ], dispatch_message: "Test message"
         )
 
         expect(checked_cc.reload.dispatch_as_attachment).to be true
@@ -304,6 +353,45 @@ RSpec.describe Workflow::ApproveStepOrganizer do
         described_class.call(step: visa_step, current_user: visa_step.actor, addressee_dispatch_as_attachment: "true")
 
         expect(other_document.reload.addressee_dispatch_as_attachment).to be false
+      end
+    end
+
+    context "approving EXP with a dispatch message" do
+      let(:exp_step) { document.workflow_steps.find_by(role: "EXP") }
+
+      before do
+        document.workflow_steps.where(role: %w[VISA SIGN]).find_each { |s| s.update!(status: "approved") }
+        document.sign!
+      end
+
+      it "persists the submitted dispatch message" do
+        described_class.call(step: exp_step, current_user: exp_step.actor, dispatch_message: "Please review before Friday.")
+
+        expect(document.reload.dispatch_message).to eq("Please review before Friday.")
+      end
+
+      it "fails and does not approve the step when the message is blank" do
+        result = described_class.call(step: exp_step, current_user: exp_step.actor, dispatch_message: "   ")
+
+        expect(result).not_to be_success
+        expect(exp_step.reload).to be_pending
+      end
+
+      it "fails and does not approve the step when no message is given at all" do
+        result = described_class.call(step: exp_step, current_user: exp_step.actor)
+
+        expect(result).not_to be_success
+        expect(exp_step.reload).to be_pending
+      end
+
+      it "does not require a dispatch message for a non-EXP step" do
+        other_document = create(:document, :with_workflow, :in_progress)
+        other_document.workflow_steps.find_by(role: "RED").update!(status: "approved")
+        visa_step = other_document.workflow_steps.find_by(role: "VISA")
+
+        result = described_class.call(step: visa_step, current_user: visa_step.actor)
+
+        expect(result).to be_success
       end
     end
 

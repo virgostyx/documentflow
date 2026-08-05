@@ -105,6 +105,20 @@ RSpec.describe "WorkflowSteps", type: :request do
 
         expect(response).to have_http_status(:ok)
       end
+
+      it "pre-fills the message field with a default mentioning the document's reference and subject" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+        expect(response.body).to include("Document #{document.reload.reference_number} (#{document.subject}) has been finalized.")
+      end
+
+      it "pre-fills the message field with the document's previously saved dispatch message, if any" do
+        document.update!(dispatch_message: "Please review the attached amendment before Friday.")
+
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+        expect(response.body).to include("Please review the attached amendment before Friday.")
+      end
     end
 
     context "as another user" do
@@ -150,7 +164,7 @@ RSpec.describe "WorkflowSteps", type: :request do
 
     it "persists the addressee attachment preference from the submitted checkbox" do
       post approve_entity_document_workflow_step_path(entity, document, exp_step),
-        params: { addressee_dispatch_as_attachment: "true" }
+        params: { addressee_dispatch_as_attachment: "true", dispatch_message: "Test message" }
 
       expect(document.reload.addressee_dispatch_as_attachment).to be true
     end
@@ -159,9 +173,24 @@ RSpec.describe "WorkflowSteps", type: :request do
       cc_recipient = create(:cc_recipient, document: document, party: create(:contact, entity: entity))
 
       post approve_entity_document_workflow_step_path(entity, document, exp_step),
-        params: { cc_dispatch_as_attachment_ids: [ cc_recipient.id.to_s ] }
+        params: { cc_dispatch_as_attachment_ids: [ cc_recipient.id.to_s ], dispatch_message: "Test message" }
 
       expect(cc_recipient.reload.dispatch_as_attachment).to be true
+    end
+
+    it "persists the submitted dispatch message" do
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { dispatch_message: "Please review the attached amendment before Friday." }
+
+      expect(document.reload.dispatch_message).to eq("Please review the attached amendment before Friday.")
+    end
+
+    it "does not approve the step when the dispatch message is blank" do
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { dispatch_message: "   " }
+
+      expect(exp_step.reload).to be_pending
+      expect(flash[:alert]).to be_present
     end
   end
 

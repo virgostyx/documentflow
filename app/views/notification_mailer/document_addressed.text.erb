@@ -1,6 +1,6 @@
 Hello <%= @recipient_name %>,
 
-Document <%= @document.reference_number %> (<%= @document.subject %>) has been addressed to you and is now finalized.
+<%= @dispatch_message %>
 
 <% if @files_attached %>
 The document and its attachments are enclosed with this email as PDF files.

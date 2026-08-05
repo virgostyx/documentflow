@@ -14,7 +14,7 @@
           href: confirm_sign_entity_document_workflow_step_path(current_entity, @document, @document.current_step),
           data: { turbo_frame: "modal", action: "click->modal#open" }
         ) { "Approve" } %>
-      <% elsif @document.current_step.exp? && @document.any_external_recipients? %>
+      <% elsif @document.current_step.exp? %>
         <% menu.with_item(
           href: confirm_exp_entity_document_workflow_step_path(current_entity, @document, @document.current_step),
           data: { turbo_frame: "modal", action: "click->modal#open" }

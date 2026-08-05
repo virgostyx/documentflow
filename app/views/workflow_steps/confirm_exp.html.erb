@@ -6,9 +6,11 @@
       recipients always access it in the app.
     </p>
 
-    <%= form_with url: approve_entity_document_workflow_step_path(current_entity, @document, @workflow_step),
-                  method: :post, local: true, data: { turbo_frame: "_top" } do %>
-      <div class="space-y-3 mb-6">
+    <%= form_with model: @document, url: approve_entity_document_workflow_step_path(current_entity, @document, @workflow_step),
+                  method: :post, builder: FloatingLabelsRails::FormBuilder, local: true, data: { turbo_frame: "_top" } do |f| %>
+      <%= f.floating_text_area :dispatch_message, label: "Message to include in the notification email", placeholder: " ", required: true, name: "dispatch_message" %>
+
+      <div class="space-y-3 my-6">
         <% if @document.addressee.external? %>
           <label class="flex items-start gap-2 text-sm text-gray-700">
             <input type="checkbox" name="addressee_dispatch_as_attachment" value="true" class="mt-0.5 rounded border-gray-300">

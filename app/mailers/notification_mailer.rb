@@ -61,6 +61,7 @@ class NotificationMailer < ApplicationMailer
   def document_addressed(party, document)
     @recipient_name = party.display_name
     @document = document
+    @dispatch_message = document.dispatch_message
 
     if party.external? && document.addressee_dispatch_as_attachment?
       attach_document_files(document)
@@ -77,6 +78,7 @@ class NotificationMailer < ApplicationMailer
   def cc_notification(party, document)
     @recipient_name = party.display_name
     @document = document
+    @dispatch_message = document.dispatch_message
     cc_recipient = document.cc_recipients.find_by(party_type: party.class.name, party_id: party.id)
 
     if party.external? && cc_recipient&.dispatch_as_attachment?

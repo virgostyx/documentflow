@@ -1,6 +1,6 @@
 <p>Hello <%= @recipient_name %>,</p>
 
-<p>Document <strong><%= @document.reference_number %></strong> (<%= @document.subject %>) has been finalized.</p>
+<%= simple_format(@dispatch_message) %>
 
 <% if @files_attached %>
   <p>The document and its attachments are enclosed with this email as PDF files.</p>

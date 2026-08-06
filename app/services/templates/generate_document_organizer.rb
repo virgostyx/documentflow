@@ -7,6 +7,7 @@ module Templates
                    Actions::RenderTemplateSubject,
                    Documents::Actions::CreateDocument,
                    Actions::CreateCcRecipients,
+                   Actions::CreateAnnexes,
                    Actions::GenerateMainFileFromDocx,
                    Actions::ApplyDefaultCircuitTemplate
   end

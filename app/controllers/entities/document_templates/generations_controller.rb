@@ -29,7 +29,8 @@ module Entities
           document_template: @document_template,
           field_values: field_values_params,
           document_params: document_params,
-          cc_party_tokens: cc_party_tokens_params
+          cc_party_tokens: cc_party_tokens_params,
+          annex_files: annex_files_params
         )
 
         if result.success?
@@ -63,6 +64,10 @@ module Entities
 
       def cc_party_tokens_params
         params.require(:document).permit(cc_party_tokens: []).fetch(:cc_party_tokens, [])
+      end
+
+      def annex_files_params
+        params.require(:document).permit(annexes: []).fetch(:annexes, [])
       end
     end
   end

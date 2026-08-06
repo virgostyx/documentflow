@@ -45,6 +45,12 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
       expect(response.body).to include(cc_user.display_name)
       expect(response.body).to include(cc_contact.display_name)
     end
+
+    it "renders an annexes file input" do
+      get new_entity_document_template_generation_path(entity, document_template)
+
+      expect(response.body).to include('name="document[annexes][]"')
+    end
   end
 
   describe "POST /entities/:entity_id/document_templates/:document_template_id/generation" do
@@ -109,6 +115,28 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
 
         document = entity.documents.last
         expect(document.cc_recipients.map(&:party)).to contain_exactly(cc_user, cc_contact)
+      end
+    end
+
+    context "with annex files attached" do
+      let(:generation_params) do
+        {
+          document: {
+            department_id: department.id,
+            document_date: Date.current,
+            sender_token: "Contact-#{sender.id}",
+            addressee_token: "Contact-#{addressee.id}",
+            annexes: [ fixture_file_upload("sample.pdf", "application/pdf"), fixture_file_upload("sample.pdf", "application/pdf") ]
+          },
+          field_values: { "supplier" => "Acme Corp", "amount" => "1200 EUR" }
+        }
+      end
+
+      it "creates one annex per attached file on the generated document" do
+        post entity_document_template_generation_path(entity, document_template), params: generation_params
+
+        document = entity.documents.last
+        expect(document.annexes.count).to eq(2)
       end
     end
 

@@ -35,7 +35,8 @@ RSpec.describe Templates::GenerateDocumentOrganizer do
       document_template: document_template,
       field_values: field_values,
       document_params: document_params,
-      cc_party_tokens: []
+      cc_party_tokens: [],
+      annex_files: []
     }
   end
 
@@ -169,6 +170,29 @@ RSpec.describe Templates::GenerateDocumentOrganizer do
 
         expect(result).to be_success
         expect(result.document.cc_recipients).to be_empty
+      end
+    end
+
+    context "when annex_files are provided" do
+      let(:field_values) { { "supplier" => "Acme Corp", "amount" => "1200 EUR" } }
+      let(:annex_upload) { fixture_file_upload("sample.pdf", "application/pdf") }
+
+      it "creates the corresponding annexes on the generated document" do
+        result = described_class.call(**base_args.merge(annex_files: [ annex_upload ]))
+
+        expect(result).to be_success
+        expect(result.document.annexes.reload.count).to eq(1)
+      end
+    end
+
+    context "when annex_files is empty" do
+      let(:field_values) { { "supplier" => "Acme Corp", "amount" => "1200 EUR" } }
+
+      it "creates the document with no annexes" do
+        result = described_class.call(**base_args)
+
+        expect(result).to be_success
+        expect(result.document.annexes).to be_empty
       end
     end
 

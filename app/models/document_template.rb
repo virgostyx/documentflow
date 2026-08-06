@@ -7,6 +7,10 @@ class DocumentTemplate < ApplicationRecord
   DOCX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   SOURCE_FILE_MAX_SIZE = 10.megabytes
 
+  # Tags that resolve to a computed value (see Templates::Actions::InjectComputedFieldValues)
+  # instead of a value typed on the generation form - never get a document_template_fields row.
+  RESERVED_TAGS = %w[date].freeze
+
   # Associations
   belongs_to :entity
   belongs_to :department, optional: true
@@ -37,6 +41,12 @@ class DocumentTemplate < ApplicationRecord
   # any earlier (e.g. in after_save) would race the upload and silently see
   # an empty/missing file.
   after_commit :sync_template_fields, on: %i[create update]
+
+  # All tags currently referenced by this template (subject + docx body),
+  # including reserved ones that don't get a document_template_fields row.
+  def tags
+    extract_tags
+  end
 
   private
 
@@ -74,7 +84,7 @@ class DocumentTemplate < ApplicationRecord
   end
 
   def sync_template_fields
-    tags = extract_tags
+    tags = extract_tags - RESERVED_TAGS
     existing_tags = document_template_fields.pluck(:tag_name)
 
     new_tags = tags - existing_tags

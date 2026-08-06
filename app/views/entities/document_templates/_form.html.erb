@@ -46,6 +46,8 @@
     <p class="mt-1 text-xs text-gray-500">
       Write the letter in Word with tags like <code class="rounded bg-gray-100 px-1">{{supplier}}</code>
       for values that change each time, then upload it here.
+      The tag <code class="rounded bg-gray-100 px-1">{{date}}</code> is reserved and automatically
+      filled in with the document date &mdash; no need to add a field for it.
     </p>
   </div>
 
@@ -63,6 +65,11 @@
             <%= render "document_template_field_fields", f: field_form %>
           <% end %>
         </div>
+      <% elsif document_template.tags.any? %>
+        <p class="mt-1 text-sm text-gray-500">
+          Only the reserved <code class="rounded bg-gray-100 px-1">{{date}}</code> tag is used &mdash;
+          it doesn't need a field, it's filled in automatically.
+        </p>
       <% else %>
         <p class="mt-1 text-sm text-gray-500">
           No tags detected yet. Add tags like <code class="rounded bg-gray-100 px-1">{{supplier}}</code>

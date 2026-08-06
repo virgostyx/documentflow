@@ -114,6 +114,35 @@ RSpec.describe Templates::GenerateDocumentOrganizer do
       end
     end
 
+    context "when the template's subject uses the reserved {{date}} tag" do
+      let(:document_template) do
+        create(
+          :document_template, entity: entity, created_by: user,
+          subject_template: "VAT exemption request - {{supplier}}, issued {{date}}"
+        )
+      end
+      let(:field_values) { { "supplier" => "Acme Corp", "amount" => "1200 EUR" } }
+
+      it "substitutes the document date without it being supplied in field_values" do
+        result = described_class.call(**base_args)
+
+        expect(result).to be_success
+        expect(result.document.subject).to eq("VAT exemption request - Acme Corp, issued #{I18n.l(document_params[:document_date].to_date)}")
+      end
+
+      it "also substitutes {{date}} in the docx body" do
+        attach_docx(document_template, :source_file, docx_paragraph("Issued on {{date}} for {{supplier}}, {{amount}}."))
+        document_template.save!
+
+        result = described_class.call(**base_args)
+
+        result.document.main_file.open do |file|
+          xml = Zip::File.open(file.path) { |zip| zip.read("word/document.xml") }
+          expect(xml).to include("Issued on #{I18n.l(document_params[:document_date].to_date)} for Acme Corp, 1200 EUR.")
+        end
+      end
+    end
+
     context "when the current_user is not a member of the requested department" do
       let(:field_values) { { "supplier" => "Acme Corp", "amount" => "1200 EUR" } }
       let(:outsider) { create(:user) }

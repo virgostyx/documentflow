@@ -101,6 +101,30 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
       end
     end
 
+    context "when the template uses the reserved {{date}} tag" do
+      let!(:document_template) do
+        create(
+          :document_template,
+          entity: entity, created_by: member_user, name: "Notice",
+          subject_template: "Notice - {{supplier}}, issued {{date}}"
+        )
+      end
+
+      it "does not render a field for the reserved tag" do
+        get new_entity_document_template_generation_path(entity, document_template)
+
+        expect(response.body).to include("Supplier")
+        expect(response.body).not_to include('name="field_values[date]"')
+      end
+
+      it "generates the document with the date auto-substituted, without a \"date\" field_values key" do
+        post entity_document_template_generation_path(entity, document_template), params: generation_params
+
+        document = entity.documents.last
+        expect(document.subject).to eq("Notice - Acme Corp, issued #{I18n.l(Date.current)}")
+      end
+    end
+
     context "when submitting an unknown field_values key" do
       let(:generation_params) do
         {

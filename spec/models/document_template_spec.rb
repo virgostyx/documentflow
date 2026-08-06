@@ -145,6 +145,45 @@ RSpec.describe DocumentTemplate, type: :model do
     end
   end
 
+  # ── Reserved tags ─────────────────────────────────────────────────────────
+
+  describe "reserved tags" do
+    it "does not create a field for the reserved {{date}} tag" do
+      document_template.subject_template = "Issued on {{date}}"
+      attach_docx(document_template, :source_file, docx_paragraph("No other tags here"))
+      document_template.save!
+
+      expect(document_template.document_template_fields).to be_empty
+    end
+
+    it "only creates fields for the non-reserved tags when mixed with {{date}}" do
+      document_template.subject_template = "Issued on {{date}} for {{supplier}}"
+      attach_docx(document_template, :source_file, docx_paragraph("No other tags here"))
+      document_template.save!
+
+      expect(document_template.document_template_fields.pluck(:tag_name)).to contain_exactly("supplier")
+    end
+
+    it "removes a previously-existing field named after a now-reserved tag" do
+      document_template.subject_template = "No tags here"
+      attach_docx(document_template, :source_file, docx_paragraph("No other tags here"))
+      document_template.save!
+      document_template.document_template_fields.create!(tag_name: "date", label: "Date", field_type: "text", position: 1)
+
+      document_template.update!(subject_template: "Issued on {{date}}")
+
+      expect(document_template.document_template_fields.reload).to be_empty
+    end
+
+    it "still reports the reserved tag via #tags even though it has no field" do
+      document_template.subject_template = "Issued on {{date}}"
+      attach_docx(document_template, :source_file, docx_paragraph("No other tags here"))
+      document_template.save!
+
+      expect(document_template.tags).to include("date")
+    end
+  end
+
   # ── Nested attributes ────────────────────────────────────────────────────
 
   describe "nested attributes" do

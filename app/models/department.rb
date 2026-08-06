@@ -5,6 +5,7 @@ class Department < ApplicationRecord
   has_many :entity_user_departments, dependent: :destroy
   has_many :entity_users, through: :entity_user_departments
   has_many :documents, dependent: :restrict_with_error
+  has_many :document_templates, dependent: :nullify
   has_one_attached :logo
 
   LOGO_CONTENT_TYPES = %w[image/png image/jpeg image/svg+xml image/webp].freeze

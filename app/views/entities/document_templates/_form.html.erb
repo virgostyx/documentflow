@@ -1,0 +1,63 @@
+<%= form_with model: [ current_entity, document_template ], builder: FloatingLabelsRails::FormBuilder, local: true do |f| %>
+  <% if document_template.errors.any? %>
+    <div class="mb-4 rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+      <%= document_template.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= f.floating_text_field :name, label: "Name", required: true, autofocus: true, placeholder: " " %>
+
+  <%= f.floating_select :department_id, current_entity.departments.order(:name).map { |d| [ d.name, d.id ] },
+        { selected: document_template.department_id, include_blank: "Entity-wide (all departments)" },
+        { label: "Department" } %>
+
+  <%= f.floating_select :circuit_template_id, current_entity.circuit_templates.order(:name).map { |c| [ c.name, c.id ] },
+        { selected: document_template.circuit_template_id, include_blank: "No circuit (choose manually each time)" },
+        { label: "Circuit template" } %>
+
+  <%= render(Documents::PartyPickerComponent.new(
+    form: f, attribute: :default_sender_token, entity: current_entity,
+    label: "Default sender", include_blank: "Choose each time...",
+    selected: document_template.default_sender_token, show_new_contact: false, internal_only: true
+  )) %>
+  <%= render(Documents::PartyPickerComponent.new(
+    form: f, attribute: :default_addressee_token, entity: current_entity,
+    label: "Default addressee", include_blank: "Choose each time...",
+    selected: document_template.default_addressee_token
+  )) %>
+
+  <%= f.floating_text_field :subject_template, label: "Subject template", required: true, placeholder: " " %>
+  <p class="-mt-4 mb-6 text-xs text-gray-500">
+    Use tags like <code class="rounded bg-gray-100 px-1">{{supplier}}</code> for values that change each time.
+  </p>
+
+  <%= f.floating_text_area :body_template, label: "Body template", required: true, placeholder: " ", rows: 8 %>
+
+  <% if document_template.persisted? %>
+    <div class="mt-6 border-t border-gray-200 pt-6">
+      <h3 class="text-sm font-medium text-gray-900">Detected fields</h3>
+
+      <% if document_template.document_template_fields.any? %>
+        <p class="mt-1 text-sm text-gray-500">
+          These fields were detected from the tags above. Refine their label, type and whether they are required.
+        </p>
+
+        <div class="mt-4 space-y-4">
+          <%= f.fields_for :document_template_fields do |field_form| %>
+            <%= render "document_template_field_fields", f: field_form %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="mt-1 text-sm text-gray-500">
+          No tags detected yet. Add tags like <code class="rounded bg-gray-100 px-1">{{supplier}}</code>
+          to the text above and save to detect fields.
+        </p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="mt-6 flex justify-end gap-3">
+    <%= render(Ui::ButtonComponent.new(href: entity_document_templates_path(current_entity), variant: :secondary)) { "Cancel" } %>
+    <%= render(Ui::ButtonComponent.new) { document_template.persisted? ? "Save changes" : "Create document template" } %>
+  </div>
+<% end %>

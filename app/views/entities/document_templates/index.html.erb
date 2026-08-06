@@ -1,0 +1,60 @@
+<% content_for :breadcrumb do %>
+  <%= render Ui::BreadcrumbsComponent.new(items: [
+    { label: "Settings", path: entity_settings_path(current_entity) },
+    { label: "Document templates" }
+  ]) %>
+<% end %>
+
+<% content_for :actions do %>
+  <% if policy(DocumentTemplate.new(entity: current_entity)).create? %>
+    <%= render(Ui::ButtonComponent.new(href: new_entity_document_template_path(current_entity))) { "New document template" } %>
+  <% end %>
+<% end %>
+
+<div class="max-w-3xl">
+  <h1 class="text-2xl font-bold text-gray-900 mb-4">Document templates</h1>
+
+  <% if @document_templates.any? %>
+    <%= render Ui::CardComponent.new do |card| %>
+      <% card.with_header { "All document templates" } %>
+
+      <ul class="divide-y divide-gray-100">
+        <% @document_templates.each do |document_template| %>
+          <li class="flex items-center justify-between py-3">
+            <div>
+              <p class="font-medium text-gray-900"><%= document_template.name %></p>
+              <p class="text-sm text-gray-600">
+                <%= document_template.department&.name || "Entity-wide" %>
+                &middot; <%= pluralize(document_template.document_template_fields.size, "field") %>
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <%= render(Ui::ButtonComponent.new(href: new_entity_document_template_generation_path(current_entity, document_template))) { "Generate document" } %>
+              <% if policy(document_template).update? %>
+                <%= render(Ui::ButtonComponent.new(href: edit_entity_document_template_path(current_entity, document_template), variant: :secondary)) { "Edit" } %>
+              <% end %>
+              <% if policy(document_template).destroy? %>
+                <%= render(Ui::ButtonComponent.new(
+                  href: entity_document_template_path(current_entity, document_template), variant: :danger, method: :delete,
+                  data: { turbo_confirm: "Are you sure you want to delete this document template?" }
+                )) { "Delete" } %>
+              <% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  <% else %>
+    <%= render Ui::EmptyStateComponent.new(
+      title: "No document templates yet",
+      description: "Create a reusable template with tags to quickly generate recurring documents."
+    ) do |empty_state| %>
+      <% empty_state.with_action do %>
+        <% if policy(DocumentTemplate.new(entity: current_entity)).create? %>
+          <%= render(Ui::ButtonComponent.new(href: new_entity_document_template_path(current_entity))) { "New document template" } %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

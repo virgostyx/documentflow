@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_05_185107) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_06_053016) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -153,6 +153,44 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_05_185107) do
     t.index ["document_id", "annex_id", "version_number"], name: "index_document_file_versions_on_document_annex_version", unique: true
     t.index ["document_id"], name: "index_document_file_versions_on_document_id"
     t.index ["user_id"], name: "index_document_file_versions_on_user_id"
+  end
+
+  create_table "document_template_fields", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "document_template_id", null: false
+    t.string "field_type", default: "text", null: false
+    t.string "label", null: false
+    t.jsonb "options", default: []
+    t.integer "position", null: false
+    t.boolean "required", default: true, null: false
+    t.string "tag_name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_template_id", "position"], name: "idx_on_document_template_id_position_b94f1549e9", unique: true
+    t.index ["document_template_id", "tag_name"], name: "idx_on_document_template_id_tag_name_074ba02865", unique: true
+    t.index ["document_template_id"], name: "index_document_template_fields_on_document_template_id"
+  end
+
+  create_table "document_templates", force: :cascade do |t|
+    t.text "body_template", null: false
+    t.bigint "circuit_template_id"
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id", null: false
+    t.bigint "default_addressee_id"
+    t.string "default_addressee_type"
+    t.bigint "default_sender_id"
+    t.string "default_sender_type"
+    t.bigint "department_id"
+    t.bigint "entity_id", null: false
+    t.string "name", null: false
+    t.text "subject_template", null: false
+    t.datetime "updated_at", null: false
+    t.index ["circuit_template_id"], name: "index_document_templates_on_circuit_template_id"
+    t.index ["created_by_id"], name: "index_document_templates_on_created_by_id"
+    t.index ["default_addressee_type", "default_addressee_id"], name: "idx_on_default_addressee_type_default_addressee_id_697e0e8f89"
+    t.index ["default_sender_type", "default_sender_id"], name: "idx_on_default_sender_type_default_sender_id_a60acfc79f"
+    t.index ["department_id"], name: "index_document_templates_on_department_id"
+    t.index ["entity_id", "name"], name: "index_document_templates_on_entity_id_and_name", unique: true
+    t.index ["entity_id"], name: "index_document_templates_on_entity_id"
   end
 
   create_table "documents", force: :cascade do |t|
@@ -340,6 +378,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_05_185107) do
   add_foreign_key "document_file_versions", "annexes"
   add_foreign_key "document_file_versions", "documents"
   add_foreign_key "document_file_versions", "users"
+  add_foreign_key "document_template_fields", "document_templates"
+  add_foreign_key "document_templates", "circuit_templates"
+  add_foreign_key "document_templates", "departments"
+  add_foreign_key "document_templates", "entities"
+  add_foreign_key "document_templates", "users", column: "created_by_id"
   add_foreign_key "documents", "classification_nodes"
   add_foreign_key "documents", "departments"
   add_foreign_key "documents", "documents", column: "in_reply_to_id"

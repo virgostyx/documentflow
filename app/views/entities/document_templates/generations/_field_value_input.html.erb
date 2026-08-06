@@ -1,0 +1,23 @@
+<div>
+  <label for="field_values_<%= field.tag_name %>" class="block text-sm font-medium text-gray-700">
+    <%= field.label %><%= " *" if field.required? %>
+  </label>
+
+  <% input_classes = "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+  <% field_name = "field_values[#{field.tag_name}]" %>
+  <% field_id = "field_values_#{field.tag_name}" %>
+
+  <% case field.field_type %>
+  <% when "textarea" %>
+    <%= text_area_tag field_name, value, id: field_id, required: field.required?, class: input_classes %>
+  <% when "number" %>
+    <%= number_field_tag field_name, value, id: field_id, required: field.required?, class: input_classes %>
+  <% when "date" %>
+    <%= date_field_tag field_name, value, id: field_id, required: field.required?, class: input_classes %>
+  <% when "select" %>
+    <%= select_tag field_name, options_for_select(field.options, value), id: field_id,
+          include_blank: !field.required?, required: field.required?, class: input_classes %>
+  <% else %>
+    <%= text_field_tag field_name, value, id: field_id, required: field.required?, class: input_classes %>
+  <% end %>
+</div>

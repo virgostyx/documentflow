@@ -43,6 +43,9 @@ Rails.application.routes.draw do
     end
     resources :contacts
     resources :circuit_templates, controller: "entities/circuit_templates"
+    resources :document_templates, controller: "entities/document_templates" do
+      resource :generation, only: %i[new create], controller: "entities/document_templates/generations"
+    end
     resources :departments, controller: "entities/departments"
     resources :classification_nodes, controller: "entities/classification_nodes" do
       member do

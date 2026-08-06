@@ -11,6 +11,7 @@ class Entity < ApplicationRecord
   has_many :departments, dependent: :destroy
   has_many :classification_nodes, dependent: :destroy
   has_many :circuit_templates, dependent: :destroy
+  has_many :document_templates, dependent: :destroy
   has_one_attached :logo
 
   LOGO_CONTENT_TYPES = %w[image/png image/jpeg image/svg+xml image/webp].freeze

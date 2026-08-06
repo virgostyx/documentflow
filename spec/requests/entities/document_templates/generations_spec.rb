@@ -33,6 +33,18 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
       expect(response.body).to include("Supplier")
       expect(response.body).to include("Amount")
     end
+
+    it "renders a CC recipients multi-select listing the entity's users and contacts" do
+      cc_user = create(:user, first_name: "Colleague", last_name: "Smith")
+      create(:entity_user, entity: entity, user: cc_user, status: "active")
+      cc_contact = create(:contact, entity: entity, first_name: "External", last_name: "Watcher")
+
+      get new_entity_document_template_generation_path(entity, document_template)
+
+      expect(response.body).to include('name="document[cc_party_tokens][]"')
+      expect(response.body).to include(cc_user.display_name)
+      expect(response.body).to include(cc_contact.display_name)
+    end
   end
 
   describe "POST /entities/:entity_id/document_templates/:document_template_id/generation" do
@@ -71,6 +83,32 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
 
         document = entity.documents.last
         expect(response).to redirect_to(entity_document_path(entity, document))
+      end
+    end
+
+    context "with cc recipients selected" do
+      let(:cc_user) { create(:user) }
+      let(:cc_contact) { create(:contact, entity: entity) }
+      let(:generation_params) do
+        {
+          document: {
+            department_id: department.id,
+            document_date: Date.current,
+            sender_token: "Contact-#{sender.id}",
+            addressee_token: "Contact-#{addressee.id}",
+            cc_party_tokens: [ "User-#{cc_user.id}", "Contact-#{cc_contact.id}" ]
+          },
+          field_values: { "supplier" => "Acme Corp", "amount" => "1200 EUR" }
+        }
+      end
+
+      before { create(:entity_user, entity: entity, user: cc_user, status: "active") }
+
+      it "creates the corresponding cc_recipients on the generated document" do
+        post entity_document_template_generation_path(entity, document_template), params: generation_params
+
+        document = entity.documents.last
+        expect(document.cc_recipients.map(&:party)).to contain_exactly(cc_user, cc_contact)
       end
     end
 

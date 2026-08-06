@@ -17,6 +17,7 @@ module Entities
           document_date: Date.current
         )
         @field_values = {}
+        @cc_party_tokens = []
       end
 
       def create
@@ -27,7 +28,8 @@ module Entities
           current_user: current_user,
           document_template: @document_template,
           field_values: field_values_params,
-          document_params: document_params
+          document_params: document_params,
+          cc_party_tokens: cc_party_tokens_params
         )
 
         if result.success?
@@ -35,6 +37,7 @@ module Entities
         else
           @document = current_entity.documents.new(document_params)
           @field_values = field_values_params
+          @cc_party_tokens = cc_party_tokens_params
           flash.now[:alert] = result.message
           render :new, status: :unprocessable_content
         end
@@ -56,6 +59,10 @@ module Entities
         return {} unless params[:field_values]
 
         params.require(:field_values).permit(*@document_template.document_template_fields.pluck(:tag_name)).to_h
+      end
+
+      def cc_party_tokens_params
+        params.require(:document).permit(cc_party_tokens: []).fetch(:cc_party_tokens, [])
       end
     end
   end

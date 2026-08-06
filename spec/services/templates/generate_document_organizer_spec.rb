@@ -34,7 +34,8 @@ RSpec.describe Templates::GenerateDocumentOrganizer do
       current_user: user,
       document_template: document_template,
       field_values: field_values,
-      document_params: document_params
+      document_params: document_params,
+      cc_party_tokens: []
     }
   end
 
@@ -140,6 +141,34 @@ RSpec.describe Templates::GenerateDocumentOrganizer do
           xml = Zip::File.open(file.path) { |zip| zip.read("word/document.xml") }
           expect(xml).to include("Issued on #{I18n.l(document_params[:document_date].to_date)} for Acme Corp, 1200 EUR.")
         end
+      end
+    end
+
+    context "when cc_party_tokens are provided" do
+      let(:field_values) { { "supplier" => "Acme Corp", "amount" => "1200 EUR" } }
+      let(:internal_cc_user) { create(:user) }
+      let(:external_cc_contact) { create(:contact, entity: entity) }
+
+      before { create(:entity_user, entity: entity, user: internal_cc_user, status: "active") }
+
+      it "creates the corresponding cc_recipients on the generated document" do
+        result = described_class.call(
+          **base_args.merge(cc_party_tokens: [ "User-#{internal_cc_user.id}", "Contact-#{external_cc_contact.id}" ])
+        )
+
+        expect(result).to be_success
+        expect(result.document.cc_recipients.reload.map(&:party)).to contain_exactly(internal_cc_user, external_cc_contact)
+      end
+    end
+
+    context "when cc_party_tokens is empty" do
+      let(:field_values) { { "supplier" => "Acme Corp", "amount" => "1200 EUR" } }
+
+      it "creates the document with no cc_recipients" do
+        result = described_class.call(**base_args)
+
+        expect(result).to be_success
+        expect(result.document.cc_recipients).to be_empty
       end
     end
 

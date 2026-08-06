@@ -3,9 +3,9 @@
 module Templates
   class GenerateDocumentOrganizer < ApplicationService
     workflow_steps Documents::Actions::ValidateDepartmentMembership,
-                   Actions::RenderTemplateText,
+                   Actions::RenderTemplateSubject,
                    Documents::Actions::CreateDocument,
-                   Actions::GenerateMainFileFromText,
+                   Actions::GenerateMainFileFromDocx,
                    Actions::ApplyDefaultCircuitTemplate
   end
 end

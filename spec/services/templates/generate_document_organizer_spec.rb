@@ -16,13 +16,7 @@ RSpec.describe Templates::GenerateDocumentOrganizer do
   end
 
   let(:document_template) do
-    create(
-      :document_template,
-      entity: entity,
-      created_by: user,
-      subject_template: "VAT exemption request - {{supplier}}",
-      body_template: "Please exempt the purchase from {{supplier}} for an amount of {{amount}}."
-    )
+    create(:document_template, entity: entity, created_by: user, subject_template: "VAT exemption request - {{supplier}}")
   end
 
   let(:document_params) do
@@ -55,9 +49,10 @@ RSpec.describe Templates::GenerateDocumentOrganizer do
         expect(result.document.subject).to eq("VAT exemption request - Acme Corp")
       end
 
-      it "attaches the generated PDF as the document's main_file" do
+      it "attaches the generated .docx as the document's main_file" do
         result = described_class.call(**base_args)
         expect(result.document.main_file).to be_attached
+        expect(result.document.main_file.content_type).to eq(DocumentTemplate::DOCX_CONTENT_TYPE)
       end
 
       it "sets sender, addressee and department from document_params" do

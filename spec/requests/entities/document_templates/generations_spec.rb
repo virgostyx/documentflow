@@ -19,8 +19,7 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
     create(
       :document_template,
       entity: entity, created_by: member_user, name: "VAT exemption",
-      subject_template: "VAT exemption request - {{supplier}}",
-      body_template: "Please exempt the purchase from {{supplier}} amounting to {{amount}}."
+      subject_template: "VAT exemption request - {{supplier}}"
     )
   end
 

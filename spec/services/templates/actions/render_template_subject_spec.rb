@@ -2,13 +2,9 @@
 
 require "rails_helper"
 
-RSpec.describe Templates::Actions::RenderTemplateText do
+RSpec.describe Templates::Actions::RenderTemplateSubject do
   let(:document_template) do
-    create(
-      :document_template,
-      subject_template: "VAT exemption request - {{supplier}}",
-      body_template: "Please exempt the purchase from {{supplier}} for an amount of {{amount}}."
-    )
+    create(:document_template, subject_template: "VAT exemption request - {{supplier}}")
   end
 
   let(:ctx) do
@@ -26,11 +22,6 @@ RSpec.describe Templates::Actions::RenderTemplateText do
       it "substitutes tags in the rendered subject" do
         result = described_class.execute(ctx)
         expect(result.document_params[:subject]).to eq("VAT exemption request - Acme Corp")
-      end
-
-      it "substitutes tags in the rendered body" do
-        result = described_class.execute(ctx)
-        expect(result.rendered_body).to eq("Please exempt the purchase from Acme Corp for an amount of 1200 EUR.")
       end
 
       it "preserves the other keys already present in document_params" do

@@ -65,6 +65,10 @@ gem "prawn"
 gem "prawn-table"
 gem "prawn-templates"
 
+# .docx template tag substitution (word/document.xml parsing/rewriting)
+gem "nokogiri"
+gem "rubyzip", require: "zip"
+
 # Recherche full-text
 gem "pg_search"
 

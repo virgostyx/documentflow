@@ -28,8 +28,7 @@ RSpec.describe "Document template golden path", type: :system do
     select sender_user.display_name, from: "Default sender"
     select supplier_contact.display_name, from: "Default addressee"
     fill_in "Subject template", with: "VAT exemption request - {{supplier}}"
-    fill_in "Body template",
-            with: "Please exempt the purchase from {{supplier}} amounting to {{amount}}, TPIN {{tpin}}."
+    attach_file "document_template[source_file]", Rails.root.join("spec/fixtures/files/vat_exemption_template.docx")
     click_button "Create document template"
 
     expect(page).to have_content("Document template created")
@@ -57,6 +56,11 @@ RSpec.describe "Document template golden path", type: :system do
     expect(document.sender).to eq(sender_user)
     expect(document.addressee).to eq(supplier_contact)
     expect(document.main_file).to be_attached
+    expect(document.main_file.content_type).to eq(DocumentTemplate::DOCX_CONTENT_TYPE)
+    document.main_file.open do |file|
+      xml = Zip::File.open(file.path) { |zip| zip.read("word/document.xml") }
+      expect(xml).to include("Please exempt the purchase from Acme Corp amounting to 1200 EUR, TPIN 1234567890.")
+    end
     expect(document.workflow_steps.reload.pluck(:role, :order)).to eq([ [ "RED", 1 ], [ "SIGN", 2 ] ])
   end
 end

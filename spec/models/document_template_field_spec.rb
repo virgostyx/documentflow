@@ -4,7 +4,10 @@ require "rails_helper"
 
 RSpec.describe DocumentTemplateField, type: :model do
   let(:document_template) do
-    create(:document_template, subject_template: "No tags here", body_template: "No tags here either")
+    template = build(:document_template, subject_template: "No tags here")
+    attach_docx(template, :source_file, docx_paragraph("No tags here either"))
+    template.save!
+    template
   end
 
   subject(:field) { build(:document_template_field, document_template: document_template) }

@@ -4,6 +4,8 @@ class DocumentTemplate < ApplicationRecord
   include PartyAssignable
 
   TAG_PATTERN = /\{\{(\w+)\}\}/
+  DOCX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  SOURCE_FILE_MAX_SIZE = 10.megabytes
 
   # Associations
   belongs_to :entity
@@ -13,6 +15,7 @@ class DocumentTemplate < ApplicationRecord
   belongs_to :default_sender, polymorphic: true, optional: true
   belongs_to :default_addressee, polymorphic: true, optional: true
   has_many :document_template_fields, -> { order(:position) }, dependent: :destroy, inverse_of: :document_template
+  has_one_attached :source_file
 
   accepts_nested_attributes_for :document_template_fields
 
@@ -21,15 +24,36 @@ class DocumentTemplate < ApplicationRecord
   # Validations
   validates :name, presence: true, uniqueness: { scope: :entity_id }
   validates :subject_template, presence: true
-  validates :body_template, presence: true
   validate :department_belongs_to_entity
   validate :default_sender_belongs_to_entity
   validate :default_addressee_belongs_to_entity
+  validate :source_file_must_be_a_valid_docx
 
   # Callbacks
-  after_save :sync_template_fields
+  #
+  # Must be after_commit, not after_save: has_one_attached only uploads the
+  # blob's actual bytes to the storage service on after_commit (see
+  # ActiveStorage::Attached::Model#has_one_attached) - reading source_file
+  # any earlier (e.g. in after_save) would race the upload and silently see
+  # an empty/missing file.
+  after_commit :sync_template_fields, on: %i[create update]
 
   private
+
+  def source_file_must_be_a_valid_docx
+    unless source_file.attached?
+      errors.add(:source_file, "must be attached")
+      return
+    end
+
+    if source_file.content_type != DOCX_CONTENT_TYPE
+      errors.add(:source_file, "must be a Word (.docx) file")
+    end
+
+    if source_file.blob.byte_size > SOURCE_FILE_MAX_SIZE
+      errors.add(:source_file, "must be smaller than #{SOURCE_FILE_MAX_SIZE / 1.megabyte}MB")
+    end
+  end
 
   def department_belongs_to_entity
     return if entity.nil? || department.nil? || department.entity_id == entity_id
@@ -66,7 +90,16 @@ class DocumentTemplate < ApplicationRecord
   end
 
   def extract_tags
-    "#{subject_template} #{body_template}".scan(TAG_PATTERN).flatten.uniq
+    tags = subject_template.to_s.scan(TAG_PATTERN).flatten
+    tags += docx_tags if source_file.attached?
+    tags.uniq
+  end
+
+  def docx_tags
+    source_file.open { |file| Templates::DocxTemplateProcessor.tags_in(file.path) }
+  rescue StandardError => e
+    Rails.logger.warn("[DocumentTemplate##{id}] could not scan source_file for tags: #{e.message}")
+    []
   end
 
   def next_field_position

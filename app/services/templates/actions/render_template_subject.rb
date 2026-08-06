@@ -2,9 +2,9 @@
 
 module Templates
   module Actions
-    class RenderTemplateText < ApplicationAction
+    class RenderTemplateSubject < ApplicationAction
       expects :document_template, :field_values, :document_params
-      promises :document_params, :rendered_body
+      promises :document_params
 
       executed do |ctx|
         field_values = ctx.field_values || {}
@@ -18,10 +18,11 @@ module Templates
           next fail_with!(ctx, "Missing required field(s): #{missing_fields.map(&:label).join(', ')}", :validation_error)
         end
 
-        substitute = ->(text) { text.gsub(DocumentTemplate::TAG_PATTERN) { field_values[Regexp.last_match(1)].to_s } }
+        rendered_subject = template.subject_template.gsub(DocumentTemplate::TAG_PATTERN) do
+          field_values[Regexp.last_match(1)].to_s
+        end
 
-        ctx.document_params = ctx.document_params.merge(subject: substitute.call(template.subject_template))
-        ctx.rendered_body = substitute.call(template.body_template)
+        ctx.document_params = ctx.document_params.merge(subject: rendered_subject)
       end
     end
   end

@@ -6,6 +6,14 @@ FactoryBot.define do
     association :created_by, factory: :user
     sequence(:name) { |n| "Document template #{n}" }
     subject_template { "VAT exemption request - {{supplier}}" }
-    body_template { "Please find enclosed our VAT exemption request for {{supplier}}, amount {{amount}}." }
+
+    after(:build) do |document_template|
+      next if document_template.source_file.attached?
+
+      document_template.source_file.attach(
+        io: File.open(Rails.root.join("spec/fixtures/files/document_template.docx")),
+        filename: "template.docx", content_type: DocumentTemplate::DOCX_CONTENT_TYPE
+      )
+    end
   end
 end

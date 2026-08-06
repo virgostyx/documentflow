@@ -58,7 +58,7 @@ module Entities
 
     def document_template_params
       params.require(:document_template).permit(
-        :name, :department_id, :subject_template, :body_template, :circuit_template_id,
+        :name, :department_id, :subject_template, :source_file, :circuit_template_id,
         :default_sender_token, :default_addressee_token,
         document_template_fields_attributes: %i[id label field_type required options_text]
       )

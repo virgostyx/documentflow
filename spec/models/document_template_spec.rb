@@ -23,7 +23,22 @@ RSpec.describe DocumentTemplate, type: :model do
   describe "validations" do
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_presence_of(:subject_template) }
-    it { is_expected.to validate_presence_of(:body_template) }
+
+    it "requires a source_file" do
+      document_template.source_file.detach
+
+      expect(document_template).not_to be_valid
+      expect(document_template.errors[:source_file]).to be_present
+    end
+
+    it "rejects a source_file that isn't a .docx" do
+      document_template.source_file.attach(
+        io: StringIO.new("not a docx"), filename: "template.txt", content_type: "text/plain"
+      )
+
+      expect(document_template).not_to be_valid
+      expect(document_template.errors[:source_file]).to be_present
+    end
 
     it "validates uniqueness of name scoped to entity" do
       create(:document_template, entity: entity, created_by: user, name: "VAT exemption")
@@ -77,9 +92,9 @@ RSpec.describe DocumentTemplate, type: :model do
   # ── Tag synchronization ──────────────────────────────────────────────────
 
   describe "tag synchronization" do
-    it "creates a field for each unique tag found in subject and body" do
+    it "creates a field for each unique tag found in the subject and the uploaded docx body" do
       document_template.subject_template = "Request for {{supplier}}"
-      document_template.body_template = "Amount: {{amount}}. Supplier: {{supplier}}."
+      attach_docx(document_template, :source_file, docx_paragraph("Amount: {{amount}}. Supplier: {{supplier}}."))
       document_template.save!
 
       expect(document_template.document_template_fields.pluck(:tag_name)).to contain_exactly("supplier", "amount")
@@ -87,7 +102,7 @@ RSpec.describe DocumentTemplate, type: :model do
 
     it "defaults the label to a humanized version of the tag and the type to text" do
       document_template.subject_template = "Request for {{supplier_name}}"
-      document_template.body_template = "Body"
+      attach_docx(document_template, :source_file, docx_paragraph("Body"))
       document_template.save!
 
       field = document_template.document_template_fields.find_by(tag_name: "supplier_name")
@@ -97,13 +112,14 @@ RSpec.describe DocumentTemplate, type: :model do
 
     it "does not duplicate an existing field when re-saving with the same tags" do
       document_template.subject_template = "Request for {{supplier}}"
-      document_template.body_template = "Body without other tags"
+      attach_docx(document_template, :source_file, docx_paragraph("Body without other tags"))
       document_template.save!
 
       field = document_template.document_template_fields.find_by(tag_name: "supplier")
       field.update!(label: "Custom label", field_type: "textarea")
 
-      document_template.update!(body_template: "Amount: {{supplier}} again")
+      attach_docx(document_template, :source_file, docx_paragraph("Amount: {{supplier}} again"))
+      document_template.save!
 
       expect(document_template.document_template_fields.where(tag_name: "supplier").count).to eq(1)
       expect(document_template.document_template_fields.find_by(tag_name: "supplier").label).to eq("Custom label")
@@ -111,13 +127,21 @@ RSpec.describe DocumentTemplate, type: :model do
 
     it "removes a field whose tag no longer appears in the text" do
       document_template.subject_template = "Request for {{supplier}} and {{amount}}"
-      document_template.body_template = "Body without any tags"
+      attach_docx(document_template, :source_file, docx_paragraph("Body without any tags"))
       document_template.save!
       expect(document_template.document_template_fields.pluck(:tag_name)).to contain_exactly("supplier", "amount")
 
       document_template.update!(subject_template: "Request for {{supplier}}")
 
       expect(document_template.document_template_fields.reload.pluck(:tag_name)).to contain_exactly("supplier")
+    end
+
+    it "detects a tag from the docx even when split across multiple runs" do
+      document_template.subject_template = "No tags here"
+      attach_docx(document_template, :source_file, docx_paragraph("Dear {{sup", "plier}}, hello."))
+      document_template.save!
+
+      expect(document_template.document_template_fields.pluck(:tag_name)).to contain_exactly("supplier")
     end
   end
 
@@ -126,7 +150,7 @@ RSpec.describe DocumentTemplate, type: :model do
   describe "nested attributes" do
     it "updates an existing field's label, type and required flag" do
       document_template.subject_template = "Request for {{supplier}}"
-      document_template.body_template = "Body without other tags"
+      attach_docx(document_template, :source_file, docx_paragraph("Body without other tags"))
       document_template.save!
       field = document_template.document_template_fields.find_by(tag_name: "supplier")
 

@@ -74,7 +74,7 @@ class WorkflowStepsController < ApplicationController
     @selected_email_template = @email_templates.find_by(id: params[:email_template_id])
     @field_values = params[:field_values]&.to_unsafe_h || {}
 
-    @document.dispatch_message ||= "Document #{@document.reference_number} (#{@document.subject}) has been finalized."
+    @document.dispatch_message ||= "Document #{@document.reference_number} (#{@document.subject}) has been finalized." unless @selected_email_template
 
     if @selected_email_template && params[:generate_message].present?
       result = Templates::RenderEmailBody.call(email_template: @selected_email_template, field_values: @field_values)

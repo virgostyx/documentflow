@@ -217,6 +217,12 @@ RSpec.describe "WorkflowSteps", type: :request do
         expect(response.body).to include(reference_field.label)
       end
 
+      it "does not pre-fill the default finalized sentence once a template is selected" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step), params: { email_template_id: email_template.id }
+
+        expect(response.body).not_to include("has been finalized.")
+      end
+
       it "pre-fills the message with the rendered body, leaving {{recipient_name}} literal, when field values are submitted" do
         get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step),
             params: { email_template_id: email_template.id, field_values: { "reference" => "TND-2026-01" }, generate_message: "1" }

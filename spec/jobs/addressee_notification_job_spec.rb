@@ -50,6 +50,12 @@ RSpec.describe AddresseeNotificationJob do
         expect(log.auditable).to eq(document)
         expect(log.change_data["recipient_email"]).to eq(contact.email)
       end
+
+      it "broadcasts a live update to the document's dispatch status panel" do
+        expect(DispatchStatusBroadcastJob).to receive(:perform_later).with(document.id)
+
+        described_class.new.perform("Contact", contact.id, document.id, acting_user.id)
+      end
     end
 
     context "when delivery fails" do
@@ -67,6 +73,14 @@ RSpec.describe AddresseeNotificationJob do
         log = AuditLog.last
         expect(log.action).to eq("dispatch_failed")
         expect(log.change_data["error"]).to eq("SMTP timeout")
+      end
+
+      it "still broadcasts a live update to the dispatch status panel" do
+        expect(DispatchStatusBroadcastJob).to receive(:perform_later).with(document.id)
+
+        expect {
+          described_class.new.perform("Contact", contact.id, document.id, acting_user.id)
+        }.to raise_error(StandardError)
       end
     end
   end

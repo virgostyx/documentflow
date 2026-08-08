@@ -976,6 +976,20 @@ RSpec.describe "Documents", type: :request do
           expect(response.body).to include(addressee.display_name)
           expect(response.body).to include("Sent")
         end
+
+        it "wraps the panel content in the document's dispatch_status dom id, for live updates" do
+          get entity_document_path(entity, document)
+
+          expect(response.body).to include(%(id="#{ActionView::RecordIdentifier.dom_id(document, :dispatch_status)}"))
+        end
+      end
+
+      it "subscribes to the document's dispatch_status turbo stream" do
+        get entity_document_path(entity, document)
+
+        expected_signed_name = Turbo::StreamsChannel.signed_stream_name([ document, :dispatch_status ])
+        expect(response.body).to include(%(<turbo-cable-stream-source))
+        expect(response.body).to include(%(signed-stream-name="#{CGI.escapeHTML(expected_signed_name)}"))
       end
 
       context "when the document has audit logs" do

@@ -24,5 +24,6 @@ class CcNotificationJob < ApplicationJob
       user: user, auditable: document, action: action,
       changes: { recipient_type: party_type, recipient_id: party_id, recipient_email: email, error: error }.compact
     )
+    DispatchStatusBroadcastJob.perform_later(document.id)
   end
 end

@@ -24,10 +24,10 @@ class EmailTemplate < ApplicationRecord
   # Callbacks
   after_commit :sync_template_fields, on: %i[create update]
 
-  # All tags currently referenced by this template's body, including
-  # reserved ones that don't get an email_template_fields row.
+  # All tags currently referenced by this template's subject and body,
+  # including reserved ones that don't get an email_template_fields row.
   def tags
-    Templates::TagScanner.tags_in(body_template)
+    (Templates::TagScanner.tags_in(subject_template) + Templates::TagScanner.tags_in(body_template)).uniq
   end
 
   private

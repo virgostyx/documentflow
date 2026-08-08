@@ -58,7 +58,7 @@ module Entities
 
     def email_template_params
       params.require(:email_template).permit(
-        :name, :department_id, :body_template,
+        :name, :department_id, :subject_template, :body_template,
         email_template_fields_attributes: %i[id label field_type required options_text]
       )
     end

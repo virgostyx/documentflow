@@ -11,10 +11,12 @@
         { selected: email_template.department_id, include_blank: "Entity-wide (all departments)" },
         { label: "Department" } %>
 
+  <%= f.floating_text_field :subject_template, label: "Subject (optional, leave blank for the default subject)", placeholder: " " %>
+
   <%= f.floating_text_area :body_template, label: "Email body", required: true, rows: 6 %>
   <p class="-mt-4 mb-6 text-xs text-gray-500">
-    Use tags like <code class="rounded bg-gray-100 px-1">{{deadline}}</code> for values that change each time.
-    The tags <code class="rounded bg-gray-100 px-1">{{date}}</code> and
+    Use tags like <code class="rounded bg-gray-100 px-1">{{deadline}}</code> in the subject or the body for
+    values that change each time. The tags <code class="rounded bg-gray-100 px-1">{{date}}</code> and
     <code class="rounded bg-gray-100 px-1">{{recipient_name}}</code> are reserved and filled in
     automatically &mdash; no need to add a field for them.
   </p>

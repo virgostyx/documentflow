@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_07_190002) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_08_073300) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -205,6 +205,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_07_190002) do
     t.bigint "department_id", null: false
     t.string "direction", default: "outgoing", null: false
     t.text "dispatch_message"
+    t.string "dispatch_subject"
     t.date "document_date", null: false
     t.bigint "entity_id", null: false
     t.boolean "expects_response", default: false, null: false
@@ -260,6 +261,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_07_190002) do
     t.bigint "department_id"
     t.bigint "entity_id", null: false
     t.string "name", null: false
+    t.text "subject_template"
     t.datetime "updated_at", null: false
     t.index ["created_by_id"], name: "index_email_templates_on_created_by_id"
     t.index ["department_id"], name: "index_email_templates_on_department_id"

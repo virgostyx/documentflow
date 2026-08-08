@@ -23,6 +23,11 @@ RSpec.describe EmailTemplate, type: :model do
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_presence_of(:body_template) }
 
+    it "allows a blank subject_template (falls back to the default subject)" do
+      email_template.subject_template = nil
+      expect(email_template).to be_valid
+    end
+
     it "validates uniqueness of name scoped to entity" do
       create(:email_template, entity: entity, created_by: user, name: "Bid call")
 
@@ -94,6 +99,22 @@ RSpec.describe EmailTemplate, type: :model do
       email_template.update!(body_template: "{{reference}} only")
 
       expect(email_template.email_template_fields.reload.pluck(:tag_name)).to contain_exactly("reference")
+    end
+
+    it "creates a field for a tag that only appears in the subject" do
+      email_template.subject_template = "Tender {{reference}}"
+      email_template.body_template = "No tags here"
+      email_template.save!
+
+      expect(email_template.email_template_fields.pluck(:tag_name)).to contain_exactly("reference")
+    end
+
+    it "does not duplicate a field referenced in both the subject and the body" do
+      email_template.subject_template = "Tender {{reference}}"
+      email_template.body_template = "Reference: {{reference}}"
+      email_template.save!
+
+      expect(email_template.email_template_fields.where(tag_name: "reference").count).to eq(1)
     end
   end
 

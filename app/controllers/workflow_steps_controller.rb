@@ -80,6 +80,7 @@ class WorkflowStepsController < ApplicationController
       result = Templates::RenderEmailBody.call(email_template: @selected_email_template, field_values: @field_values)
       if result.success?
         @document.dispatch_message = result.body
+        @document.dispatch_subject = result.subject if result.subject.present?
       else
         @email_body_errors = result.missing_fields.map(&:label)
       end

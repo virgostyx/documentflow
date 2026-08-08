@@ -25,6 +25,7 @@ RSpec.describe "Multi-recipient templated dispatch golden path", type: :system d
 
   let!(:email_template) do
     create(:email_template, entity: entity, created_by: owner, name: "Bid call",
+      subject_template: "Tender {{reference}} - {{recipient_name}}",
       body_template: "Dear {{recipient_name}}, please submit your bid for {{reference}} before {{deadline}}.")
   end
 
@@ -107,6 +108,7 @@ RSpec.describe "Multi-recipient templated dispatch golden path", type: :system d
     fill_in "Deadline", with: "2026-09-01"
     click_button "Insert into message"
     expect(page).to have_field("dispatch_message", with: /Dear \{\{recipient_name\}\}, please submit your bid for TND-2026-042 before 2026-09-01\./)
+    expect(page).to have_field("dispatch_subject", with: "Tender TND-2026-042 - {{recipient_name}}")
 
     perform_enqueued_jobs do
       click_button "Approve"
@@ -121,6 +123,7 @@ RSpec.describe "Multi-recipient templated dispatch golden path", type: :system d
     [ bidder_a, bidder_b, bidder_c ].each do |bidder|
       mail = deliveries.find { |m| m.to == [ bidder.email ] }
       expect(mail).to be_present
+      expect(mail.subject).to eq("Tender TND-2026-042 - #{bidder.display_name}")
       expect(mail.text_part.body.encoded).to include(
         "Dear #{bidder.display_name}, please submit your bid for TND-2026-042 before 2026-09-01."
       )

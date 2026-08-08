@@ -35,6 +35,34 @@ RSpec.describe Templates::RenderEmailBody do
       end
     end
 
+    context "when the template has a subject_template" do
+      let(:email_template) do
+        create(:email_template, entity: entity,
+          subject_template: "Tender {{reference}} - {{recipient_name}}",
+          body_template: "Dear {{recipient_name}}, reference {{reference}}.")
+      end
+
+      it "substitutes ordinary tags in the subject" do
+        result = described_class.call(email_template: email_template, field_values: { "reference" => "TND-2026-01" })
+
+        expect(result.subject).to include("Tender TND-2026-01")
+      end
+
+      it "leaves the reserved {{recipient_name}} tag literal in the subject too" do
+        result = described_class.call(email_template: email_template, field_values: { "reference" => "TND-2026-01" })
+
+        expect(result.subject).to include("{{recipient_name}}")
+      end
+    end
+
+    context "when the template has no subject_template" do
+      it "returns a nil subject" do
+        result = described_class.call(email_template: email_template, field_values: { "reference" => "TND-2026-01" })
+
+        expect(result.subject).to be_nil
+      end
+    end
+
     context "when a required field is missing" do
       it "does not render a body" do
         result = described_class.call(email_template: email_template, field_values: {})

@@ -146,6 +146,16 @@ RSpec.describe NotificationMailer do
         expect(mail.text_part.body.encoded).to include("Dear #{user.display_name}, please review.")
         expect(mail.text_part.body.encoded).not_to include("{{recipient_name}}")
       end
+
+      it "uses the document's default subject when no dispatch_subject override is set" do
+        expect(mail.subject).to eq("Document addressed to you: #{document.reference_number}")
+      end
+
+      it "uses the dispatch_subject override when set, substituting {{recipient_name}}" do
+        document.update!(dispatch_subject: "Tender TND-2026-01 - {{recipient_name}}")
+
+        expect(mail.subject).to eq("Tender TND-2026-01 - #{user.display_name}")
+      end
     end
 
     context "with an external contact recipient" do
@@ -241,6 +251,16 @@ RSpec.describe NotificationMailer do
       it "does not mention any link expiration" do
         expect(mail.text_part.body.encoded).not_to include("expire")
         expect(mail.html_part.body.encoded).not_to include("expire")
+      end
+
+      it "uses the document's default subject when no dispatch_subject override is set" do
+        expect(mail.subject).to eq("Document finalized: #{document.reference_number}")
+      end
+
+      it "uses the dispatch_subject override when set, substituting {{recipient_name}}" do
+        document.update!(dispatch_subject: "Tender TND-2026-01 - {{recipient_name}}")
+
+        expect(mail.subject).to eq("Tender TND-2026-01 - #{user.display_name}")
       end
     end
 

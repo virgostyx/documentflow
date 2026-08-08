@@ -201,6 +201,20 @@ RSpec.describe "WorkflowSteps", type: :request do
         expect(response.body).to include("Dear {{recipient_name}}, reference TND-2026-01")
       end
 
+      context "when the template has a subject_template" do
+        let!(:email_template) do
+          create(:email_template, entity: entity, subject_template: "Tender {{reference}}",
+            body_template: "Dear {{recipient_name}}, reference {{reference}}, issued {{date}}.")
+        end
+
+        it "pre-fills the subject field with the rendered subject when field values are submitted" do
+          get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step),
+              params: { email_template_id: email_template.id, field_values: { "reference" => "TND-2026-01" }, generate_message: "1" }
+
+          expect(response.body).to include(%(value="Tender TND-2026-01"))
+        end
+      end
+
       it "shows an error and does not overwrite the message when a required field is missing" do
         document.update!(dispatch_message: "Original message")
 
@@ -244,6 +258,21 @@ RSpec.describe "WorkflowSteps", type: :request do
         params: { dispatch_message: "Please review the attached amendment before Friday." }
 
       expect(document.reload.dispatch_message).to eq("Please review the attached amendment before Friday.")
+    end
+
+    it "persists the submitted dispatch subject" do
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { dispatch_message: "Test message", dispatch_subject: "Tender TND-2026-01" }
+
+      expect(document.reload.dispatch_subject).to eq("Tender TND-2026-01")
+    end
+
+    it "does not require a dispatch subject (falls back to the default subject)" do
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { dispatch_message: "Test message" }
+
+      expect(exp_step.reload).to be_approved
+      expect(document.reload.dispatch_subject).to be_blank
     end
 
     it "does not approve the step when the dispatch message is blank" do

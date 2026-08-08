@@ -72,7 +72,7 @@ class NotificationMailer < ApplicationMailer
       @document_url = entity_document_url(document.entity, document)
     end
 
-    mail(to: party.email, subject: "Document addressed to you: #{document.reference_number}")
+    mail(to: party.email, subject: dispatch_subject_for(document, "Document addressed to you: #{document.reference_number}"))
   end
 
   def cc_notification(party, document)
@@ -90,10 +90,14 @@ class NotificationMailer < ApplicationMailer
       @document_url = entity_document_url(document.entity, document)
     end
 
-    mail(to: party.email, subject: "Document finalized: #{document.reference_number}")
+    mail(to: party.email, subject: dispatch_subject_for(document, "Document finalized: #{document.reference_number}"))
   end
 
   private
+
+  def dispatch_subject_for(document, default_subject)
+    document.dispatch_subject.presence&.gsub("{{recipient_name}}", @recipient_name) || default_subject
+  end
 
   def attach_document_files(document)
     used_names = Set.new

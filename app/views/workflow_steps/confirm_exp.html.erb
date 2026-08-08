@@ -46,6 +46,7 @@
           </div>
         <% end %>
 
+        <%= f.floating_text_field :dispatch_subject, label: "Subject (optional, leave blank for the default subject)", placeholder: " ", name: "dispatch_subject" %>
         <%= f.floating_text_area :dispatch_message, label: "Message to include in the notification email", placeholder: " ", required: true, name: "dispatch_message" %>
       <% end %>
 

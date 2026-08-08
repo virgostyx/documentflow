@@ -9,6 +9,7 @@ module Workflow
                    Actions::ApproveStep,
                    Actions::SetDispatchPreference,
                    Actions::SetDispatchMessage,
+                   Actions::SetDispatchSubject,
                    Actions::AdvanceWorkflow,
                    Actions::NotifyNextActor,
                    Actions::BroadcastSidebarToNextActor,

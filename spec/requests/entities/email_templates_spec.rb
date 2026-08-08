@@ -81,6 +81,30 @@ RSpec.describe "Entities::EmailTemplates", type: :request do
       end
     end
 
+    context "with a subject_template" do
+      let(:email_template_params) do
+        {
+          email_template: {
+            name: "Bid call",
+            subject_template: "Tender {{reference}}",
+            body_template: "Dear {{recipient_name}}, please submit your bid for {{reference}}."
+          }
+        }
+      end
+
+      it "persists the subject_template" do
+        post entity_email_templates_path(entity), params: email_template_params
+
+        expect(entity.email_templates.last.subject_template).to eq("Tender {{reference}}")
+      end
+
+      it "does not duplicate a field referenced in both the subject and the body" do
+        post entity_email_templates_path(entity), params: email_template_params
+
+        expect(entity.email_templates.last.email_template_fields.pluck(:tag_name)).to contain_exactly("reference")
+      end
+    end
+
     context "with invalid params" do
       let(:email_template_params) { { email_template: { name: "" } } }
 

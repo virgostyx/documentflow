@@ -9,6 +9,11 @@ class MissionControlAuthController < ApplicationController
   private
 
   def require_super_admin
-    redirect_to root_path, alert: "You are not authorized to perform this action." unless current_user&.super_admin?
+    return if current_user&.super_admin?
+
+    # `main_app.` avoids resolving to the mission_control-jobs engine's own
+    # (isolated) root route, which would otherwise redirect back into /jobs
+    # and loop.
+    redirect_to main_app.root_path, alert: "You are not authorized to perform this action."
   end
 end

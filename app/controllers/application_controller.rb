@@ -25,7 +25,11 @@ class ApplicationController < ActionController::Base
     return unless current_user.two_factor_required?
     return if current_user.otp_required_for_login? || current_user.passwordless?
 
-    redirect_to two_factor_setup_path, alert: "Two-factor authentication is mandatory for your account. Please set it up to continue."
+    # `main_app.` is required here (rather than the bare path helper) because this
+    # before_action also runs inside the isolated mission_control-jobs engine's
+    # controllers, whose own url_helpers/default_url_options would otherwise shadow
+    # or pollute a same-named/unscoped route lookup.
+    redirect_to main_app.two_factor_setup_path, alert: "Two-factor authentication is mandatory for your account. Please set it up to continue."
   end
 
   # Devise pages (sign in, sign up, password...) are public

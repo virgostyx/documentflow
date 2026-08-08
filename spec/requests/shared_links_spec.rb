@@ -166,7 +166,7 @@ RSpec.describe "SharedLinks", type: :request do
     context "with an email matching the document's external addressee" do
       it "enqueues an addressee notification" do
         expect(AddresseeNotificationJob).to receive(:perform_later)
-          .with("Contact", document.addressee_id, document.id)
+          .with("Contact", document.addressee_id, document.id, document.created_by_id)
 
         post renew_shared_document_path(token: shared_link.token), params: { email: document.addressee.email }
       end

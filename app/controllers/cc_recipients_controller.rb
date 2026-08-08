@@ -16,6 +16,20 @@ class CcRecipientsController < ApplicationController
     end
   end
 
+  def bulk_create
+    authorize CcRecipient.new(document: @document), :create?
+
+    tokens = Array(params[:party_tokens]).reject(&:blank?)
+    result = Documents::AddCcRecipientsOrganizer.call(document: @document, cc_party_tokens: tokens)
+
+    if result.success?
+      @document.update!(multi_recipient: true) if tokens.any?
+      redirect_to entity_document_path(current_entity, @document), notice: "Recipients added to copy successfully."
+    else
+      redirect_to entity_document_path(current_entity, @document), alert: result.message
+    end
+  end
+
   def destroy
     @cc_recipient = @document.cc_recipients.find(params[:id])
     authorize @cc_recipient

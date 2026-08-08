@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Templates
+module Documents
   module Actions
     class CreateCcRecipients < ApplicationAction
       expects :document, :cc_party_tokens

@@ -1,0 +1,17 @@
+<div class="space-y-3">
+  <% grouped_parties.each do |group_label, options| %>
+    <% next if options.empty? %>
+
+    <div>
+      <p class="text-xs font-medium text-gray-500 uppercase tracking-wide"><%= group_label %></p>
+      <div class="mt-1 space-y-1">
+        <% options.each do |label, token| %>
+          <label class="flex items-center gap-2 text-sm text-gray-700">
+            <%= check_box_tag name, token, false, id: nil, class: "h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded" %>
+            <%= label %>
+          </label>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

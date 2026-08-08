@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_06_093402) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_07_190002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -211,6 +211,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_06_093402) do
     t.bigint "in_reply_to_id"
     t.boolean "is_frozen", default: false, null: false
     t.bigint "lead_user_id"
+    t.boolean "multi_recipient", default: false, null: false
     t.string "reference_number"
     t.date "response_deadline"
     t.datetime "routed_at"
@@ -235,6 +236,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_06_093402) do
     t.index ["sender_type", "sender_id"], name: "index_documents_on_sender_type_and_sender_id"
     t.index ["status"], name: "index_documents_on_status"
     t.index ["temporary_number"], name: "index_documents_on_temporary_number", unique: true
+  end
+
+  create_table "email_template_fields", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "email_template_id", null: false
+    t.string "field_type", default: "text", null: false
+    t.string "label", null: false
+    t.jsonb "options", default: []
+    t.integer "position", null: false
+    t.boolean "required", default: true, null: false
+    t.string "tag_name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email_template_id", "position"], name: "index_email_template_fields_on_email_template_id_and_position", unique: true
+    t.index ["email_template_id", "tag_name"], name: "index_email_template_fields_on_email_template_id_and_tag_name", unique: true
+    t.index ["email_template_id"], name: "index_email_template_fields_on_email_template_id"
+  end
+
+  create_table "email_templates", force: :cascade do |t|
+    t.text "body_template", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id", null: false
+    t.bigint "department_id"
+    t.bigint "entity_id", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_email_templates_on_created_by_id"
+    t.index ["department_id"], name: "index_email_templates_on_department_id"
+    t.index ["entity_id", "name"], name: "index_email_templates_on_entity_id_and_name", unique: true
+    t.index ["entity_id"], name: "index_email_templates_on_entity_id"
   end
 
   create_table "entities", force: :cascade do |t|
@@ -389,6 +419,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_06_093402) do
   add_foreign_key "documents", "users", column: "checked_out_by_id"
   add_foreign_key "documents", "users", column: "created_by_id"
   add_foreign_key "documents", "users", column: "lead_user_id"
+  add_foreign_key "email_template_fields", "email_templates"
+  add_foreign_key "email_templates", "departments"
+  add_foreign_key "email_templates", "entities"
+  add_foreign_key "email_templates", "users", column: "created_by_id"
   add_foreign_key "entity_user_departments", "departments"
   add_foreign_key "entity_user_departments", "entity_users"
   add_foreign_key "entity_users", "entities"

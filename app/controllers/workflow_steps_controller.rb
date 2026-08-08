@@ -70,7 +70,20 @@ class WorkflowStepsController < ApplicationController
     authorize @document, :approve?
     return head :not_found unless @workflow_step.exp?
 
+    @email_templates = current_entity.email_templates.order(:name)
+    @selected_email_template = @email_templates.find_by(id: params[:email_template_id])
+    @field_values = params[:field_values]&.to_unsafe_h || {}
+
     @document.dispatch_message ||= "Document #{@document.reference_number} (#{@document.subject}) has been finalized."
+
+    if @selected_email_template && params[:generate_message].present?
+      result = Templates::RenderEmailBody.call(email_template: @selected_email_template, field_values: @field_values)
+      if result.success?
+        @document.dispatch_message = result.body
+      else
+        @email_body_errors = result.missing_fields.map(&:label)
+      end
+    end
 
     render "workflow_steps/confirm_exp"
   end

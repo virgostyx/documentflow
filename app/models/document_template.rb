@@ -3,7 +3,7 @@
 class DocumentTemplate < ApplicationRecord
   include PartyAssignable
 
-  TAG_PATTERN = /\{\{(\w+)\}\}/
+  TAG_PATTERN = Templates::TagScanner::TAG_PATTERN
   DOCX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   SOURCE_FILE_MAX_SIZE = 10.megabytes
 
@@ -100,7 +100,7 @@ class DocumentTemplate < ApplicationRecord
   end
 
   def extract_tags
-    tags = subject_template.to_s.scan(TAG_PATTERN).flatten
+    tags = Templates::TagScanner.tags_in(subject_template)
     tags += docx_tags if source_file.attached?
     tags.uniq
   end

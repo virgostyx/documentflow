@@ -13,7 +13,10 @@ module Documents
       "cancel_check_out" => ->(_log) { "released the checkout" },
       "classify" => ->(log) { "changed the classification#{classification_detail(log)}" },
       "finalize" => ->(_log) { "finalized the document" },
-      "route" => ->(_log) { "routed the incoming mail" }
+      "route" => ->(_log) { "routed the incoming mail" },
+      "dispatch_queued" => ->(log) { "queued the dispatch email to #{recipient_label(log)}" },
+      "dispatch_sent" => ->(log) { "sent the dispatch email to #{recipient_label(log)}" },
+      "dispatch_failed" => ->(log) { "failed to send the dispatch email to #{recipient_label(log)}#{dispatch_error_detail(log)}" }
     }.freeze
 
     def initialize(document:)
@@ -59,6 +62,19 @@ module Documents
       return nil if id.blank?
 
       User.find_by(id: id)&.display_name || "a former member"
+    end
+
+    def recipient_label(log)
+      type = log.change_data["recipient_type"]
+      id = log.change_data["recipient_id"]
+      party = type.present? && id.present? ? type.constantize.find_by(id: id) : nil
+
+      party&.display_name || log.change_data["recipient_email"]
+    end
+
+    def dispatch_error_detail(log)
+      error = log.change_data["error"]
+      error.present? ? " (#{error})" : ""
     end
   end
 end

@@ -123,6 +123,56 @@ RSpec.describe Documents::AuditLogListComponent, type: :component do
     end
   end
 
+  context "with a dispatch_queued event" do
+    let(:contact) { create(:contact, entity: document.entity, first_name: "Jean", last_name: "Dupont") }
+
+    before do
+      create(:audit_log, auditable: document, user: actor, action: "dispatch_queued",
+        change_data: { "recipient_type" => "Contact", "recipient_id" => contact.id, "recipient_email" => contact.email })
+    end
+
+    it "names the recipient" do
+      expect(subject).to have_text("queued the dispatch email to Jean Dupont")
+    end
+  end
+
+  context "with a dispatch_sent event" do
+    let(:contact) { create(:contact, entity: document.entity, first_name: "Jean", last_name: "Dupont") }
+
+    before do
+      create(:audit_log, auditable: document, user: actor, action: "dispatch_sent",
+        change_data: { "recipient_type" => "Contact", "recipient_id" => contact.id, "recipient_email" => contact.email })
+    end
+
+    it "names the recipient" do
+      expect(subject).to have_text("sent the dispatch email to Jean Dupont")
+    end
+  end
+
+  context "with a dispatch_failed event" do
+    let(:contact) { create(:contact, entity: document.entity, first_name: "Jean", last_name: "Dupont") }
+
+    before do
+      create(:audit_log, auditable: document, user: actor, action: "dispatch_failed",
+        change_data: { "recipient_type" => "Contact", "recipient_id" => contact.id, "recipient_email" => contact.email, "error" => "SMTP timeout" })
+    end
+
+    it "names the recipient and the error" do
+      expect(subject).to have_text("failed to send the dispatch email to Jean Dupont (SMTP timeout)")
+    end
+  end
+
+  context "with a dispatch event whose recipient no longer exists" do
+    before do
+      create(:audit_log, auditable: document, user: actor, action: "dispatch_sent",
+        change_data: { "recipient_type" => "Contact", "recipient_id" => 0, "recipient_email" => "old@example.com" })
+    end
+
+    it "falls back to the recorded email address" do
+      expect(subject).to have_text("sent the dispatch email to old@example.com")
+    end
+  end
+
   context "with an unmapped action" do
     before { create(:audit_log, auditable: document, user: actor, action: "some_future_action") }
 

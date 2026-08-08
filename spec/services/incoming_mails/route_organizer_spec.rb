@@ -71,7 +71,7 @@ RSpec.describe IncomingMails::RouteOrganizer do
 
       it "notifies the action user and the info recipients" do
         expect(NotificationJob).to receive(:perform_later).with(action_user.id, "mail_action_assigned", document.id)
-        expect(CcNotificationJob).to receive(:perform_later).with("User", info_user.id, document.id)
+        expect(CcNotificationJob).to receive(:perform_later).with("User", info_user.id, document.id, lead.id)
 
         described_class.call(document: document, current_user: lead, routing_params: routing_params)
       end

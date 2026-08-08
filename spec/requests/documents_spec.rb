@@ -922,6 +922,29 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).to include("No")
       end
 
+      context "as the document's author" do
+        let!(:document) { create(:document, entity: entity, department: department, sender: sender, addressee: addressee, created_by: user) }
+
+        it "shows a panel to add multiple recipients at once, excluding the addressee" do
+          get entity_document_path(entity, document)
+
+          expect(response.body).to include("Add multiple recipients at once")
+          checkbox_values = Nokogiri::HTML(response.body).css("input[type=checkbox]").map { |el| el["value"] }
+          expect(checkbox_values).not_to include(document.addressee_token)
+        end
+
+        context "when the document already has a cc_recipient" do
+          let!(:existing_cc) { create(:cc_recipient, document: document) }
+
+          it "excludes the existing cc_recipient from the bulk picker" do
+            get entity_document_path(entity, document)
+
+            checkbox_values = Nokogiri::HTML(response.body).css("input[type=checkbox]").map { |el| el["value"] }
+            expect(checkbox_values).not_to include(existing_cc.party_token)
+          end
+        end
+      end
+
       it "does not show a document chain section for a standalone document" do
         get entity_document_path(entity, document)
 
@@ -932,6 +955,27 @@ RSpec.describe "Documents", type: :request do
         get entity_document_path(entity, document)
 
         expect(response.body).not_to include("Activity history")
+      end
+
+      it "does not show a dispatch status section when there are no dispatch events" do
+        get entity_document_path(entity, document)
+
+        expect(response.body).not_to include("Dispatch status")
+      end
+
+      context "when the document has dispatch events" do
+        before do
+          create(:audit_log, auditable: document, user: user, action: "dispatch_sent",
+            change_data: { "recipient_type" => "Contact", "recipient_id" => addressee.id, "recipient_email" => addressee.email })
+        end
+
+        it "shows the dispatch status section with the recipient's status" do
+          get entity_document_path(entity, document)
+
+          expect(response.body).to include("Dispatch status")
+          expect(response.body).to include(addressee.display_name)
+          expect(response.body).to include("Sent")
+        end
       end
 
       context "when the document has audit logs" do

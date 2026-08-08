@@ -1,0 +1,49 @@
+<%= form_with model: [ current_entity, email_template ], builder: FloatingLabelsRails::FormBuilder, local: true do |f| %>
+  <% if email_template.errors.any? %>
+    <div class="mb-4 rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+      <%= email_template.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= f.floating_text_field :name, label: "Name", required: true, autofocus: true, placeholder: " " %>
+
+  <%= f.floating_select :department_id, current_entity.departments.order(:name).map { |d| [ d.name, d.id ] },
+        { selected: email_template.department_id, include_blank: "Entity-wide (all departments)" },
+        { label: "Department" } %>
+
+  <%= f.floating_text_area :body_template, label: "Email body", required: true, rows: 6 %>
+  <p class="-mt-4 mb-6 text-xs text-gray-500">
+    Use tags like <code class="rounded bg-gray-100 px-1">{{deadline}}</code> for values that change each time.
+    The tags <code class="rounded bg-gray-100 px-1">{{date}}</code> and
+    <code class="rounded bg-gray-100 px-1">{{recipient_name}}</code> are reserved and filled in
+    automatically &mdash; no need to add a field for them.
+  </p>
+
+  <% if email_template.persisted? %>
+    <div class="mt-6 border-t border-gray-200 pt-6">
+      <h3 class="text-sm font-medium text-gray-900">Detected fields</h3>
+
+      <% if email_template.email_template_fields.any? %>
+        <p class="mt-1 text-sm text-gray-500">
+          These fields were detected from the tags above. Refine their label, type and whether they are required.
+        </p>
+
+        <div class="mt-4 space-y-4">
+          <%= f.fields_for :email_template_fields do |field_form| %>
+            <%= render "email_template_field_fields", f: field_form %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="mt-1 text-sm text-gray-500">
+          No tags detected yet. Add tags like <code class="rounded bg-gray-100 px-1">{{deadline}}</code>
+          to the text above and save to detect fields.
+        </p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="mt-6 flex justify-end gap-3">
+    <%= render(Ui::ButtonComponent.new(href: entity_email_templates_path(current_entity), variant: :secondary)) { "Cancel" } %>
+    <%= render(Ui::ButtonComponent.new) { email_template.persisted? ? "Save changes" : "Create email template" } %>
+  </div>
+<% end %>

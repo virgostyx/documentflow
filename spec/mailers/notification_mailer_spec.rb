@@ -139,6 +139,13 @@ RSpec.describe NotificationMailer do
         expect(mail.text_part.body.encoded).to include("A custom note from the EXP actor.")
         expect(mail.text_part.body.encoded).not_to include("has been addressed to you and is now finalized")
       end
+
+      it "substitutes the reserved {{recipient_name}} tag with this recipient's display name" do
+        document.update!(dispatch_message: "Dear {{recipient_name}}, please review.")
+
+        expect(mail.text_part.body.encoded).to include("Dear #{user.display_name}, please review.")
+        expect(mail.text_part.body.encoded).not_to include("{{recipient_name}}")
+      end
     end
 
     context "with an external contact recipient" do
@@ -256,6 +263,13 @@ RSpec.describe NotificationMailer do
 
         expect(mail.text_part.body.encoded).to include(contact.display_name, document.dispatch_message, shared_url)
         expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(contact.display_name), document.dispatch_message, shared_url)
+      end
+
+      it "substitutes the reserved {{recipient_name}} tag with this recipient's own display name" do
+        document.update!(dispatch_message: "Dear {{recipient_name}}, please submit your bid.")
+
+        expect(mail.text_part.body.encoded).to include("Dear #{contact.display_name}, please submit your bid.")
+        expect(mail.text_part.body.encoded).not_to include("{{recipient_name}}")
       end
 
       it "reuses an existing active shared link instead of creating a new one" do

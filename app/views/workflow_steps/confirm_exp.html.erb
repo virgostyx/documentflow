@@ -7,20 +7,59 @@
     </p>
 
     <%= form_with model: @document, url: approve_entity_document_workflow_step_path(current_entity, @document, @workflow_step),
-                  method: :post, builder: FloatingLabelsRails::FormBuilder, local: true, data: { turbo_frame: "_top" } do |f| %>
-      <%= f.floating_text_area :dispatch_message, label: "Message to include in the notification email", placeholder: " ", required: true, name: "dispatch_message" %>
+          method: :post, builder: FloatingLabelsRails::FormBuilder, local: true, data: { turbo_frame: "_top" } do |f| %>
+      <%= turbo_frame_tag "dispatch_message_editor" do %>
+        <% if @email_templates.any? %>
+          <div class="mb-4">
+            <div class="flex items-end gap-3">
+              <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Use an email template (optional)</label>
+                <%= select_tag :email_template_id,
+                      options_for_select(@email_templates.map { |t| [ t.name, t.id ] }, @selected_email_template&.id),
+                      include_blank: "Choose a template...",
+                      class: "block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
+              </div>
+              <%= render(Ui::ButtonComponent.new(
+                variant: :secondary, size: :sm, type: "submit",
+                formmethod: "get", formaction: confirm_exp_entity_document_workflow_step_path(current_entity, @document, @workflow_step)
+              )) { "Load template" } %>
+            </div>
+
+            <% if @selected_email_template %>
+              <div class="mt-4 space-y-3">
+                <% @selected_email_template.email_template_fields.ordered.each do |field| %>
+                  <%= render "shared/template_field_value_input", field: field, value: @field_values[field.tag_name] %>
+                <% end %>
+              </div>
+
+              <% if @email_body_errors.present? %>
+                <p class="mt-2 text-sm text-danger-600">Missing required field(s): <%= @email_body_errors.join(", ") %></p>
+              <% end %>
+
+              <div class="mt-3">
+                <%= render(Ui::ButtonComponent.new(
+                  variant: :secondary, size: :sm, type: "submit", name: "generate_message", value: "1",
+                  formmethod: "get", formaction: confirm_exp_entity_document_workflow_step_path(current_entity, @document, @workflow_step)
+                )) { "Insert into message" } %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%= f.floating_text_area :dispatch_message, label: "Message to include in the notification email", placeholder: " ", required: true, name: "dispatch_message" %>
+      <% end %>
 
       <div class="space-y-3 my-6">
         <% if @document.addressee.external? %>
           <label class="flex items-start gap-2 text-sm text-gray-700">
-            <input type="checkbox" name="addressee_dispatch_as_attachment" value="true" class="mt-0.5 rounded border-gray-300">
+            <input type="checkbox" name="addressee_dispatch_as_attachment" value="true" class="mt-0.5 rounded border-gray-300" <%= "checked" if @document.multi_recipient? %>>
             Send as attachment to <%= @document.addressee.display_name %> (addressee)
           </label>
         <% end %>
 
         <% @document.cc_recipients.select { |cc| cc.party.external? }.each do |cc| %>
           <label class="flex items-start gap-2 text-sm text-gray-700">
-            <input type="checkbox" name="cc_dispatch_as_attachment_ids[]" value="<%= cc.id %>" class="mt-0.5 rounded border-gray-300">
+            <input type="checkbox" name="cc_dispatch_as_attachment_ids[]" value="<%= cc.id %>" class="mt-0.5 rounded border-gray-300" <%= "checked" if @document.multi_recipient? %>>
             Send as attachment to <%= cc.party.display_name %> (cc)
           </label>
         <% end %>

@@ -46,6 +46,7 @@ Rails.application.routes.draw do
     resources :document_templates, controller: "entities/document_templates" do
       resource :generation, only: %i[new create], controller: "entities/document_templates/generations"
     end
+    resources :email_templates, controller: "entities/email_templates"
     resources :departments, controller: "entities/departments"
     resources :classification_nodes, controller: "entities/classification_nodes" do
       member do
@@ -73,7 +74,11 @@ Rails.application.routes.draw do
         end
       end
       resources :shared_links, only: %i[create destroy]
-      resources :cc_recipients, only: %i[create destroy]
+      resources :cc_recipients, only: %i[create destroy] do
+        collection do
+          post :bulk_create
+        end
+      end
       resource :main_file, only: %i[create destroy] do
         get :preview
         get :preview_content

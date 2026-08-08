@@ -6,7 +6,7 @@ module Templates
                    Actions::InjectComputedFieldValues,
                    Actions::RenderTemplateSubject,
                    Documents::Actions::CreateDocument,
-                   Actions::CreateCcRecipients,
+                   Documents::Actions::CreateCcRecipients,
                    Actions::CreateAnnexes,
                    Actions::GenerateMainFileFromDocx,
                    Actions::ApplyDefaultCircuitTemplate

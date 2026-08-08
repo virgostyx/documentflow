@@ -4,8 +4,9 @@ require "rails_helper"
 
 RSpec.describe Documents::Actions::NotifyCcRecipients do
   let(:document) { create(:document) }
+  let(:current_user) { create(:user) }
 
-  let(:ctx) { LightService::Context.make(document: document) }
+  let(:ctx) { LightService::Context.make(document: document, current_user: current_user) }
 
   describe ".execute" do
     context "when the document has cc recipients" do
@@ -19,10 +20,17 @@ RSpec.describe Documents::Actions::NotifyCcRecipients do
       end
 
       it "enqueues a cc_notification job for each recipient" do
-        expect(CcNotificationJob).to receive(:perform_later).with("User", user.id, document.id)
-        expect(CcNotificationJob).to receive(:perform_later).with("Contact", contact.id, document.id)
+        expect(CcNotificationJob).to receive(:perform_later).with("User", user.id, document.id, current_user.id)
+        expect(CcNotificationJob).to receive(:perform_later).with("Contact", contact.id, document.id, current_user.id)
 
         described_class.execute(ctx)
+      end
+
+      it "logs a dispatch_queued audit event for each recipient" do
+        expect { described_class.execute(ctx) }.to change(AuditLog, :count).by(2)
+
+        actions = AuditLog.where(auditable: document).pluck(:action)
+        expect(actions).to eq(%w[dispatch_queued dispatch_queued])
       end
     end
 
@@ -31,6 +39,10 @@ RSpec.describe Documents::Actions::NotifyCcRecipients do
         expect(CcNotificationJob).not_to receive(:perform_later)
 
         described_class.execute(ctx)
+      end
+
+      it "does not log any audit event" do
+        expect { described_class.execute(ctx) }.not_to change(AuditLog, :count)
       end
     end
 

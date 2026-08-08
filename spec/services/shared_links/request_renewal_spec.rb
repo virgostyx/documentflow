@@ -10,7 +10,7 @@ RSpec.describe SharedLinks::RequestRenewal do
     context "when the email matches the document's external addressee" do
       it "enqueues an addressee notification and returns true" do
         expect(AddresseeNotificationJob).to receive(:perform_later)
-          .with("Contact", document.addressee_id, document.id)
+          .with("Contact", document.addressee_id, document.id, document.created_by_id)
 
         result = described_class.call(token: expired_link.token, email: document.addressee.email)
 
@@ -44,7 +44,7 @@ RSpec.describe SharedLinks::RequestRenewal do
       before { create(:cc_recipient, document: document, party: contact) }
 
       it "enqueues a cc notification and returns true" do
-        expect(CcNotificationJob).to receive(:perform_later).with("Contact", contact.id, document.id)
+        expect(CcNotificationJob).to receive(:perform_later).with("Contact", contact.id, document.id, document.created_by_id)
 
         result = described_class.call(token: expired_link.token, email: contact.email)
 

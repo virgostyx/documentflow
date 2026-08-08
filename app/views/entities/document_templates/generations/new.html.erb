@@ -58,7 +58,7 @@
 
           <div class="mt-4 space-y-4">
             <% @document_template.document_template_fields.ordered.each do |field| %>
-              <%= render "field_value_input", field: field, value: @field_values[field.tag_name] %>
+              <%= render "shared/template_field_value_input", field: field, value: @field_values[field.tag_name] %>
             <% end %>
           </div>
         </div>

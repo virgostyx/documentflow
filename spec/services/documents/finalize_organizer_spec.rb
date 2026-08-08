@@ -36,7 +36,7 @@ RSpec.describe Documents::FinalizeOrganizer do
 
       it "notifie le destinataire principal du document" do
         expect(AddresseeNotificationJob).to receive(:perform_later)
-          .with(document.addressee_type, document.addressee_id, document.id)
+          .with(document.addressee_type, document.addressee_id, document.id, user.id)
 
         described_class.call(document: document, current_user: user)
       end
@@ -68,9 +68,10 @@ RSpec.describe Documents::FinalizeOrganizer do
       end
 
       it "enregistre un audit log" do
+        # +1 for the finalization event itself, +1 for the addressee's dispatch_queued event
         expect {
           described_class.call(document: document, current_user: user)
-        }.to change(AuditLog, :count).by(1)
+        }.to change(AuditLog, :count).by(2)
       end
 
       context "when the document has cc recipients" do
@@ -81,7 +82,7 @@ RSpec.describe Documents::FinalizeOrganizer do
         end
 
         it "notifies each cc recipient" do
-          expect(CcNotificationJob).to receive(:perform_later).with("Contact", contact.id, document.id)
+          expect(CcNotificationJob).to receive(:perform_later).with("Contact", contact.id, document.id, user.id)
 
           described_class.call(document: document, current_user: user)
         end

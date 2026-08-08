@@ -41,11 +41,14 @@ module SharedLinks
       party&.external? && party.email.casecmp?(@email)
     end
 
+    # No signed-in user initiates a renewal request (it's a public, unauthenticated
+    # flow matched by email) - attribute the resulting audit trail to the document's
+    # original author instead, since AuditLog requires an actor.
     def notify(role, party, document)
       if role == :addressee
-        AddresseeNotificationJob.perform_later(party.class.name, party.id, document.id)
+        AddresseeNotificationJob.perform_later(party.class.name, party.id, document.id, document.created_by_id)
       else
-        CcNotificationJob.perform_later(party.class.name, party.id, document.id)
+        CcNotificationJob.perform_later(party.class.name, party.id, document.id, document.created_by_id)
       end
     end
   end

@@ -9,6 +9,9 @@
   <% if policy(current_entity.document_templates.new).index? %>
     <%= render(Ui::ButtonComponent.new(href: entity_document_templates_path(current_entity), variant: :secondary)) { "Document templates" } %>
   <% end %>
+  <% if policy(current_entity.email_templates.new).index? %>
+    <%= render(Ui::ButtonComponent.new(href: entity_email_templates_path(current_entity), variant: :secondary)) { "Email templates" } %>
+  <% end %>
   <% if policy(current_entity).update? %>
     <%= render(Ui::ButtonComponent.new(href: edit_entity_path(current_entity), variant: :secondary)) { "Edit entity" } %>
   <% end %>

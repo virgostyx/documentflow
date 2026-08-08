@@ -1,0 +1,18 @@
+<div class="rounded-md border border-gray-200 p-3">
+  <%= f.hidden_field :id %>
+  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{<%= f.object.tag_name %>}}</p>
+
+  <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <%= f.floating_text_field :label, label: "Label", required: true, placeholder: " " %>
+    <%= f.floating_select :field_type, EmailTemplateField::FIELD_TYPES.map { |type| [ type.titleize, type ] },
+          { selected: f.object.field_type }, { label: "Type" } %>
+  </div>
+
+  <%= f.floating_text_field :options_text, label: "Options (comma-separated, for the Select type only)",
+        value: f.object.options_text, placeholder: " " %>
+
+  <div class="flex items-center gap-2">
+    <%= f.check_box :required, class: "h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded" %>
+    <%= f.label :required, "Required", class: "text-sm text-gray-700" %>
+  </div>
+</div>

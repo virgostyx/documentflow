@@ -119,6 +119,26 @@ RSpec.describe "WorkflowSteps", type: :request do
 
         expect(response.body).to include("Please review the attached amendment before Friday.")
       end
+
+      context "when the document is multi_recipient" do
+        before { document.update!(multi_recipient: true) }
+
+        it "defaults the addressee's attachment checkbox to checked" do
+          get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+          checkbox = Nokogiri::HTML(response.body).at_css("input[name='addressee_dispatch_as_attachment']")
+          expect(checkbox["checked"]).to eq("checked")
+        end
+      end
+
+      context "when the document is not multi_recipient" do
+        it "leaves the addressee's attachment checkbox unchecked by default" do
+          get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+          checkbox = Nokogiri::HTML(response.body).at_css("input[name='addressee_dispatch_as_attachment']")
+          expect(checkbox["checked"]).to be_nil
+        end
+      end
     end
 
     context "as another user" do
@@ -148,6 +168,47 @@ RSpec.describe "WorkflowSteps", type: :request do
         get confirm_exp_entity_document_workflow_step_path(entity, document, visa_step)
 
         expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "with an email template" do
+      let!(:email_template) do
+        create(:email_template, entity: entity, body_template: "Dear {{recipient_name}}, reference {{reference}}, issued {{date}}.")
+      end
+      let(:reference_field) { email_template.email_template_fields.find_by(tag_name: "reference") }
+
+      before do
+        create(:entity_user, entity: entity, user: exp_step.actor)
+        sign_in exp_step.actor
+      end
+
+      it "shows the template picker" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+        expect(response.body).to include(email_template.name)
+      end
+
+      it "shows the template's fields once a template is selected" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step), params: { email_template_id: email_template.id }
+
+        expect(response.body).to include(reference_field.label)
+      end
+
+      it "pre-fills the message with the rendered body, leaving {{recipient_name}} literal, when field values are submitted" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step),
+            params: { email_template_id: email_template.id, field_values: { "reference" => "TND-2026-01" }, generate_message: "1" }
+
+        expect(response.body).to include("Dear {{recipient_name}}, reference TND-2026-01")
+      end
+
+      it "shows an error and does not overwrite the message when a required field is missing" do
+        document.update!(dispatch_message: "Original message")
+
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step),
+            params: { email_template_id: email_template.id, field_values: {}, generate_message: "1" }
+
+        expect(response.body).to include("Missing required field")
+        expect(response.body).to include("Original message")
       end
     end
   end

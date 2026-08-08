@@ -9,7 +9,7 @@ module Templates
   # change mid-type), so both operations work on each paragraph's
   # concatenated <w:t> text rather than matching node-by-node.
   class DocxTemplateProcessor
-    TAG_PATTERN = /\{\{(\w+)\}\}/
+    TAG_PATTERN = Templates::TagScanner::TAG_PATTERN
     WORD_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
     NS = { "w" => WORD_NS }.freeze
     DOCUMENT_ENTRY = "word/document.xml"

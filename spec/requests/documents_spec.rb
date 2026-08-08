@@ -957,10 +957,17 @@ RSpec.describe "Documents", type: :request do
         expect(response.body).not_to include("Activity history")
       end
 
-      it "does not show a dispatch status section when there are no dispatch events" do
+      it "shows the dispatch status section with a not-dispatched-yet message when there are no dispatch events" do
         get entity_document_path(entity, document)
 
-        expect(response.body).not_to include("Dispatch status")
+        expect(response.body).to include("Dispatch status")
+        expect(response.body).to include("Not dispatched yet.")
+      end
+
+      it "always wraps the panel in the document's dispatch_status dom id, even with no dispatch events yet, so a later live update has a target to replace" do
+        get entity_document_path(entity, document)
+
+        expect(response.body).to include(%(id="#{ActionView::RecordIdentifier.dom_id(document, :dispatch_status)}"))
       end
 
       context "when the document has dispatch events" do

@@ -16,6 +16,10 @@ module Documents
       @document = document
     end
 
+    def dom_id
+      ActionView::RecordIdentifier.dom_id(document, :dispatch_status)
+    end
+
     def rows
       logs_by_recipient.map do |_key, logs|
         latest = logs.max_by(&:created_at)
@@ -23,10 +27,6 @@ module Documents
 
         Row.new(label: recipient_label(latest), status_label: status[:label], status_color: status[:color], created_at: latest.created_at)
       end.sort_by(&:label)
-    end
-
-    def render?
-      logs_by_recipient.any?
     end
 
     private

@@ -11,9 +11,13 @@ RSpec.describe Documents::DispatchStatusComponent, type: :component do
   subject { render_inline(described_class.new(document: document)) }
 
   context "when there are no dispatch events" do
-    it "renders nothing" do
-      expect(subject.to_html.strip).to be_empty
+    it "shows a not-dispatched-yet message" do
+      expect(subject).to have_text("Not dispatched yet.")
     end
+  end
+
+  it "wraps its own output in the document's dispatch_status dom id, so a Turbo Stream replace keeps the id for later broadcasts" do
+    expect(subject).to have_css("##{ActionView::RecordIdentifier.dom_id(document, :dispatch_status)}")
   end
 
   context "with a single queued recipient" do

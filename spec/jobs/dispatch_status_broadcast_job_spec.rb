@@ -33,5 +33,15 @@ RSpec.describe DispatchStatusBroadcastJob do
         expect(content).to include("Sent")
       }
     end
+
+    it "includes the dom id inside the broadcast content itself, so the replaced element keeps its id for later broadcasts" do
+      target = ActionView::RecordIdentifier.dom_id(document, :dispatch_status)
+
+      expect {
+        described_class.new.perform(document.id)
+      }.to have_broadcasted_to(stream_name).with { |content|
+        expect(content).to include(%(id="#{target}"))
+      }
+    end
   end
 end

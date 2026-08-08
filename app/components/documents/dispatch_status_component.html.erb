@@ -1,11 +1,17 @@
-<ul class="divide-y divide-gray-100">
-  <% rows.each do |row| %>
-    <li class="py-2 flex items-center justify-between gap-4 text-sm">
-      <span class="text-gray-900"><%= row.label %></span>
-      <span class="flex items-center gap-2">
-        <%= render(Ui::BadgeComponent.new(color: row.status_color)) { row.status_label } %>
-        <span class="text-gray-500 text-xs"><%= l(row.created_at, format: :short) %></span>
-      </span>
-    </li>
+<div id="<%= dom_id %>">
+  <% if rows.any? %>
+    <ul class="divide-y divide-gray-100">
+      <% rows.each do |row| %>
+        <li class="py-2 flex items-center justify-between gap-4 text-sm">
+          <span class="text-gray-900"><%= row.label %></span>
+          <span class="flex items-center gap-2">
+            <%= render(Ui::BadgeComponent.new(color: row.status_color)) { row.status_label } %>
+            <span class="text-gray-500 text-xs"><%= l(row.created_at, format: :short) %></span>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-sm text-gray-500">Not dispatched yet.</p>
   <% end %>
-</ul>
+</div>

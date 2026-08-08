@@ -21,7 +21,8 @@
               </div>
               <%= render(Ui::ButtonComponent.new(
                 variant: :secondary, size: :sm, type: "submit",
-                formmethod: "get", formaction: confirm_exp_entity_document_workflow_step_path(current_entity, @document, @workflow_step)
+                formmethod: "get", formaction: confirm_exp_entity_document_workflow_step_path(current_entity, @document, @workflow_step),
+                data: { turbo_frame: "dispatch_message_editor" }
               )) { "Load template" } %>
             </div>
 
@@ -39,7 +40,8 @@
               <div class="mt-3">
                 <%= render(Ui::ButtonComponent.new(
                   variant: :secondary, size: :sm, type: "submit", name: "generate_message", value: "1",
-                  formmethod: "get", formaction: confirm_exp_entity_document_workflow_step_path(current_entity, @document, @workflow_step)
+                  formmethod: "get", formaction: confirm_exp_entity_document_workflow_step_path(current_entity, @document, @workflow_step),
+                  data: { turbo_frame: "dispatch_message_editor" }
                 )) { "Insert into message" } %>
               </div>
             <% end %>

@@ -74,8 +74,7 @@ function showConfirmModal(messageOrOptions) {
       }
     }
 
-    modal.classList.remove('hidden')
-    document.body.style.overflow = 'hidden'
+    if (!modal.open) modal.showModal()
 
     const confirmButton = modal.querySelector('[data-confirm-target="confirmButton"]')
     if (confirmButton) {

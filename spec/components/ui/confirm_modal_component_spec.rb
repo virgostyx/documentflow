@@ -22,10 +22,11 @@ RSpec.describe Ui::ConfirmModalComponent, type: :component do
     expect(page).to have_button("Cancel")
   end
 
-  it "has the modal hidden by default" do
+  it "renders a native dialog, closed by default, so it can stack above other open dialogs" do
     render_inline(described_class.new)
 
-    expect(page).to have_css("#confirm-modal.hidden")
+    expect(page).to have_css("dialog#confirm-modal")
+    expect(page).not_to have_css("dialog#confirm-modal[open]")
   end
 
   it "has correct aria attributes for accessibility" do

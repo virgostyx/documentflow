@@ -7,7 +7,7 @@ RSpec.describe "Approve and dispatch modal", type: :system, js: true do
   let(:owner) { create(:user) }
   let(:exp_actor) { create(:user) }
 
-  let(:document) { create(:document, :in_progress, entity: entity, created_by: owner, subject: "Supplier agreement") }
+  let(:document) { create(:document, :signed, entity: entity, created_by: owner, subject: "Supplier agreement") }
 
   let!(:email_template) do
     create(:email_template, entity: entity, created_by: owner, name: "Standard notice",
@@ -50,5 +50,14 @@ RSpec.describe "Approve and dispatch modal", type: :system, js: true do
     click_button "Cancel"
 
     expect(page).not_to have_content("Approve and dispatch")
+  end
+
+  it "lets the user actually reach and click Confirm in the nested confirmation dialog" do
+    click_button "Approve"
+
+    expect(page).to have_content("Confirmation Required")
+    click_button "Confirm"
+
+    expect(page).to have_content("Finalized")
   end
 end

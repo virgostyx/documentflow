@@ -1,0 +1,7 @@
+<td class="px-4 py-3">
+  <%= link_to failed_job_error(job), application_job_path(@application, job.job_id, anchor: "error"), class: "text-danger-600 hover:text-danger-700" %>
+  <div class="text-gray-500 text-xs"><%= time_distance_in_words_with_title(job.failed_at) %> ago</div>
+</td>
+<td class="px-4 py-3 text-right">
+  <%= render "mission_control/jobs/jobs/failed/actions", job: job %>
+</td>

@@ -1,0 +1,15 @@
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job</th>
+        <% attribute_names_for_job_status(jobs_status).each do |attribute| %>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= attribute %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <%= render partial: "mission_control/jobs/jobs/job", collection: jobs_page.records %>
+    </tbody>
+  </table>
+</div>

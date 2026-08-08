@@ -1,0 +1,16 @@
+<tr class="hover:bg-gray-50">
+  <td class="px-4 py-3">
+    <%= link_to queue.name, application_queue_path(@application, queue), class: "text-primary-600 hover:text-primary-700 font-medium" %>
+    <% if queue.paused? %>
+      <%= render(Ui::BadgeComponent.new(color: :warning)) { "Paused" } %>
+    <% end %>
+  </td>
+  <td class="px-4 py-3 text-gray-700">
+    <%= queue.size %>
+  </td>
+  <td class="px-4 py-3 text-right">
+    <% if queue_pausing_supported? %>
+      <%= render "mission_control/jobs/queues/actions", queue: queue %>
+    <% end %>
+  </td>
+</tr>

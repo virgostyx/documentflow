@@ -1,0 +1,5 @@
+<%= render Ui::CardComponent.new do |card| %>
+  <% card.with_header { "Configuration" } %>
+
+  <pre class="bg-gray-50 rounded-md p-4 text-xs overflow-x-auto font-mono"><%= JSON.pretty_generate(worker.configuration) %></pre>
+<% end %>

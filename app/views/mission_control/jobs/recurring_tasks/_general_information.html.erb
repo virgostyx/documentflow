@@ -1,0 +1,26 @@
+<%= render Ui::CardComponent.new do |card| %>
+  <% card.with_header { "General information" } %>
+
+  <%= render Ui::DefinitionListComponent.new do |list| %>
+    <% if recurring_task.job_class_name.present? %>
+      <% list.with_item(term: "Job class") { recurring_task.job_class_name } %>
+      <% list.with_item(term: "Arguments") do %>
+        <span class="font-mono text-xs"><%= recurring_task.arguments.join(",") %></span>
+      <% end %>
+    <% elsif recurring_task.command.present? %>
+      <% list.with_item(term: "Command") do %>
+        <span class="font-mono text-xs"><%= recurring_task.command %></span>
+      <% end %>
+    <% end %>
+
+    <% list.with_item(term: "Schedule") { recurring_task.schedule } %>
+
+    <% if recurring_task.queue_name.present? %>
+      <% list.with_item(term: "Queue") { recurring_task.queue_name } %>
+    <% end %>
+
+    <% if recurring_task.priority.present? %>
+      <% list.with_item(term: "Priority") { recurring_task.priority } %>
+    <% end %>
+  <% end %>
+<% end %>

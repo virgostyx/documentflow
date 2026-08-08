@@ -1,0 +1,2 @@
+<td class="px-4 py-3 text-gray-700"><%= link_to job.queue_name, application_queue_path(@application, job.queue), class: "text-primary-600 hover:text-primary-700" %></td>
+<td class="px-4 py-3 text-gray-500"><%= time_distance_in_words_with_title(job.finished_at) %> ago</td>

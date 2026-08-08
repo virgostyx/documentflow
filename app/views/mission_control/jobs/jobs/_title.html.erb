@@ -1,0 +1,18 @@
+<div class="flex items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+    <h2 class="text-lg font-semibold text-gray-900"><%= job_title(job) %></h2>
+    <%= render(Ui::BadgeComponent.new(color: badge_color_for_status(job.status))) { job.status } %>
+  </div>
+
+  <div>
+    <% if job.failed? %>
+      <%= render "mission_control/jobs/jobs/failed/actions", job: job %>
+    <% end %>
+    <% if job.blocked? %>
+      <%= render "mission_control/jobs/jobs/blocked/actions", job: job %>
+    <% end %>
+    <% if job.scheduled? %>
+      <%= render "mission_control/jobs/jobs/scheduled/actions", job: job %>
+    <% end %>
+  </div>
+</div>

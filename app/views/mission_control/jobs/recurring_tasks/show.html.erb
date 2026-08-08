@@ -1,0 +1,17 @@
+<% navigation(title: @recurring_task.id, section: :recurring_tasks) %>
+
+<div class="space-y-6">
+  <%= render "mission_control/jobs/recurring_tasks/title", recurring_task: @recurring_task %>
+  <%= render "mission_control/jobs/recurring_tasks/general_information", recurring_task: @recurring_task %>
+
+  <% if @jobs_page.empty? %>
+    <%= blank_status_notice "No jobs found for this recurring task" %>
+  <% else %>
+    <div>
+      <h2 class="text-sm font-medium text-gray-500 mb-2"><%= pluralize @recurring_task.jobs.count, "job" %></h2>
+      <%= render "mission_control/jobs/shared/jobs", jobs: @jobs_page.records %>
+    </div>
+
+    <%= render "mission_control/jobs/shared/pagination_toolbar", page: @jobs_page, filter_param: jobs_filter_param %>
+  <% end %>
+</div>

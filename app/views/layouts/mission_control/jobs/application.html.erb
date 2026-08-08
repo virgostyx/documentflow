@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Background jobs<%= " - #{page_title}" if page_title %></title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="turbo-cache-control" content="no-cache">
+
+  <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags "application", importmap: MissionControl::Jobs.importmap %>
+</head>
+
+<body class="bg-gray-50 antialiased">
+  <%= render Shared::HeaderComponent.new(current_user: current_user) %>
+
+  <%= render "shared/flash" %>
+
+  <main class="pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <%= render "layouts/mission_control/jobs/application_selection" %>
+
+      <%= render Ui::PageHeaderComponent.new(title: page_title || "Background jobs") %>
+
+      <%= render "layouts/mission_control/jobs/navigation" %>
+
+      <%= yield %>
+    </div>
+  </main>
+</body>
+</html>

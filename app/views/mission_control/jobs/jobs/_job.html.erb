@@ -1,0 +1,13 @@
+<tr class="hover:bg-gray-50">
+  <td class="px-4 py-3">
+    <%= link_to job_title(job), application_job_path(@application, job.job_id), class: "text-primary-600 hover:text-primary-700 font-medium" %>
+
+    <% if job.serialized_arguments.present? %>
+      <div class="font-mono text-xs text-gray-500"><%= job_arguments(job) %></div>
+    <% end %>
+
+    <div class="text-gray-500 text-xs">Enqueued <%= time_distance_in_words_with_title(job.enqueued_at.to_datetime) %> ago</div>
+  </td>
+
+  <%= render "mission_control/jobs/jobs/#{jobs_status}/job", job: job %>
+</tr>

@@ -1,0 +1,13 @@
+<div class="flex items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+    <h2 class="text-lg font-semibold text-gray-900"><%= queue.name %></h2>
+    <% if queue.paused? %>
+      <%= render(Ui::BadgeComponent.new(color: :warning)) { "Paused" } %>
+    <% end %>
+    <span class="text-sm text-gray-500"><%= pluralize queue.size, "pending job" %></span>
+  </div>
+
+  <% if queue_pausing_supported? %>
+    <%= render "mission_control/jobs/queues/actions", queue: queue %>
+  <% end %>
+</div>

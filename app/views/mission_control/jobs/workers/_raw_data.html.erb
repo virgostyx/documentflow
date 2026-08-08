@@ -1,0 +1,5 @@
+<%= render Ui::CardComponent.new do |card| %>
+  <% card.with_header { "Raw data" } %>
+
+  <pre class="bg-gray-50 rounded-md p-4 text-xs overflow-x-auto font-mono"><%= JSON.pretty_generate(worker.raw_data) %></pre>
+<% end %>

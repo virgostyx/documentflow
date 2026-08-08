@@ -1,0 +1,10 @@
+<div class="flex items-center justify-between gap-3 mb-4 text-sm">
+  <% if defined?(main_app.root_path) %>
+    <%= link_to "← Back to DocumentFlow", main_app.root_path, class: "text-gray-500 hover:text-primary-600 transition-colors" %>
+  <% end %>
+
+  <div class="flex items-center gap-3">
+    <%= render "layouts/mission_control/jobs/application_selection/servers", application: @application %>
+    <%= render "layouts/mission_control/jobs/application_selection/applications" if selectable_applications.any? %>
+  </div>
+</div>

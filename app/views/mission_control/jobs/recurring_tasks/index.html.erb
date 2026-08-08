@@ -1,0 +1,23 @@
+<% navigation(title: "Recurring tasks", section: :recurring_tasks) %>
+
+<% if @recurring_tasks.empty? %>
+  <%= blank_status_notice "There are no recurring tasks configured" %>
+<% else %>
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schedule</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last enqueued</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Next</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <%= render partial: "mission_control/jobs/recurring_tasks/recurring_task", collection: @recurring_tasks %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

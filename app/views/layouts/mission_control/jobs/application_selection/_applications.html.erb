@@ -1,0 +1,9 @@
+<div class="relative">
+  <select onchange="window.location = this.value"
+          class="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+    <option value="" selected disabled><%= MissionControl::Jobs::Current.application.name %></option>
+    <% selectable_applications.each do |application| %>
+      <option value="<%= application_queues_path(application, server_id: nil) %>"><%= application.name %></option>
+    <% end %>
+  </select>
+</div>

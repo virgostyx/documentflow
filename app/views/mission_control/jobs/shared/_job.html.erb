@@ -1,0 +1,22 @@
+<tr class="hover:bg-gray-50">
+  <td class="px-4 py-3">
+    <%= link_to job_title(job), application_job_path(@application, job.job_id, filter: { queue_name: job.queue }), class: "text-primary-600 hover:text-primary-700 font-medium" %>
+    <div class="text-gray-500 text-xs">Enqueued <%= time_distance_in_words_with_title(job.enqueued_at.to_datetime) %> ago</div>
+  </td>
+  <td class="px-4 py-3">
+    <% if job.serialized_arguments.present? %>
+      <span class="font-mono text-xs text-gray-500">
+        <%= job_arguments(job) %>
+      </span>
+    <% end %>
+  </td>
+  <td class="px-4 py-3 text-gray-500">
+    <% if job.started_at %>
+      Running for <%= time_distance_in_words_with_title(job.started_at) %>
+    <% elsif job.finished_at %>
+      Finished <%= time_distance_in_words_with_title(job.finished_at) %> ago
+    <% else %>
+      Pending
+    <% end %>
+  </td>
+</tr>

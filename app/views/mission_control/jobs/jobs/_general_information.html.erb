@@ -1,0 +1,38 @@
+<%= render Ui::CardComponent.new do |card| %>
+  <% card.with_header { "General information" } %>
+
+  <%= render Ui::DefinitionListComponent.new do |list| %>
+    <% list.with_item(term: "Arguments") do %>
+      <span class="font-mono text-xs"><%= job_arguments(job) %></span>
+    <% end %>
+
+    <% list.with_item(term: "Job id") { job.job_id } %>
+
+    <% list.with_item(term: "Queue") do %>
+      <%= link_to job.queue_name, application_queue_path(@application, job.queue), class: "text-primary-600 hover:text-primary-700" %>
+    <% end %>
+
+    <% list.with_item(term: "Enqueued") { "#{time_distance_in_words_with_title(job.enqueued_at.to_datetime)} ago" } %>
+
+    <% if job.scheduled? %>
+      <% list.with_item(term: "Scheduled", badge: job_delayed?(job) ? { color: :danger, text: "delayed" } : nil) do %>
+        <%= bidirectional_time_distance_in_words_with_title(job.scheduled_at) %>
+      <% end %>
+    <% end %>
+
+    <% if job.failed? %>
+      <% list.with_item(term: "Failed") { "#{time_distance_in_words_with_title(job.failed_at)} ago" } %>
+    <% end %>
+
+    <% if job.finished_at.present? %>
+      <% list.with_item(term: "Finished") { "#{time_distance_in_words_with_title(job.finished_at)} ago" } %>
+      <% list.with_item(term: "Duration") { "#{job.duration.round(3)} seconds" } %>
+    <% end %>
+
+    <% if job.worker_id.present? %>
+      <% list.with_item(term: "Processed by") do %>
+        <%= link_to "worker #{job.worker_id}", application_worker_path(@application, job.worker_id), class: "text-primary-600 hover:text-primary-700" %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

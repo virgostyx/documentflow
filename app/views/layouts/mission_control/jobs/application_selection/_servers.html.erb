@@ -1,0 +1,9 @@
+<% if application.servers.many? %>
+  <div class="flex gap-1 rounded-md border border-gray-300 p-0.5">
+    <% application.servers.each do |server| %>
+      <% active = selected_server?(server) %>
+      <%= link_to server.name, application_queues_path(application, server_id: server),
+            class: "px-2.5 py-1 text-xs font-medium rounded #{active ? "bg-primary-600 text-white" : "text-gray-600 hover:bg-gray-100"}" %>
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,16 @@
+<% if job.failed? %>
+  <%= render Ui::CardComponent.new do |card| %>
+    <% card.with_header { "Error information" } %>
+
+    <%= render Ui::DefinitionListComponent.new do |list| %>
+      <% list.with_item(term: "Type") { job.last_execution_error.error_class } %>
+      <% list.with_item(term: "Message") { job.last_execution_error.try(:message) || job.last_execution_error.inspect } %>
+    <% end %>
+
+    <% if @server.backtrace_cleaner %>
+      <%= render "mission_control/jobs/jobs/failed/backtrace_toggle", application: @application, job: job %>
+    <% end %>
+
+    <pre class="bg-gray-50 rounded-md p-4 text-xs overflow-x-auto font-mono"><%= failed_job_backtrace(job, @server) %></pre>
+  <% end %>
+<% end %>

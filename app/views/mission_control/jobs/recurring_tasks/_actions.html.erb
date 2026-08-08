@@ -1,0 +1,7 @@
+<div class="flex justify-end">
+  <% if recurring_task.runnable? %>
+    <%= button_to "Run now", application_recurring_task_path(@application, recurring_task.id), method: :put,
+          class: "inline-flex items-center justify-center gap-2 rounded-md px-2.5 py-1 text-xs font-medium transition-colors " \
+                 "focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-primary-500" %>
+  <% end %>
+</div>

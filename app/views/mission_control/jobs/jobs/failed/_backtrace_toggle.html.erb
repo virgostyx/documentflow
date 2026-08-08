@@ -1,0 +1,10 @@
+<%# locals: (application:, job:) %>
+
+<div class="flex justify-end mb-2">
+  <div class="flex gap-1 rounded-md border border-gray-300 p-0.5">
+    <%= link_to "Clean", application_job_path(application, job.job_id, clean_backtrace: true),
+          class: "px-2.5 py-1 text-xs font-medium rounded #{clean_backtrace? ? "bg-primary-600 text-white" : "text-gray-600 hover:bg-gray-100"}" %>
+    <%= link_to "Full", application_job_path(application, job.job_id, clean_backtrace: false),
+          class: "px-2.5 py-1 text-xs font-medium rounded #{!clean_backtrace? ? "bg-primary-600 text-white" : "text-gray-600 hover:bg-gray-100"}" %>
+  </div>
+</div>

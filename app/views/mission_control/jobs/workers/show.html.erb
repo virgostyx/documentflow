@@ -1,0 +1,17 @@
+<% navigation(title: "Worker #{@worker.id}", section: :workers) %>
+
+<div class="space-y-6">
+  <%= render "mission_control/jobs/workers/title", worker: @worker %>
+  <%= render "mission_control/jobs/workers/configuration", worker: @worker %>
+
+  <% if @worker.jobs.empty? %>
+    <%= blank_status_notice "This worker is idle" %>
+  <% else %>
+    <div>
+      <h2 class="text-sm font-medium text-gray-500 mb-2">Running <%= pluralize @worker.jobs.size, "job" %></h2>
+      <%= render "mission_control/jobs/shared/jobs", jobs: @worker.jobs %>
+    </div>
+  <% end %>
+
+  <%= render "mission_control/jobs/workers/raw_data", worker: @worker %>
+</div>

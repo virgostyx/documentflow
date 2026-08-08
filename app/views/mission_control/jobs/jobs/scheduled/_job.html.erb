@@ -1,0 +1,10 @@
+<td class="px-4 py-3 text-gray-700"><%= link_to job.queue_name, application_queue_path(@application, job.queue), class: "text-primary-600 hover:text-primary-700" %></td>
+<td class="px-4 py-3 text-gray-700">
+  <%= bidirectional_time_distance_in_words_with_title(job.scheduled_at) %>
+  <% if job_delayed?(job) %>
+    <%= render(Ui::BadgeComponent.new(color: :danger)) { "delayed" } %>
+  <% end %>
+</td>
+<td class="px-4 py-3 text-right">
+  <%= render "mission_control/jobs/jobs/scheduled/actions", job: job %>
+</td>

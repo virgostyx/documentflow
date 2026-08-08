@@ -1,0 +1,19 @@
+<tr class="hover:bg-gray-50">
+  <td class="px-4 py-3">
+    <%= link_to "worker #{worker.id}", application_worker_path(@application, worker.id), class: "text-primary-600 hover:text-primary-700 font-medium" %>
+    <div class="text-gray-500 text-xs"><%= worker.name %></div>
+  </td>
+  <td class="px-4 py-3 text-gray-700"><%= worker.hostname %></td>
+  <td class="px-4 py-3 text-gray-700">
+    <% worker.jobs.each do |job| %>
+      <div class="mb-1 last:mb-0">
+        <%= link_to job_title(job), application_job_path(@application, job.job_id), class: "text-primary-600 hover:text-primary-700" %>
+
+        <% if job.serialized_arguments.present? %>
+          <div class="font-mono text-xs text-gray-500"><%= job_arguments(job) %></div>
+        <% end %>
+      </div>
+    <% end %>
+  </td>
+  <td class="px-4 py-3 text-gray-500"><%= time_distance_in_words_with_title(worker.last_heartbeat_at) %> ago</td>
+</tr>

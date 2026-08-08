@@ -47,4 +47,15 @@ RSpec.describe Documents::RecipientsPickerComponent, type: :component do
       expect(subject).to have_css("input[type=checkbox][name='bulk[tokens][]']", minimum: 3)
     end
   end
+
+  it "wires up the client-side filter controller" do
+    expect(subject).to have_css("[data-controller='recipients-picker']")
+    expect(subject).to have_css("input[data-recipients-picker-target='search'][data-action='input->recipients-picker#filter']")
+    expect(subject).to have_css("[data-recipients-picker-target='empty'].hidden")
+  end
+
+  it "tags each row with its lowercased display name for matching" do
+    expect(subject).to have_css("[data-recipients-picker-target='row'][data-searchable-text='#{colleague.display_name.downcase}']")
+    expect(subject).to have_css("[data-recipients-picker-target='row'][data-searchable-text='#{contact.display_name.downcase}']")
+  end
 end

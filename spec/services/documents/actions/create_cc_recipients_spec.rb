@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe Templates::Actions::CreateCcRecipients do
+RSpec.describe Documents::Actions::CreateCcRecipients do
   let(:entity) { create(:entity) }
   let(:document) { create(:document, entity: entity) }
   let(:internal_user) { create(:user) }

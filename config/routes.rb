@@ -32,6 +32,7 @@ Rails.application.routes.draw do
   resource :signature, only: %i[show create destroy], controller: "users/signatures"
 
   mount ActionCable.server => "/cable"
+  mount MissionControl::Jobs::Engine, at: "/jobs"
 
   # Authenticated application
   resources :entities do

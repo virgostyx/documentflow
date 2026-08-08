@@ -9,7 +9,7 @@
 # email-archive pipeline (EmailArchive::CreateOrganizer).
 class DocumentRowBroadcastJob < ApplicationJob
   queue_as :default
-  retry_on StandardError, wait: :exponentially_longer, attempts: 3
+  retry_on StandardError, wait: :polynomially_longer, attempts: 3
 
   TARGET_DOM_ID = "documents-overview-table-body"
 

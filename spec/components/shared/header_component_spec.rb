@@ -20,4 +20,16 @@ RSpec.describe Shared::HeaderComponent, type: :component do
   it "est un header fixe en haut de la page" do
     expect(subject).to have_css("header.fixed.top-0")
   end
+
+  it "n'affiche pas de lien vers les jobs en arrière-plan pour un utilisateur normal" do
+    expect(subject).not_to have_link("Background jobs", visible: false)
+  end
+
+  context "when the current user is a super admin" do
+    let(:user) { build_stubbed(:user, :super_admin, email: "admin@documentflow.test") }
+
+    it "shows a link to the background jobs dashboard" do
+      expect(subject).to have_link("Background jobs", href: "/jobs", visible: false)
+    end
+  end
 end

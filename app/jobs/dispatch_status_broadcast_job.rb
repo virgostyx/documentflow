@@ -5,7 +5,7 @@
 # events, so a viewer doesn't need to reload to see "Pending" flip to "Sent".
 class DispatchStatusBroadcastJob < ApplicationJob
   queue_as :default
-  retry_on StandardError, wait: :exponentially_longer, attempts: 3
+  retry_on StandardError, wait: :polynomially_longer, attempts: 3
 
   def perform(document_id)
     document = Document.find(document_id)

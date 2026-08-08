@@ -4,7 +4,7 @@ class SidebarBroadcastJob < ApplicationJob
   BADGE_KEYS = %i[overview to_validate received mine todo waiting info incoming_mail].freeze
 
   queue_as :default
-  retry_on StandardError, wait: :exponentially_longer, attempts: 3
+  retry_on StandardError, wait: :polynomially_longer, attempts: 3
 
   def perform(user_id, entity_id)
     user = User.find(user_id)

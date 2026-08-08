@@ -3,7 +3,7 @@
 class PdfConversionJob < ApplicationJob
   queue_as :default
 
-  retry_on StandardError, wait: :exponentially_longer, attempts: 3
+  retry_on StandardError, wait: :polynomially_longer, attempts: 3
 
   def perform(document_id, step_id = nil)
     document = Document.find(document_id)

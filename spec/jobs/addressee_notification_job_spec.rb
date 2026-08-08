@@ -3,8 +3,31 @@
 require "rails_helper"
 
 RSpec.describe AddresseeNotificationJob do
+  include ActiveJob::TestHelper
+
   let(:document) { create(:document) }
   let(:acting_user) { create(:user) }
+
+  around do |example|
+    original_adapter = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = :test
+    example.run
+    ActiveJob::Base.queue_adapter = original_adapter
+  end
+
+  describe "retry_on, exercised through the real ActiveJob execution path" do
+    let(:contact) { create(:contact, entity: document.entity) }
+
+    before do
+      allow(NotificationMailer).to receive(:document_addressed).and_raise(StandardError, "SMTP timeout")
+    end
+
+    it "reschedules a retry instead of crashing on an undeterminable delay (regression test for :exponentially_longer)" do
+      expect {
+        described_class.perform_now("Contact", contact.id, document.id, acting_user.id)
+      }.to have_enqueued_job(described_class).with("Contact", contact.id, document.id, acting_user.id)
+    end
+  end
 
   describe "#perform" do
     context "with an internal user recipient" do

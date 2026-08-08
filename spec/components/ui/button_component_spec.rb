@@ -33,6 +33,12 @@ RSpec.describe Ui::ButtonComponent, type: :component do
     expect(rendered).to have_css("a.bg-danger-600", text: "Delete")
   end
 
+  it "applies the orange variant classes" do
+    rendered = render_inline(described_class.new(variant: :orange)) { "Load template" }
+
+    expect(rendered).to have_css("button.bg-orange-500", text: "Load template")
+  end
+
   it "forwards html options such as data attributes" do
     rendered = render_inline(described_class.new(href: "/documents/1", method: :delete, data: { turbo_confirm: "Are you sure?" })) { "Delete" }
 

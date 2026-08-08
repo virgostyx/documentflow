@@ -20,7 +20,7 @@
                       class: "block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" %>
               </div>
               <%= render(Ui::ButtonComponent.new(
-                variant: :secondary, size: :sm, type: "submit",
+                variant: :orange, size: :sm, type: "submit",
                 formmethod: "get", formaction: confirm_exp_entity_document_workflow_step_path(current_entity, @document, @workflow_step),
                 data: { turbo_frame: "dispatch_message_editor" }
               )) { "Load template" } %>

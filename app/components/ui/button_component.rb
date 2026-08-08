@@ -5,7 +5,8 @@ module Ui
     VARIANTS = {
       primary: "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500",
       secondary: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-primary-500",
-      danger: "bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500"
+      danger: "bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500",
+      orange: "bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500"
     }.freeze
 
     SIZES = {

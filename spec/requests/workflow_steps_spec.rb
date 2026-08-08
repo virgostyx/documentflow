@@ -211,6 +211,13 @@ RSpec.describe "WorkflowSteps", type: :request do
         expect(response.body).to include(email_template.name)
       end
 
+      it "renders the Load template button in orange" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+        button = Nokogiri::HTML(response.body).css("button").find { |b| b.text.strip == "Load template" }
+        expect(button["class"]).to include("bg-orange-500")
+      end
+
       it "shows the template's fields once a template is selected" do
         get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step), params: { email_template_id: email_template.id }
 

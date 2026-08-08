@@ -120,6 +120,29 @@ RSpec.describe "WorkflowSteps", type: :request do
         expect(response.body).to include("Please review the attached amendment before Friday.")
       end
 
+      it "asks for confirmation before the Approve button actually dispatches, mentioning the recipient count" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+        expect(response.body).to include(
+          "data-turbo-confirm=\"Dispatch this document to 1 recipient? This finalizes the document and cannot be undone.\""
+        )
+      end
+
+      context "with cc recipients" do
+        before do
+          create(:cc_recipient, document: document, party: create(:contact, entity: entity))
+          create(:cc_recipient, document: document, party: create(:contact, entity: entity))
+        end
+
+        it "mentions the total recipient count (addressee + cc recipients) in the confirmation" do
+          get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+          expect(response.body).to include(
+            "data-turbo-confirm=\"Dispatch this document to 3 recipients? This finalizes the document and cannot be undone.\""
+          )
+        end
+      end
+
       context "when the document is multi_recipient" do
         before { document.update!(multi_recipient: true) }
 

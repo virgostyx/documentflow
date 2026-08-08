@@ -68,7 +68,11 @@
 
       <div class="flex justify-end gap-3">
         <%= render(Ui::ButtonComponent.new(variant: :secondary, type: "button", data: { action: "click->modal#close" })) { "Cancel" } %>
-        <%= render(Ui::ButtonComponent.new(type: "submit")) { "Approve" } %>
+        <% recipient_count = 1 + @document.cc_recipients.size %>
+        <%= render(Ui::ButtonComponent.new(
+          type: "submit",
+          data: { turbo_confirm: "Dispatch this document to #{pluralize(recipient_count, "recipient")}? This finalizes the document and cannot be undone." }
+        )) { "Approve" } %>
       </div>
     <% end %>
   </div>

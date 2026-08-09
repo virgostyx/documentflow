@@ -1,0 +1,8 @@
+<%= render Ui::PageHeaderComponent.new(title: "Users") %>
+
+<% if @users.any? %>
+  <%= render "table", users: @users %>
+  <%= paginate @users %>
+<% else %>
+  <%= render Ui::EmptyStateComponent.new(title: "No users yet") %>
+<% end %>

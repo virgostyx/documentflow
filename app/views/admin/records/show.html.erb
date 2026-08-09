@@ -1,0 +1,9 @@
+<%= render Ui::PageHeaderComponent.new(title: "#{@model_name} ##{@record.id}", back_path: admin_records_path(model: @model_name), back_text: "Back to #{Admin::ModelRegistry.display_name(@model_name)}") %>
+
+<%= render Ui::CardComponent.new do %>
+  <%= render Ui::DefinitionListComponent.new do |list| %>
+    <% @columns.each do |column| %>
+      <% list.with_item(term: column.humanize) { display_value(@record, column) } %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,0 +1,33 @@
+<%= render Ui::PageHeaderComponent.new(title: "Entities") %>
+
+<% if @entities.any? %>
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prefix</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Members</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @entities.each do |entity| %>
+          <tr>
+            <td class="px-4 py-3">
+              <%= link_to entity.name, admin_entity_path(entity), class: "font-medium text-primary-700 hover:underline" %>
+            </td>
+            <td class="px-4 py-3 text-gray-600 font-mono"><%= entity.prefix %></td>
+            <td class="px-4 py-3">
+              <%= render(Ui::BadgeComponent.new(color: entity.status == "active" ? :success : :gray)) { entity.status.humanize } %>
+            </td>
+            <td class="px-4 py-3 text-gray-500"><%= entity.entity_users.count %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= paginate @entities %>
+<% else %>
+  <%= render Ui::EmptyStateComponent.new(title: "No entities yet") %>
+<% end %>

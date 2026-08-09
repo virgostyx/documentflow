@@ -1,0 +1,12 @@
+<tr>
+  <td class="px-4 py-3">
+    <%= link_to user.full_name, admin_user_path(user), class: "font-medium text-primary-700 hover:underline" %>
+  </td>
+  <td class="px-4 py-3 text-gray-600"><%= user.email %></td>
+  <td class="px-4 py-3">
+    <% if user.super_admin? %>
+      <%= render(Ui::BadgeComponent.new(color: :danger)) { "Super admin" } %>
+    <% end %>
+  </td>
+  <td class="px-4 py-3 text-gray-500"><%= user.created_at.to_date.to_fs(:long) %></td>
+</tr>

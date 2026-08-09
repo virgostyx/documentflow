@@ -1,0 +1,8 @@
+<tr>
+  <td class="px-4 py-3">
+    <%= link_to audit_log.action.humanize, admin_audit_log_path(audit_log), class: "font-medium text-primary-700 hover:underline" %>
+  </td>
+  <td class="px-4 py-3 text-gray-600"><%= audit_log.user.email %></td>
+  <td class="px-4 py-3 text-gray-600"><%= audit_log.auditable_type %> #<%= audit_log.auditable_id %></td>
+  <td class="px-4 py-3 text-gray-500"><%= audit_log.created_at.to_fs(:long) %></td>
+</tr>

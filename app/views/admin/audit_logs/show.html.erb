@@ -1,0 +1,16 @@
+<%= render Ui::PageHeaderComponent.new(title: @audit_log.action.humanize, back_path: admin_audit_logs_path, back_text: "Back to audit logs") %>
+
+<%= render Ui::CardComponent.new do %>
+  <%= render Ui::DefinitionListComponent.new do |list| %>
+    <% list.with_item(term: "User") { @audit_log.user.email } %>
+    <% list.with_item(term: "Record") { "#{@audit_log.auditable_type} ##{@audit_log.auditable_id}" } %>
+    <% list.with_item(term: "IP address") { @audit_log.ip_address } %>
+    <% list.with_item(term: "User agent") { @audit_log.user_agent } %>
+    <% list.with_item(term: "When") { @audit_log.created_at.to_fs(:long) } %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new do |card| %>
+  <% card.with_header { "Change data" } %>
+  <pre class="text-xs bg-gray-50 rounded p-4 overflow-x-auto"><%= JSON.pretty_generate(@audit_log.change_data) %></pre>
+<% end %>

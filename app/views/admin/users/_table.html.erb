@@ -1,0 +1,17 @@
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% users.each do |user| %>
+        <%= render Admin::UserRowComponent.new(user: user) %>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,41 @@
+<%= render Ui::PageHeaderComponent.new(title: @user.full_name, back_path: admin_users_path, back_text: "Back to users") do |header| %>
+  <% header.with_actions do %>
+    <% if @user.super_admin? %>
+      <%= link_to "Revoke super admin", confirm_revoke_super_admin_admin_user_path(@user),
+            data: { turbo_frame: "modal", action: "click->modal#open" },
+            class: "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors " \
+                   "focus:outline-none focus:ring-2 focus:ring-offset-2 bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500" %>
+    <% else %>
+      <%= button_to "Grant super admin", grant_super_admin_admin_user_path(@user), method: :patch,
+            class: "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors " \
+                   "focus:outline-none focus:ring-2 focus:ring-offset-2 bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500" %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new do %>
+  <%= render Ui::DefinitionListComponent.new do |list| %>
+    <% list.with_item(term: "Email") { @user.email } %>
+    <% list.with_item(term: "Full name") { @user.full_name } %>
+    <% list.with_item(term: "Role", badge: @user.super_admin? ? { color: :danger, text: "Super admin" } : nil) { @user.super_admin? ? "Super admin" : "Regular user" } %>
+    <% list.with_item(term: "Signature on file") { @user.signature_image.present? ? "Yes" : "No" } %>
+    <% list.with_item(term: "Joined") { @user.created_at.to_fs(:long) } %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new do |card| %>
+  <% card.with_header { "Entity memberships" } %>
+
+  <% if @user.entity_users.any? %>
+    <ul class="divide-y divide-gray-100">
+      <% @user.entity_users.includes(:entity).each do |entity_user| %>
+        <li class="py-2 flex items-center justify-between text-sm">
+          <span class="text-gray-900"><%= entity_user.entity.name %></span>
+          <span class="text-gray-500"><%= entity_user.role.humanize %> &middot; <%= entity_user.status.humanize %></span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-sm text-gray-500">No entity memberships.</p>
+  <% end %>
+<% end %>

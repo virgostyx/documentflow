@@ -1,0 +1,24 @@
+<%= render Ui::PageHeaderComponent.new(title: "Audit logs") %>
+
+<% if @audit_logs.any? %>
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">When</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @audit_logs.each do |audit_log| %>
+          <%= render Admin::AuditLogRowComponent.new(audit_log: audit_log) %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= paginate @audit_logs %>
+<% else %>
+  <%= render Ui::EmptyStateComponent.new(title: "No audit log entries yet") %>
+<% end %>

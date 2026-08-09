@@ -34,6 +34,25 @@ Rails.application.routes.draw do
   mount ActionCable.server => "/cable"
   mount MissionControl::Jobs::Engine, at: "/jobs"
 
+  namespace :admin do
+    root to: "dashboard#index"
+
+    resources :users, only: %i[index show] do
+      member do
+        get   :confirm_revoke_super_admin
+        patch :grant_super_admin
+        patch :revoke_super_admin
+      end
+    end
+    resources :entities, only: %i[index show]
+    resources :audit_logs, only: %i[index show]
+
+    get "records/:model",     to: "records#index", as: :records,
+        constraints: { model: Regexp.union(Admin::ModelRegistry::ENTRIES.keys) }
+    get "records/:model/:id", to: "records#show",  as: :record,
+        constraints: { model: Regexp.union(Admin::ModelRegistry::ENTRIES.keys) }
+  end
+
   # Authenticated application
   resources :entities do
     resources :entity_users, only: %i[index create update destroy] do

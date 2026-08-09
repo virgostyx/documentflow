@@ -1,0 +1,11 @@
+<%= render Ui::PageHeaderComponent.new(title: @entity.name, back_path: admin_entities_path, back_text: "Back to entities") %>
+
+<%= render Ui::CardComponent.new do %>
+  <%= render Ui::DefinitionListComponent.new do |list| %>
+    <% list.with_item(term: "Prefix") { @entity.prefix } %>
+    <% list.with_item(term: "Status", badge: @entity.status == "active" ? { color: :success, text: "Active" } : { color: :gray, text: @entity.status.humanize }) { @entity.status.humanize } %>
+    <% list.with_item(term: "Members") { @entity.entity_users.count } %>
+    <% list.with_item(term: "Documents") { @entity.documents.count } %>
+    <% list.with_item(term: "Created") { @entity.created_at.to_fs(:long) } %>
+  <% end %>
+<% end %>

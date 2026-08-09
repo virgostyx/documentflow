@@ -2,11 +2,11 @@
 
 require "rails_helper"
 
-RSpec.describe "Mission Control Jobs mount", type: :request do
-  describe "GET /jobs" do
+RSpec.describe "Admin dashboard", type: :request do
+  describe "GET /admin" do
     context "when not signed in" do
       it "redirects to sign in" do
-        get "/jobs"
+        get "/admin"
 
         expect(response).to redirect_to(new_user_session_path)
       end
@@ -16,12 +16,8 @@ RSpec.describe "Mission Control Jobs mount", type: :request do
       before { sign_in create(:user) }
 
       it "redirects with an authorization alert" do
-        get "/jobs"
+        get "/admin"
 
-        # A literal path, not the `root_path` helper: after dispatching through the
-        # mounted engine, request specs rebind implicit route helpers to the engine's
-        # own route set for the rest of the example, so `root_path` here would
-        # resolve to "/jobs/" instead of the main app's root.
         expect(response).to redirect_to("/")
         expect(flash[:alert]).to be_present
       end
@@ -34,10 +30,18 @@ RSpec.describe "Mission Control Jobs mount", type: :request do
 
       before { sign_in super_admin }
 
-      it "renders the Mission Control Jobs dashboard" do
-        get "/jobs"
+      it "renders the admin dashboard" do
+        get "/admin"
 
         expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Admin")
+      end
+
+      it "links to every model in the read-only records browser" do
+        get "/admin"
+
+        expect(response.body).to include(admin_records_path(model: "Department"))
+        expect(response.body).to include(admin_records_path(model: "SharedLink"))
       end
     end
   end

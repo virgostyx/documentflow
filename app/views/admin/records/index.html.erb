@@ -1,0 +1,33 @@
+<%= render Ui::PageHeaderComponent.new(title: Admin::ModelRegistry.display_name(@model_name)) %>
+
+<% if @records.any? %>
+  <div class="bg-white rounded-lg border border-gray-200 overflow-x-auto mt-6">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <% @columns.each do |column| %>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"><%= column.humanize %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @records.each do |record| %>
+          <tr>
+            <% @columns.each_with_index do |column, index| %>
+              <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
+                <% if index.zero? %>
+                  <%= link_to display_value(record, column), admin_record_path(model: @model_name, id: record.id), class: "font-medium text-primary-700 hover:underline" %>
+                <% else %>
+                  <%= display_value(record, column) %>
+                <% end %>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= paginate @records %>
+<% else %>
+  <%= render Ui::EmptyStateComponent.new(title: "No #{Admin::ModelRegistry.display_name(@model_name).downcase} yet") %>
+<% end %>

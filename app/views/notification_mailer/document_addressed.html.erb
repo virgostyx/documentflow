@@ -3,7 +3,9 @@
 <%= simple_format(@dispatch_message) %>
 
 <% if @files_attached %>
-  <p>The document and its attachments are enclosed with this email as PDF files.</p>
+  <% if @include_attachment_note %>
+    <p>The document and its attachments are enclosed with this email as PDF files.</p>
+  <% end %>
 <% else %>
   <p><%= link_to "View the document", @document_url %></p>
 

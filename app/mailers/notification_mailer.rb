@@ -109,6 +109,7 @@ class NotificationMailer < ApplicationMailer
       attachments[filename] = { mime_type: "application/pdf", content: bytes }
     end
     @files_attached = true
+    @include_attachment_note = document.include_attachment_note
   end
 
   def unique_filename(filename, used_names)

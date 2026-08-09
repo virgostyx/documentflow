@@ -14,6 +14,7 @@ module WorkflowActions
         step_up_tokens: session[:step_up_tokens] || {},
         addressee_dispatch_as_attachment: params[:addressee_dispatch_as_attachment],
         cc_dispatch_as_attachment_ids: params[:cc_dispatch_as_attachment_ids],
+        include_attachment_note: params[:include_attachment_note],
         dispatch_message: params[:dispatch_message],
         dispatch_subject: params[:dispatch_subject]
       },

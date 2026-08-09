@@ -354,6 +354,31 @@ RSpec.describe Workflow::ApproveStepOrganizer do
 
         expect(other_document.reload.addressee_dispatch_as_attachment).to be false
       end
+
+      it "records the include_attachment_note preference when checked" do
+        described_class.call(
+          step: exp_step, current_user: exp_step.actor,
+          include_attachment_note: "true", dispatch_message: "Test message"
+        )
+
+        expect(document.reload.include_attachment_note).to be true
+      end
+
+      it "sets include_attachment_note to false when unchecked" do
+        described_class.call(step: exp_step, current_user: exp_step.actor, dispatch_message: "Test message")
+
+        expect(document.reload.include_attachment_note).to be false
+      end
+
+      it "does not touch include_attachment_note for a non-EXP step" do
+        other_document = create(:document, :with_workflow, :in_progress)
+        other_document.workflow_steps.find_by(role: "RED").update!(status: "approved")
+        visa_step = other_document.workflow_steps.find_by(role: "VISA")
+
+        described_class.call(step: visa_step, current_user: visa_step.actor)
+
+        expect(other_document.reload.include_attachment_note).to be true
+      end
     end
 
     context "approving EXP with a dispatch message" do

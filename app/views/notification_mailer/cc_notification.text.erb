@@ -3,7 +3,9 @@ Hello <%= @recipient_name %>,
 <%= @dispatch_message %>
 
 <% if @files_attached %>
+<% if @include_attachment_note %>
 The document and its attachments are enclosed with this email as PDF files.
+<% end %>
 <% else %>
 View the document: <%= @document_url %>
 <% if @shared_link %>

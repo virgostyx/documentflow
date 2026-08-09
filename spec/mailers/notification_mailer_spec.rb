@@ -230,6 +230,24 @@ RSpec.describe NotificationMailer do
         expect(mail.attachments.map(&:filename)).to contain_exactly("main.pdf", "main (2).pdf")
       end
     end
+
+    context "with an external contact recipient, attachment dispatch enabled, and the attachment note disabled" do
+      let(:document) do
+        create(:document, :finalized, addressee_dispatch_as_attachment: true, include_attachment_note: false,
+          dispatch_message: "Please review the attached document.")
+      end
+      let(:contact) { create(:contact, entity: document.entity) }
+      let(:mail) { described_class.document_addressed(contact, document) }
+
+      before do
+        document.main_file.attach(io: StringIO.new("%PDF-1.4 main content"), filename: "main.pdf", content_type: "application/pdf")
+      end
+
+      it "does not mention the attachment note" do
+        expect(mail.text_part.body.encoded).not_to include("enclosed")
+        expect(mail.html_part.body.encoded).not_to include("enclosed")
+      end
+    end
   end
 
   describe "#cc_notification" do

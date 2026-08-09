@@ -26,6 +26,11 @@ module Workflow
 
           cc_recipient.update_column(:dispatch_as_attachment, attachment_cc_ids.include?(cc_recipient.id))
         end
+
+        document.update_column(
+          :include_attachment_note,
+          ActiveModel::Type::Boolean.new.cast(ctx[:include_attachment_note]) || false
+        )
       end
     end
   end

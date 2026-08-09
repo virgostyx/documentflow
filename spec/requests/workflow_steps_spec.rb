@@ -143,6 +143,13 @@ RSpec.describe "WorkflowSteps", type: :request do
         end
       end
 
+      it "defaults the include_attachment_note checkbox to checked" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+        checkbox = Nokogiri::HTML(response.body).at_css("input[name='include_attachment_note']")
+        expect(checkbox["checked"]).to eq("checked")
+      end
+
       context "when the document is multi_recipient" do
         before { document.update!(multi_recipient: true) }
 
@@ -294,6 +301,20 @@ RSpec.describe "WorkflowSteps", type: :request do
         params: { dispatch_message: "Please review the attached amendment before Friday." }
 
       expect(document.reload.dispatch_message).to eq("Please review the attached amendment before Friday.")
+    end
+
+    it "persists the include_attachment_note preference when checked" do
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { include_attachment_note: "true", dispatch_message: "Test message" }
+
+      expect(document.reload.include_attachment_note).to be true
+    end
+
+    it "persists the include_attachment_note preference as false when unchecked" do
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { dispatch_message: "Test message" }
+
+      expect(document.reload.include_attachment_note).to be false
     end
 
     it "persists the submitted dispatch subject" do

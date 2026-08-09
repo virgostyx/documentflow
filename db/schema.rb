@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_08_073300) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_09_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -210,6 +210,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_08_073300) do
     t.bigint "entity_id", null: false
     t.boolean "expects_response", default: false, null: false
     t.bigint "in_reply_to_id"
+    t.boolean "include_attachment_note", default: true, null: false
     t.boolean "is_frozen", default: false, null: false
     t.bigint "lead_user_id"
     t.boolean "multi_recipient", default: false, null: false

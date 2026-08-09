@@ -66,6 +66,11 @@
             Send as attachment to <%= cc.party.display_name %> (cc)
           </label>
         <% end %>
+
+        <label class="flex items-start gap-2 text-sm text-gray-700">
+          <input type="checkbox" name="include_attachment_note" value="true" class="mt-0.5 rounded border-gray-300" checked>
+          Mention in the email that the document is attached as a PDF file
+        </label>
       </div>
 
       <div class="flex justify-end gap-3">

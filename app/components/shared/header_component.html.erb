@@ -20,6 +20,8 @@
 
       <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1">
         <% if current_user.super_admin? %>
+          <%= link_to "Admin panel", "/admin",
+                class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
           <%= link_to "Background jobs", "/jobs",
                 class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" %>
         <% end %>

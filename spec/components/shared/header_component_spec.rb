@@ -25,11 +25,19 @@ RSpec.describe Shared::HeaderComponent, type: :component do
     expect(subject).not_to have_link("Background jobs", visible: false)
   end
 
+  it "does not show a link to the admin panel for a regular user" do
+    expect(subject).not_to have_link("Admin panel", visible: false)
+  end
+
   context "when the current user is a super admin" do
     let(:user) { build_stubbed(:user, :super_admin, email: "admin@documentflow.test") }
 
     it "shows a link to the background jobs dashboard" do
       expect(subject).to have_link("Background jobs", href: "/jobs", visible: false)
+    end
+
+    it "shows a link to the admin panel" do
+      expect(subject).to have_link("Admin panel", href: "/admin", visible: false)
     end
   end
 end

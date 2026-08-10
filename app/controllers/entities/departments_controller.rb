@@ -3,6 +3,7 @@
 module Entities
   class DepartmentsController < ApplicationController
     include EntityScoped
+    include SavesAndResponds
 
     before_action :set_department, only: %i[edit update destroy]
 
@@ -19,12 +20,10 @@ module Entities
       @department = current_entity.departments.new(department_params)
       authorize @department
 
-      if @department.save
-        redirect_to entity_settings_path(current_entity), notice: "Department created successfully."
-      else
-        flash.now[:alert] = @department.errors.full_messages.to_sentence
-        render :new, status: :unprocessable_content
-      end
+      save_and_respond(@department,
+                        success_path: entity_settings_path(current_entity),
+                        success_message: "Department created successfully.",
+                        failure_template: :new) { @department.save }
     end
 
     def edit
@@ -34,12 +33,10 @@ module Entities
     def update
       authorize @department
 
-      if @department.update(department_params)
-        redirect_to entity_settings_path(current_entity), notice: "Department updated successfully."
-      else
-        flash.now[:alert] = @department.errors.full_messages.to_sentence
-        render :edit, status: :unprocessable_content
-      end
+      save_and_respond(@department,
+                        success_path: entity_settings_path(current_entity),
+                        success_message: "Department updated successfully.",
+                        failure_template: :edit) { @department.update(department_params) }
     end
 
     def destroy

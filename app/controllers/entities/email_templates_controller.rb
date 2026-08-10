@@ -3,6 +3,7 @@
 module Entities
   class EmailTemplatesController < ApplicationController
     include EntityScoped
+    include SavesAndResponds
 
     before_action :set_email_template, only: %i[edit update destroy]
 
@@ -20,13 +21,10 @@ module Entities
       @email_template = current_entity.email_templates.new(email_template_params.merge(created_by: current_user))
       authorize @email_template
 
-      if @email_template.save
-        redirect_to edit_entity_email_template_path(current_entity, @email_template),
-                    notice: "Email template created. Review the detected fields below."
-      else
-        flash.now[:alert] = @email_template.errors.full_messages.to_sentence
-        render :new, status: :unprocessable_content
-      end
+      save_and_respond(@email_template,
+                        success_path: -> { edit_entity_email_template_path(current_entity, @email_template) },
+                        success_message: "Email template created. Review the detected fields below.",
+                        failure_template: :new) { @email_template.save }
     end
 
     def edit
@@ -36,12 +34,10 @@ module Entities
     def update
       authorize @email_template
 
-      if @email_template.update(email_template_params)
-        redirect_to entity_email_templates_path(current_entity), notice: "Email template updated successfully."
-      else
-        flash.now[:alert] = @email_template.errors.full_messages.to_sentence
-        render :edit, status: :unprocessable_content
-      end
+      save_and_respond(@email_template,
+                        success_path: entity_email_templates_path(current_entity),
+                        success_message: "Email template updated successfully.",
+                        failure_template: :edit) { @email_template.update(email_template_params) }
     end
 
     def destroy

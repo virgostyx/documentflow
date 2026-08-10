@@ -3,6 +3,7 @@
 module Entities
   class CircuitTemplatesController < ApplicationController
     include EntityScoped
+    include SavesAndResponds
 
     before_action :set_circuit_template, only: %i[edit update destroy]
 
@@ -21,12 +22,10 @@ module Entities
       @circuit_template = current_entity.circuit_templates.new(circuit_template_params)
       authorize @circuit_template
 
-      if @circuit_template.save
-        redirect_to entity_circuit_templates_path(current_entity), notice: "Circuit template created successfully."
-      else
-        flash.now[:alert] = @circuit_template.errors.full_messages.to_sentence
-        render :new, status: :unprocessable_content
-      end
+      save_and_respond(@circuit_template,
+                        success_path: entity_circuit_templates_path(current_entity),
+                        success_message: "Circuit template created successfully.",
+                        failure_template: :new) { @circuit_template.save }
     end
 
     def edit
@@ -36,12 +35,10 @@ module Entities
     def update
       authorize @circuit_template
 
-      if @circuit_template.update(circuit_template_params)
-        redirect_to entity_circuit_templates_path(current_entity), notice: "Circuit template updated successfully."
-      else
-        flash.now[:alert] = @circuit_template.errors.full_messages.to_sentence
-        render :edit, status: :unprocessable_content
-      end
+      save_and_respond(@circuit_template,
+                        success_path: entity_circuit_templates_path(current_entity),
+                        success_message: "Circuit template updated successfully.",
+                        failure_template: :edit) { @circuit_template.update(circuit_template_params) }
     end
 
     def destroy

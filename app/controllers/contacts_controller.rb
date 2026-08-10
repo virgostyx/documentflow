@@ -2,6 +2,7 @@
 
 class ContactsController < ApplicationController
   include EntityScoped
+  include SavesAndResponds
 
   before_action :set_contact, only: %i[edit update destroy]
 
@@ -40,12 +41,10 @@ class ContactsController < ApplicationController
   def update
     authorize @contact
 
-    if @contact.update(contact_params)
-      redirect_to entity_contacts_path(current_entity), notice: "Contact updated successfully."
-    else
-      flash.now[:alert] = @contact.errors.full_messages.to_sentence
-      render :edit, status: :unprocessable_content
-    end
+    save_and_respond(@contact,
+                      success_path: entity_contacts_path(current_entity),
+                      success_message: "Contact updated successfully.",
+                      failure_template: :edit) { @contact.update(contact_params) }
   end
 
   def destroy

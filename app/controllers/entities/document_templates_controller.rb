@@ -3,6 +3,7 @@
 module Entities
   class DocumentTemplatesController < ApplicationController
     include EntityScoped
+    include SavesAndResponds
 
     before_action :set_document_template, only: %i[edit update destroy]
 
@@ -20,13 +21,10 @@ module Entities
       @document_template = current_entity.document_templates.new(document_template_params.merge(created_by: current_user))
       authorize @document_template
 
-      if @document_template.save
-        redirect_to edit_entity_document_template_path(current_entity, @document_template),
-                    notice: "Document template created. Review the detected fields below."
-      else
-        flash.now[:alert] = @document_template.errors.full_messages.to_sentence
-        render :new, status: :unprocessable_content
-      end
+      save_and_respond(@document_template,
+                        success_path: -> { edit_entity_document_template_path(current_entity, @document_template) },
+                        success_message: "Document template created. Review the detected fields below.",
+                        failure_template: :new) { @document_template.save }
     end
 
     def edit
@@ -36,12 +34,10 @@ module Entities
     def update
       authorize @document_template
 
-      if @document_template.update(document_template_params)
-        redirect_to entity_document_templates_path(current_entity), notice: "Document template updated successfully."
-      else
-        flash.now[:alert] = @document_template.errors.full_messages.to_sentence
-        render :edit, status: :unprocessable_content
-      end
+      save_and_respond(@document_template,
+                        success_path: entity_document_templates_path(current_entity),
+                        success_message: "Document template updated successfully.",
+                        failure_template: :edit) { @document_template.update(document_template_params) }
     end
 
     def destroy

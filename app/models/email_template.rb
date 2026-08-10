@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class EmailTemplate < ApplicationRecord
+  include EntityScopedAssociations
   # Tags that resolve to a computed value (see Templates::RenderEmailBody)
   # instead of a value typed on the generation form - never get an
   # email_template_fields row. {{date}} resolves when the email body is
@@ -19,7 +20,7 @@ class EmailTemplate < ApplicationRecord
   # Validations
   validates :name, presence: true, uniqueness: { scope: :entity_id }
   validates :body_template, presence: true
-  validate :department_belongs_to_entity
+  validates_entity_scoped :department
 
   # Callbacks
   after_commit :sync_template_fields, on: %i[create update]
@@ -31,12 +32,6 @@ class EmailTemplate < ApplicationRecord
   end
 
   private
-
-  def department_belongs_to_entity
-    return if entity.nil? || department.nil? || department.entity_id == entity_id
-
-    errors.add(:department, "must belong to the same entity")
-  end
 
   def sync_template_fields
     tag_names = tags - RESERVED_TAGS

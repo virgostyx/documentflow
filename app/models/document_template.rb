@@ -2,6 +2,7 @@
 
 class DocumentTemplate < ApplicationRecord
   include PartyAssignable
+  include EntityScopedAssociations
 
   TAG_PATTERN = Templates::TagScanner::TAG_PATTERN
   DOCX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -28,7 +29,7 @@ class DocumentTemplate < ApplicationRecord
   # Validations
   validates :name, presence: true, uniqueness: { scope: :entity_id }
   validates :subject_template, presence: true
-  validate :department_belongs_to_entity
+  validates_entity_scoped :department
   validate :default_sender_belongs_to_entity
   validate :default_addressee_belongs_to_entity
   validate :source_file_must_be_a_valid_docx
@@ -63,12 +64,6 @@ class DocumentTemplate < ApplicationRecord
     if source_file.blob.byte_size > SOURCE_FILE_MAX_SIZE
       errors.add(:source_file, "must be smaller than #{SOURCE_FILE_MAX_SIZE / 1.megabyte}MB")
     end
-  end
-
-  def department_belongs_to_entity
-    return if entity.nil? || department.nil? || department.entity_id == entity_id
-
-    errors.add(:department, "must belong to the same entity")
   end
 
   def default_sender_belongs_to_entity

@@ -3,6 +3,7 @@
 class Document < ApplicationRecord
   include AASM
   include PartyAssignable
+  include EntityScopedAssociations
 
   STATUSES = %w[draft in_progress signed finalized cancelled].freeze
   DIRECTIONS = %w[outgoing incoming].freeze
@@ -48,8 +49,7 @@ class Document < ApplicationRecord
   validates :direction, presence: true, inclusion: { in: DIRECTIONS }
   validate :sender_belongs_to_entity
   validate :addressee_belongs_to_entity
-  validate :department_belongs_to_entity
-  validate :in_reply_to_belongs_to_entity
+  validates_entity_scoped :department, :in_reply_to
   validate :classification_node_belongs_to_entity
   validate :lead_user_belongs_to_entity
 
@@ -290,18 +290,6 @@ class Document < ApplicationRecord
     return if entity.nil? || party_in_entity?(addressee)
 
     errors.add(:addressee, "must belong to the same entity")
-  end
-
-  def department_belongs_to_entity
-    return if entity.nil? || department.nil? || department.entity_id == entity_id
-
-    errors.add(:department, "must belong to the same entity")
-  end
-
-  def in_reply_to_belongs_to_entity
-    return if entity.nil? || in_reply_to.nil? || in_reply_to.entity_id == entity_id
-
-    errors.add(:in_reply_to, "must belong to the same entity")
   end
 
   def classification_node_belongs_to_entity

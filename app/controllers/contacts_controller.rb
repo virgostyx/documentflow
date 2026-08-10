@@ -7,6 +7,7 @@ class ContactsController < ApplicationController
   before_action :set_contact, only: %i[edit update destroy]
 
   def index
+    authorize Contact.new(entity: current_entity)
     @contacts = policy_scope(Contact).where(entity: current_entity).order(:last_name, :first_name)
   end
 

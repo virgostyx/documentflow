@@ -854,6 +854,22 @@ RSpec.describe Document, type: :model do
       expect(Document.waiting_for(user)).to be_empty
     end
 
+    it "excludes an outgoing document once a routed incoming reply is linked to it" do
+      user = create(:user)
+      original = create(:document, :expecting_response, entity: entity, created_by: user)
+      create(:document, :incoming, :routed, entity: entity, in_reply_to: original)
+
+      expect(Document.waiting_for(user)).to be_empty
+    end
+
+    it "keeps an outgoing document in the waiting list while its linked incoming reply is not yet routed" do
+      user = create(:user)
+      original = create(:document, :expecting_response, entity: entity, created_by: user)
+      create(:document, :incoming, entity: entity, in_reply_to: original)
+
+      expect(Document.waiting_for(user)).to contain_exactly(original)
+    end
+
     it "returns a routed incoming document for the lead, not the registrant, when a response is expected" do
       lead = create(:user)
       registrant = create(:user)

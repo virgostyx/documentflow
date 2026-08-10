@@ -63,7 +63,7 @@ class Document < ApplicationRecord
     ).distinct
   }
   scope :todo_for, ->(user) {
-    replied_document_ids = Document.finalized
+    replied_document_ids = Document.settled
                                     .where(created_by_id: user.id)
                                     .where.not(in_reply_to_id: nil)
                                     .select(:in_reply_to_id)
@@ -81,7 +81,7 @@ class Document < ApplicationRecord
       .distinct
   }
   scope :waiting_for, ->(user) {
-    replied_document_ids = Document.finalized.where.not(in_reply_to_id: nil).select(:in_reply_to_id)
+    replied_document_ids = Document.settled.where.not(in_reply_to_id: nil).select(:in_reply_to_id)
 
     where(
       "(documents.direction = 'outgoing' AND documents.created_by_id = :user_id) " \

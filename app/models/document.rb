@@ -114,6 +114,11 @@ class Document < ApplicationRecord
       "OR (documents.direction = 'incoming' AND documents.routed_at IS NOT NULL)"
     )
   }
+  scope :repliable_by, ->(sender) {
+    outgoing.settled
+            .where(addressee_type: sender.class.name, addressee_id: sender.id, expects_response: true)
+            .where.not(id: Document.settled.where.not(in_reply_to_id: nil).select(:in_reply_to_id))
+  }
   scope :in_classification_node, ->(node) { where(classification_node: node) }
   scope :unclassified, -> { where(classification_node_id: nil) }
   scope :sorted, ->(column, direction) {

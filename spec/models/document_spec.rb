@@ -1077,6 +1077,60 @@ RSpec.describe Document, type: :model do
     end
   end
 
+  describe ".repliable_by" do
+    it "returns an outgoing, settled document addressed to the given party and expecting a response" do
+      party = create(:contact, entity: entity)
+      original = create(:document, :finalized, :expecting_response, entity: entity, addressee: party)
+
+      expect(Document.repliable_by(party)).to contain_exactly(original)
+    end
+
+    it "excludes a document that is not yet settled (still draft)" do
+      party = create(:contact, entity: entity)
+      create(:document, :expecting_response, entity: entity, addressee: party)
+
+      expect(Document.repliable_by(party)).to be_empty
+    end
+
+    it "excludes a document that does not expect a response" do
+      party = create(:contact, entity: entity)
+      create(:document, :finalized, entity: entity, addressee: party)
+
+      expect(Document.repliable_by(party)).to be_empty
+    end
+
+    it "excludes a document addressed to a different party" do
+      party = create(:contact, entity: entity)
+      other_party = create(:contact, entity: entity)
+      create(:document, :finalized, :expecting_response, entity: entity, addressee: other_party)
+
+      expect(Document.repliable_by(party)).to be_empty
+    end
+
+    it "excludes an incoming document even if it otherwise matches" do
+      party = create(:contact, entity: entity)
+      create(:document, :incoming, :routed, :expecting_response, entity: entity, addressee: party)
+
+      expect(Document.repliable_by(party)).to be_empty
+    end
+
+    it "excludes a document that already has a settled reply linked" do
+      party = create(:contact, entity: entity)
+      original = create(:document, :finalized, :expecting_response, entity: entity, addressee: party)
+      create(:document, :incoming, :routed, entity: entity, in_reply_to: original)
+
+      expect(Document.repliable_by(party)).to be_empty
+    end
+
+    it "keeps a document when its only reply is not yet settled" do
+      party = create(:contact, entity: entity)
+      original = create(:document, :finalized, :expecting_response, entity: entity, addressee: party)
+      create(:document, :incoming, entity: entity, in_reply_to: original)
+
+      expect(Document.repliable_by(party)).to contain_exactly(original)
+    end
+  end
+
   describe ".pending_triage_for" do
     it "returns incoming documents where the user is the lead and routing hasn't happened yet" do
       lead = create(:user)

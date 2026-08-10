@@ -103,7 +103,7 @@ Rails.application.routes.draw do
         get :preview
         get :preview_content
       end
-      resources :annexes, only: %i[create destroy] do
+      resources :annexes, only: %i[create update destroy] do
         member do
           get :preview
           get :preview_content

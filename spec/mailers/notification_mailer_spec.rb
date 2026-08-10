@@ -229,6 +229,20 @@ RSpec.describe NotificationMailer do
 
         expect(mail.attachments.map(&:filename)).to contain_exactly("main.pdf", "main (2).pdf")
       end
+
+      it "attaches an annex flagged skip_pdf_conversion in its original format, without converting it" do
+        annex = create(:annex, document: document, skip_pdf_conversion: true)
+        annex.file.attach(io: StringIO.new("plain text"), filename: "raw.docx", content_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
+        expect(PdfConverter).not_to receive(:convert)
+
+        mail.message
+
+        expect(mail.attachments.map(&:filename)).to contain_exactly("main.pdf", "raw.docx")
+        raw_attachment = mail.attachments.find { |a| a.filename == "raw.docx" }
+        expect(raw_attachment.content_type).to start_with("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        expect(raw_attachment.body.raw_source).to eq("plain text")
+      end
     end
 
     context "with an external contact recipient, attachment dispatch enabled, and the attachment note disabled" do

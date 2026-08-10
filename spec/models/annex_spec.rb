@@ -15,6 +15,12 @@ RSpec.describe Annex, type: :model do
     it { is_expected.to have_many(:document_file_versions).dependent(:destroy) }
   end
 
+  describe "skip_pdf_conversion" do
+    it "defaults to false" do
+      expect(annex.skip_pdf_conversion).to be(false)
+    end
+  end
+
   describe "destroy" do
     it "purges the attached file and destroys its version history" do
       annex.save!

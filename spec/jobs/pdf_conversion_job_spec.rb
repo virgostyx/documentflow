@@ -117,6 +117,19 @@ RSpec.describe PdfConversionJob do
         described_class.new.perform(document.id)
       end
 
+      it "skips an annex flagged skip_pdf_conversion, even when it is not a PDF" do
+        annex = create(:annex, document: document, skip_pdf_conversion: true)
+        annex.file.attach(io: StringIO.new("plain text content"), filename: "notes.txt", content_type: "text/plain")
+
+        expect(PdfConverter).not_to receive(:convert)
+
+        described_class.new.perform(document.id)
+
+        annex.reload
+        expect(annex.file.filename.to_s).to eq("notes.txt")
+        expect(annex.file.content_type).to eq("text/plain")
+      end
+
       it "converts a non-PDF annex, replaces it with the resulting PDF in place, without stamping it" do
         annex = create(:annex, document: document)
         annex.file.attach(io: StringIO.new("plain text content"), filename: "notes.txt", content_type: "text/plain")

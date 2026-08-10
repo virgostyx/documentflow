@@ -1,10 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Submits the form as soon as a file is selected, so no explicit upload button is needed.
-// Shows the shared loading overlay while the upload is in flight.
+// Submits the form as soon as its input changes, so no explicit submit button is needed.
+// Shows the shared loading overlay while the request is in flight. For file inputs, skips
+// submitting if the selection was cleared rather than changed.
 export default class extends Controller {
   submit(event) {
-    if (event.target.files.length === 0) return
+    if (event.target.files && event.target.files.length === 0) return
 
     this._showOverlay()
     this.element.addEventListener("turbo:submit-end", () => this._hideOverlay(), { once: true })

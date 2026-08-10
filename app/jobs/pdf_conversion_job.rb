@@ -64,6 +64,7 @@ class PdfConversionJob < ApplicationJob
   def convert_annexes(document)
     document.annexes.each do |annex|
       next unless annex.file.attached?
+      next if annex.skip_pdf_conversion?
       next if annex.file.content_type == "application/pdf"
 
       convert_and_replace_annex_file(annex)

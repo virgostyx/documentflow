@@ -2,8 +2,22 @@
   <ul class="divide-y divide-gray-100">
     <% annexes.each do |annex| %>
       <li class="flex items-center justify-between py-2 text-sm">
-        <span class="text-gray-900"><%= annex.file.filename %></span>
+        <span class="text-gray-900">
+          <%= annex.file.filename %>
+          <% if annex.skip_pdf_conversion? && !show_actions? %>
+            <span class="ml-1 text-xs text-gray-400">(original format)</span>
+          <% end %>
+        </span>
         <div class="flex items-center gap-3">
+          <% if show_actions? %>
+            <%= form_with url: entity_document_annex_path(document.entity, document, annex), method: :patch,
+                          class: "flex items-center", data: { controller: "auto-submit" } do |f| %>
+              <label class="flex items-center gap-1 text-xs text-gray-500" title="Dispatch this annex in its original format instead of converting it to PDF">
+                <%= f.check_box :skip_pdf_conversion, { checked: annex.skip_pdf_conversion?, data: { action: "change->auto-submit#submit" } }, "1", "0" %>
+                Keep original format
+              </label>
+            <% end %>
+          <% end %>
           <%= link_to preview_url(annex),
                 data: { turbo_frame: "modal", action: "click->modal#open" },
                 class: "text-gray-400 hover:text-primary-600", title: "Preview" do %>

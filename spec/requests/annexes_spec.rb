@@ -112,6 +112,51 @@ RSpec.describe "Annexes", type: :request do
     end
   end
 
+  describe "PATCH /entities/:entity_id/documents/:document_id/annexes/:id" do
+    let!(:document) { create(:document, entity: entity, created_by: user) }
+    let!(:annex) { document.annexes.create!(file: { io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf" }) }
+
+    context "as the document's author" do
+      before do
+        create(:entity_user, entity: entity, user: user, status: "active")
+        sign_in user
+      end
+
+      it "flags the annex to skip PDF conversion" do
+        patch entity_document_annex_path(entity, document, annex), params: { annex: { skip_pdf_conversion: true } }
+
+        expect(response).to redirect_to(entity_document_path(entity, document))
+        expect(flash[:notice]).to be_present
+        expect(annex.reload.skip_pdf_conversion).to be(true)
+      end
+
+      it "unflags the annex" do
+        annex.update!(skip_pdf_conversion: true)
+
+        patch entity_document_annex_path(entity, document, annex), params: { annex: { skip_pdf_conversion: false } }
+
+        expect(annex.reload.skip_pdf_conversion).to be(false)
+      end
+    end
+
+    context "as a guest who is not the document's author" do
+      let!(:document) { create(:document, entity: entity, created_by: create(:user)) }
+      let!(:annex) { document.annexes.create!(file: { io: StringIO.new("content"), filename: "appendix.pdf", content_type: "application/pdf" }) }
+
+      before do
+        create(:entity_user, :guest, entity: entity, user: user, status: "active")
+        sign_in user
+      end
+
+      it "does not flag the annex" do
+        patch entity_document_annex_path(entity, document, annex), params: { annex: { skip_pdf_conversion: true } }
+
+        expect(response).to redirect_to(root_path)
+        expect(annex.reload.skip_pdf_conversion).to be(false)
+      end
+    end
+  end
+
   describe "GET /entities/:entity_id/documents/:document_id/annexes/:id/preview" do
     let!(:document) { create(:document, entity: entity, created_by: user) }
 

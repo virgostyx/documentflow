@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_09_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_10_190503) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,6 +45,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_090000) do
   create_table "annexes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "document_id", null: false
+    t.boolean "skip_pdf_conversion", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["document_id"], name: "index_annexes_on_document_id"
   end

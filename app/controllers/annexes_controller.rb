@@ -16,6 +16,13 @@ class AnnexesController < ApplicationController
     end
   end
 
+  def update
+    authorize @document, :update?
+
+    @document.annexes.find(params[:id]).update(annex_params)
+    redirect_to document_path, notice: "Annex updated successfully."
+  end
+
   def destroy
     authorize @document, :update?
 
@@ -46,5 +53,9 @@ class AnnexesController < ApplicationController
 
   def document_path
     @document.outgoing? ? entity_document_path(current_entity, @document) : entity_incoming_mail_path(current_entity, @document)
+  end
+
+  def annex_params
+    params.require(:annex).permit(:skip_pdf_conversion)
   end
 end

@@ -101,15 +101,27 @@ class NotificationMailer < ApplicationMailer
 
   def attach_document_files(document)
     used_names = Set.new
-    [ document.main_file, *document.annexes.map(&:file) ].each do |attached_file|
-      next unless attached_file.attached?
+    attach_converted(document.main_file, used_names) if document.main_file.attached?
 
-      bytes = FilePreviewRenderer.pdf_bytes_for(attached_file)
-      filename = unique_filename("#{File.basename(attached_file.filename.to_s, ".*")}.pdf", used_names)
-      attachments[filename] = { mime_type: "application/pdf", content: bytes }
+    document.annexes.each do |annex|
+      next unless annex.file.attached?
+
+      annex.skip_pdf_conversion? ? attach_original(annex.file, used_names) : attach_converted(annex.file, used_names)
     end
+
     @files_attached = true
     @include_attachment_note = document.include_attachment_note
+  end
+
+  def attach_converted(attached_file, used_names)
+    bytes = FilePreviewRenderer.pdf_bytes_for(attached_file)
+    filename = unique_filename("#{File.basename(attached_file.filename.to_s, ".*")}.pdf", used_names)
+    attachments[filename] = { mime_type: "application/pdf", content: bytes }
+  end
+
+  def attach_original(attached_file, used_names)
+    filename = unique_filename(attached_file.filename.to_s, used_names)
+    attachments[filename] = { mime_type: attached_file.content_type, content: attached_file.download }
   end
 
   def unique_filename(filename, used_names)

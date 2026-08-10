@@ -7,7 +7,7 @@
             <span class="font-mono font-medium"><%= document.display_number %></span>
             <%= render(Ui::BadgeComponent.new(color: :primary)) { "Current" } %>
           <% else %>
-            <%= link_to document.display_number, entity_document_path(document.entity, document), class: "font-mono text-primary-700 hover:text-primary-800" %>
+            <%= link_to document.display_number, document_path_for(document), class: "font-mono text-primary-700 hover:text-primary-800" %>
           <% end %>
         </p>
         <p class="text-sm text-gray-500 truncate"><%= document.subject %></p>

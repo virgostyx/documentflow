@@ -14,5 +14,9 @@ module Documents
     def current?(document)
       document == current_document
     end
+
+    def document_path_for(document)
+      document.incoming? ? entity_incoming_mail_path(document.entity, document) : entity_document_path(document.entity, document)
+    end
   end
 end

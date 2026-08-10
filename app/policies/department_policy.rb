@@ -22,14 +22,6 @@ class DepartmentPolicy < ApplicationPolicy
   end
 
   class Scope < ApplicationPolicy::Scope
-    def resolve
-      scope.where(entity: accessible_entities)
-    end
-
-    private
-
-    def accessible_entities
-      EntityUser.active.where(user: user).select(:entity_id)
-    end
+    include EntityAccessible
   end
 end

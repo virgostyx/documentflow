@@ -15,19 +15,17 @@ class PdfStamper
   FONT_SIZE = 8
 
   class << self
+    # Draws the header (logo + reference number) and any signature blocks in
+    # a single Prawn::Document/template pass. This matters beyond tidiness:
+    # each Prawn::Document has its own image-label counter (I1, I2, ...), and
+    # a page's label->XObject mapping is a plain hash that silently overwrites
+    # on collision. Two independently-templated passes (one for the header,
+    # a second re-templating the first pass's output for signatures) can
+    # therefore reuse the same label on the same page and clobber the logo's
+    # XObject with a signer's - a single shared counter makes that
+    # structurally impossible.
     def stamp(pdf_path, document)
-      stamped_path = stamp_reference_and_logo(pdf_path, document)
-      return stamped_path if stamped_path == pdf_path
-
       signers = document.workflow_steps.where(role: "SIGN", status: "approved").order(:order, :id).includes(:actor)
-      apply_signatures(stamped_path, signers) if signers.any?
-
-      stamped_path
-    end
-
-    private
-
-    def stamp_reference_and_logo(pdf_path, document)
       output_path = "#{pdf_path.sub(/\.pdf\z/i, '')}-stamped.pdf"
       logo_path = rasterized_logo_path(document)
 
@@ -36,14 +34,42 @@ class PdfStamper
         pdf.go_to_page(page_number)
         draw_stamp(pdf, document.reference_number, logo_path)
       end
-      pdf.render_file(output_path)
+
+      if signers.any?
+        stamp_signatures_and_render(pdf, signers, output_path, pdf_path)
+      else
+        pdf.render_file(output_path)
+      end
 
       output_path
+    rescue SignatureStampingError
+      raise
     rescue StandardError => e
       Rails.logger.warn("PdfStamper: failed to stamp #{pdf_path} (#{e.class}: #{e.message})")
       pdf_path
     ensure
       logo_path&.unlink if logo_path.respond_to?(:unlink)
+    end
+
+    private
+
+    def stamp_signatures_and_render(pdf, signers, output_path, pdf_path)
+      pdf.go_to_page(pdf.page_count)
+
+      signers.each_with_index do |step, index|
+        signature_image = step.actor.signature_image
+        unless signature_image
+          raise SignatureStampingError, "WorkflowStep##{step.id}: actor has no registered signature image"
+        end
+
+        draw_signature_block(pdf, step, signature_image, index)
+      end
+
+      pdf.render_file(output_path)
+    rescue SignatureStampingError
+      raise
+    rescue StandardError => e
+      raise SignatureStampingError, "Failed to stamp signature(s) onto #{pdf_path}: #{e.message}"
     end
 
     def draw_stamp(pdf, reference_number, logo_path)
@@ -88,30 +114,11 @@ class PdfStamper
       nil
     end
 
-    # Embeds each signer's decrypted signature image on the last page,
-    # stacked one block per signer (the common case is a single signer; a
-    # parallel SIGN group just repeats the block). Bytes are decrypted
-    # straight into an in-memory StringIO and never written to disk.
-    def apply_signatures(stamped_path, signers)
-      pdf = Prawn::Document.new(template: stamped_path)
-      pdf.go_to_page(pdf.page_count)
-
-      signers.each_with_index do |step, index|
-        signature_image = step.actor.signature_image
-        unless signature_image
-          raise SignatureStampingError, "WorkflowStep##{step.id}: actor has no registered signature image"
-        end
-
-        draw_signature_block(pdf, step, signature_image, index)
-      end
-
-      pdf.render_file(stamped_path)
-    rescue SignatureStampingError
-      raise
-    rescue StandardError => e
-      raise SignatureStampingError, "Failed to stamp signature(s) onto #{stamped_path}: #{e.message}"
-    end
-
+    # Draws one signer's decrypted signature image + name/date block on the
+    # already-open, already-on-the-last-page pdf, stacked one block per
+    # signer (the common case is a single signer; a parallel SIGN group just
+    # repeats the block). Bytes are decrypted straight into an in-memory
+    # StringIO and never written to disk.
     def draw_signature_block(pdf, step, signature_image, index)
       block_height = SIGNATURE_HEIGHT + (FONT_SIZE * 2) + SIGNATURE_BLOCK_SPACING
       bottom = MARGIN + (index * (block_height + SIGNATURE_BLOCK_SPACING))

@@ -144,6 +144,43 @@ RSpec.describe PdfStamper do
         expect(first_signer_y).to be < second_signer_y
       end
 
+      it "does not let the signature image overwrite the logo on a single-page document" do
+        entity = create(:entity, :with_logo)
+        department = create(:department, entity: entity)
+        document = create(:document, :finalized, entity: entity, department: department)
+        signer = create(:user)
+        create(:signature_image, user: signer)
+        create(:workflow_step, :sign, :approved, document: document, actor: signer)
+        pdf_path = build_pdf(pages: 1)
+
+        output_path = described_class.stamp(pdf_path, document)
+
+        reader = PDF::Reader.new(output_path)
+        image_count = reader.pages[0].xobjects.values.count { |x| x.hash[:Subtype] == :Image }
+        expect(image_count).to eq(2)
+      end
+
+      it "does not let a stacked signature image overwrite the logo on the last page of a multi-page document" do
+        entity = create(:entity, :with_logo)
+        department = create(:department, entity: entity)
+        document = create(:document, :finalized, entity: entity, department: department)
+        first_signer = create(:user)
+        second_signer = create(:user)
+        create(:signature_image, user: first_signer)
+        create(:signature_image, user: second_signer)
+        create(:workflow_step, :sign, :approved, :parallel, document: document, actor: first_signer, order: 1, parallel_group: 1)
+        create(:workflow_step, :sign, :approved, :parallel, document: document, actor: second_signer, order: 2, parallel_group: 1)
+        pdf_path = build_pdf(pages: 2)
+
+        output_path = described_class.stamp(pdf_path, document)
+
+        reader = PDF::Reader.new(output_path)
+        first_page_images = reader.pages[0].xobjects.values.count { |x| x.hash[:Subtype] == :Image }
+        last_page_images = reader.pages[1].xobjects.values.count { |x| x.hash[:Subtype] == :Image }
+        expect(first_page_images).to eq(1)
+        expect(last_page_images).to eq(3)
+      end
+
       it "raises instead of silently skipping when a signer has no registered signature image" do
         document = create(:document, :finalized)
         signer = create(:user)

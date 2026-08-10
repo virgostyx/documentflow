@@ -95,11 +95,7 @@ class WorkflowStepsController < ApplicationController
     circuit_template = current_entity.circuit_templates.find(params[:circuit_template_id])
     result = Workflow::ApplyCircuitTemplateOrganizer.call(document: @document, circuit_template: circuit_template, current_user: current_user)
 
-    if result.success?
-      redirect_to entity_document_path(current_entity, @document), notice: "Circuit template applied successfully."
-    else
-      redirect_to entity_document_path(current_entity, @document), alert: result.message
-    end
+    redirect_on_result(result, success_path: entity_document_path(current_entity, @document), success_message: "Circuit template applied successfully.")
   end
 
   private

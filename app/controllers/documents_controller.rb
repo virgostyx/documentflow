@@ -2,6 +2,7 @@
 
 class DocumentsController < ApplicationController
   include EntityScoped
+  include OrganizerResponse
 
   before_action :set_document, only: %i[show edit update destroy launch cancel confirm_cancel confirm_destroy classify_form classify]
   before_action :load_classification_tree, only: %i[index mine received todo waiting info to_validate search classify_form]
@@ -104,11 +105,10 @@ class DocumentsController < ApplicationController
 
     result = Documents::DestroyDocumentOrganizer.call(document: @document, current_user: current_user, reason: params[:reason])
 
-    if result.success?
-      redirect_to entity_documents_path(current_entity), notice: "Document deleted successfully."
-    else
-      redirect_to entity_document_path(current_entity, @document), alert: result.message
-    end
+    redirect_on_result(result,
+                        success_path: entity_documents_path(current_entity),
+                        failure_path: entity_document_path(current_entity, @document),
+                        success_message: "Document deleted successfully.")
   end
 
   def confirm_destroy
@@ -120,11 +120,7 @@ class DocumentsController < ApplicationController
 
     result = Documents::LaunchOrganizer.call(document: @document, current_user: current_user)
 
-    if result.success?
-      redirect_to entity_document_path(current_entity, @document), notice: "Document launched successfully."
-    else
-      redirect_to entity_document_path(current_entity, @document), alert: result.message
-    end
+    redirect_on_result(result, success_path: entity_document_path(current_entity, @document), success_message: "Document launched successfully.")
   end
 
   def cancel
@@ -132,11 +128,7 @@ class DocumentsController < ApplicationController
 
     result = Documents::CancelDocumentOrganizer.call(document: @document, current_user: current_user, reason: params[:reason])
 
-    if result.success?
-      redirect_to entity_document_path(current_entity, @document), notice: "Document cancelled successfully."
-    else
-      redirect_to entity_document_path(current_entity, @document), alert: result.message
-    end
+    redirect_on_result(result, success_path: entity_document_path(current_entity, @document), success_message: "Document cancelled successfully.")
   end
 
   def confirm_cancel

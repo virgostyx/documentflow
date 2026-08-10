@@ -2,6 +2,7 @@
 
 module WorkflowActions
   extend ActiveSupport::Concern
+  include OrganizerResponse
 
   def approve
     handle_workflow_action(
@@ -46,12 +47,6 @@ module WorkflowActions
     result = organizer.call(**organizer_params)
     yield result if block_given?
 
-    redirect_target = entity_document_path(current_entity, @workflow_step.document)
-
-    if result.success?
-      redirect_to redirect_target, notice: success_message
-    else
-      redirect_to redirect_target, alert: result.message
-    end
+    redirect_on_result(result, success_path: entity_document_path(current_entity, @workflow_step.document), success_message: success_message)
   end
 end

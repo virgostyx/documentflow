@@ -56,9 +56,9 @@ class DocumentsController < ApplicationController
 
   def show
     authorize @document
-    @document_chain = base_scope.where(id: @document.thread.map(&:id))
-                                 .includes(:sender, :addressee)
-                                 .sort_by { |doc| [ doc.document_date, doc.created_at ] }
+    @document_chain = merged_base_scope.where(id: @document.thread.map(&:id))
+                                        .includes(:sender, :addressee)
+                                        .sort_by { |doc| [ doc.document_date, doc.created_at ] }
   end
 
   def new

@@ -1026,6 +1026,20 @@ RSpec.describe "Documents", type: :request do
           expect(response.body).to include("Document chain")
           expect(response.body).to include(document.display_number)
         end
+
+        context "when the document is part of a reply chain that includes a routed incoming mail" do
+          let!(:incoming_reply) do
+            create(:document, :incoming, :routed, entity: entity, department: department,
+              in_reply_to: document, subject: "Re: original (their reply)")
+          end
+
+          it "includes the incoming mail in the document chain on the original document's page" do
+            get entity_document_path(entity, document)
+
+            expect(response.body).to include("Document chain")
+            expect(response.body).to include(incoming_reply.display_number)
+          end
+        end
       end
 
       context "when the document expects a response" do

@@ -3,6 +3,7 @@
 class DocumentTemplate < ApplicationRecord
   include PartyAssignable
   include EntityScopedAssociations
+  include SyncsTemplateFields
 
   TAG_PATTERN = Templates::TagScanner::TAG_PATTERN
   DOCX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -26,6 +27,8 @@ class DocumentTemplate < ApplicationRecord
 
   party_assignable :default_sender, :default_addressee
 
+  syncs_template_fields :document_template_fields
+
   # Validations
   validates :name, presence: true, uniqueness: { scope: :entity_id }
   validates :subject_template, presence: true
@@ -33,15 +36,6 @@ class DocumentTemplate < ApplicationRecord
   validate :default_sender_belongs_to_entity
   validate :default_addressee_belongs_to_entity
   validate :source_file_must_be_a_valid_docx
-
-  # Callbacks
-  #
-  # Must be after_commit, not after_save: has_one_attached only uploads the
-  # blob's actual bytes to the storage service on after_commit (see
-  # ActiveStorage::Attached::Model#has_one_attached) - reading source_file
-  # any earlier (e.g. in after_save) would race the upload and silently see
-  # an empty/missing file.
-  after_commit :sync_template_fields, on: %i[create update]
 
   # All tags currently referenced by this template (subject + docx body),
   # including reserved ones that don't get a document_template_fields row.
@@ -78,22 +72,6 @@ class DocumentTemplate < ApplicationRecord
     errors.add(:default_addressee, "must belong to the same entity")
   end
 
-  def sync_template_fields
-    tags = extract_tags - RESERVED_TAGS
-    existing_tags = document_template_fields.pluck(:tag_name)
-
-    new_tags = tags - existing_tags
-    new_tags.each_with_index do |tag, index|
-      document_template_fields.create!(
-        tag_name: tag, label: tag.humanize, field_type: "text", required: true,
-        position: next_field_position + index
-      )
-    end
-
-    stale_tags = existing_tags - tags
-    document_template_fields.where(tag_name: stale_tags).destroy_all if stale_tags.any?
-  end
-
   def extract_tags
     tags = Templates::TagScanner.tags_in(subject_template)
     tags += docx_tags if source_file.attached?
@@ -105,9 +83,5 @@ class DocumentTemplate < ApplicationRecord
   rescue StandardError => e
     Rails.logger.warn("[DocumentTemplate##{id}] could not scan source_file for tags: #{e.message}")
     []
-  end
-
-  def next_field_position
-    (document_template_fields.maximum(:position) || 0) + 1
   end
 end

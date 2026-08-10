@@ -2,6 +2,8 @@
 
 class EmailTemplate < ApplicationRecord
   include EntityScopedAssociations
+  include SyncsTemplateFields
+
   # Tags that resolve to a computed value (see Templates::RenderEmailBody)
   # instead of a value typed on the generation form - never get an
   # email_template_fields row. {{date}} resolves when the email body is
@@ -17,39 +19,16 @@ class EmailTemplate < ApplicationRecord
 
   accepts_nested_attributes_for :email_template_fields
 
+  syncs_template_fields :email_template_fields
+
   # Validations
   validates :name, presence: true, uniqueness: { scope: :entity_id }
   validates :body_template, presence: true
   validates_entity_scoped :department
 
-  # Callbacks
-  after_commit :sync_template_fields, on: %i[create update]
-
   # All tags currently referenced by this template's subject and body,
   # including reserved ones that don't get an email_template_fields row.
   def tags
     (Templates::TagScanner.tags_in(subject_template) + Templates::TagScanner.tags_in(body_template)).uniq
-  end
-
-  private
-
-  def sync_template_fields
-    tag_names = tags - RESERVED_TAGS
-    existing_tags = email_template_fields.pluck(:tag_name)
-
-    new_tags = tag_names - existing_tags
-    new_tags.each_with_index do |tag, index|
-      email_template_fields.create!(
-        tag_name: tag, label: tag.humanize, field_type: "text", required: true,
-        position: next_field_position + index
-      )
-    end
-
-    stale_tags = existing_tags - tag_names
-    email_template_fields.where(tag_name: stale_tags).destroy_all if stale_tags.any?
-  end
-
-  def next_field_position
-    (email_template_fields.maximum(:position) || 0) + 1
   end
 end

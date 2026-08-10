@@ -159,6 +159,8 @@ RSpec.describe "MainFiles", type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include(preview_content_entity_document_main_file_path(entity, document))
+        expect(response.body).to include('data-modal-target="previewLoader"')
+        expect(response.body).to include('data-action="load->modal#hidePreviewLoader"')
       end
     end
 

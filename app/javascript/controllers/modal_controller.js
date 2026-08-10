@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["dialog", "editorFrame", "fullscreenExpandIcon", "fullscreenCollapseIcon"]
+  static targets = ["dialog", "editorFrame", "fullscreenExpandIcon", "fullscreenCollapseIcon", "previewLoader", "previewFrame"]
 
   // Opens immediately on click, for the common case. `frameLoaded` is a
   // fallback for when this click action hasn't been (re)bound yet by the
@@ -34,6 +34,19 @@ export default class extends Controller {
 
   close() {
     this.dialogTarget.close()
+  }
+
+  hidePreviewLoader() {
+    if (this.hasPreviewLoaderTarget) this.previewLoaderTarget.classList.add("hidden")
+  }
+
+  // The iframe can finish loading before this controller connects and binds
+  // its `load` action — e.g. a small already-PDF file served instantly,
+  // versus the deferred module script that registers Stimulus controllers.
+  // Catch that race by checking whether it's already done as soon as the
+  // target is discovered.
+  previewFrameTargetConnected(frame) {
+    if (frame.contentDocument?.readyState === "complete") this.hidePreviewLoader()
   }
 
   closeBackdrop(event) {

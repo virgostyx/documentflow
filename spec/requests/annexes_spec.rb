@@ -130,6 +130,8 @@ RSpec.describe "Annexes", type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include(preview_content_entity_document_annex_path(entity, document, annex))
+        expect(response.body).to include('data-modal-target="previewLoader"')
+        expect(response.body).to include('data-action="load->modal#hidePreviewLoader"')
       end
     end
 

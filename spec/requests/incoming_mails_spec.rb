@@ -183,6 +183,17 @@ RSpec.describe "Incoming mails", type: :request do
 
         expect(response).to have_http_status(:ok)
       end
+
+      context "when a repliable original document exists" do
+        let!(:original) { create(:document, :finalized, :expecting_response, entity: entity, department: department, addressee: document.sender) }
+
+        it "shows the Replies to field with the candidate" do
+          get route_form_entity_incoming_mail_path(entity, document)
+
+          expect(response.body).to include("Replies to")
+          expect(response.body).to include(original.display_number)
+        end
+      end
     end
 
     context "as another department member who is not the lead" do
@@ -227,6 +238,19 @@ RSpec.describe "Incoming mails", type: :request do
         expect(document.addressee).to eq(user)
         expect(document.routed_at).to be_present
         expect(response).to redirect_to(entity_incoming_mail_path(entity, document))
+      end
+
+      context "when linking to an original document" do
+        let(:original) { create(:document, :finalized, :expecting_response, entity: entity, department: department) }
+        let(:params) do
+          { document: { action_user_id: user.id, expects_response: "0", in_reply_to_id: original.id } }
+        end
+
+        it "persists the link to the original document" do
+          patch route_entity_incoming_mail_path(entity, document), params: params
+
+          expect(document.reload.in_reply_to).to eq(original)
+        end
       end
     end
 

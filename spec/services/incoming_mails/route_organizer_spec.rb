@@ -92,6 +92,26 @@ RSpec.describe IncomingMails::RouteOrganizer do
 
         expect(document.reload.response_deadline).to be_nil
       end
+
+      context "when routing_params includes in_reply_to_id" do
+        let(:original) { create(:document, :finalized, :expecting_response, entity: entity, department: department) }
+        let(:routing_params) do
+          { action_user_id: action_user.id, expects_response: false, in_reply_to_id: original.id, info_user_ids: [ "" ] }
+        end
+
+        it "persists the link to the original document" do
+          described_class.call(document: document, current_user: lead, routing_params: routing_params)
+
+          expect(document.reload.in_reply_to).to eq(original)
+        end
+
+        it "clears the original document from its creator's waiting list" do
+          creator = original.created_by
+          described_class.call(document: document, current_user: lead, routing_params: routing_params)
+
+          expect(Document.waiting_for(creator)).not_to include(original)
+        end
+      end
     end
 
     context "when the action user is not a member of the document's department" do

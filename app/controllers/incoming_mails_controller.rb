@@ -75,6 +75,6 @@ class IncomingMailsController < ApplicationController
   end
 
   def routing_params
-    params.require(:document).permit(:action_user_id, :routing_message, :expects_response, :response_deadline, info_user_ids: [])
+    params.require(:document).permit(:action_user_id, :routing_message, :expects_response, :response_deadline, :in_reply_to_id, info_user_ids: [])
   end
 end

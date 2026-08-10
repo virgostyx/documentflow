@@ -47,7 +47,7 @@ New scope on `Document`:
 scope :repliable_by, ->(sender) {
   outgoing.settled
           .where(addressee_type: sender.class.name, addressee_id: sender.id, expects_response: true)
-          .where.not(id: settled.where.not(in_reply_to_id: nil).select(:in_reply_to_id))
+          .where.not(id: Document.settled.where.not(in_reply_to_id: nil).select(:in_reply_to_id))
 }
 ```
 

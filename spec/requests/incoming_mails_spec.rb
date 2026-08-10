@@ -184,6 +184,12 @@ RSpec.describe "Incoming mails", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
+      it "does not show the Replies to field when there is no repliable original document" do
+        get route_form_entity_incoming_mail_path(entity, document)
+
+        expect(response.body).not_to include("Replies to")
+      end
+
       context "when a repliable original document exists" do
         let!(:original) { create(:document, :finalized, :expecting_response, entity: entity, department: department, addressee: document.sender) }
 

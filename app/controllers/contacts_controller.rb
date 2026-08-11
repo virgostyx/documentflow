@@ -19,19 +19,17 @@ class ContactsController < ApplicationController
   def create
     @contact = current_entity.contacts.new(contact_params)
     authorize @contact
-    @contact.save
 
-    respond_to do |format|
-      if @contact.persisted?
-        format.html { redirect_to entity_contacts_path(current_entity), notice: "Contact created successfully." }
-        format.turbo_stream
-      else
-        format.html do
-          flash.now[:alert] = @contact.errors.full_messages.to_sentence
-          render :new, status: :unprocessable_content
-        end
-        format.turbo_stream { render status: :unprocessable_content }
+    if params[:picker_id].present?
+      @contact.save
+      respond_to do |format|
+        format.turbo_stream { render status: @contact.persisted? ? :ok : :unprocessable_content }
       end
+    else
+      save_and_respond(@contact,
+                        success_path: entity_contacts_path(current_entity),
+                        success_message: "Contact created successfully.",
+                        failure_template: :new) { @contact.save }
     end
   end
 

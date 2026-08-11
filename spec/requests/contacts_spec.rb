@@ -94,6 +94,13 @@ RSpec.describe "Contacts", type: :request do
 
         expect(response).to redirect_to(entity_contacts_path(entity))
       end
+
+      it "redirects to the contacts list even when submitted via Turbo Drive (no picker_id)" do
+        post entity_contacts_path(entity), params: contact_params,
+                                            headers: { "Accept" => "text/vnd.turbo-stream.html, text/html, application/xhtml+xml" }
+
+        expect(response).to redirect_to(entity_contacts_path(entity))
+      end
     end
 
     context "with invalid params" do

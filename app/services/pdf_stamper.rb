@@ -2,10 +2,9 @@
 
 class PdfStamper
   # Raised when a signature image can't be embedded for an approved SIGN
-  # step. Deliberately NOT rescued here (unlike the cosmetic reference/logo
-  # stamp below): a document must never end up "signed" with no visible
-  # signature, so this propagates out of the async PdfConversionJob and fails
-  # the Solid Queue job (retryable) instead of silently degrading.
+  # step. A document must never end up "signed" with no visible signature,
+  # so this propagates out of the async PdfConversionJob and fails the
+  # Solid Queue job (retryable) instead of silently degrading.
   class SignatureStampingError < StandardError; end
 
   MARGIN = 20
@@ -42,11 +41,6 @@ class PdfStamper
       end
 
       output_path
-    rescue SignatureStampingError
-      raise
-    rescue StandardError => e
-      Rails.logger.warn("PdfStamper: failed to stamp #{pdf_path} (#{e.class}: #{e.message})")
-      pdf_path
     ensure
       logo_path&.unlink if logo_path.respond_to?(:unlink)
     end

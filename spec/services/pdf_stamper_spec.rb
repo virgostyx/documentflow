@@ -74,13 +74,24 @@ RSpec.describe PdfStamper do
       expect(PDF::Reader.new(output_path).pages.first.text).to include(document.reference_number)
     end
 
-    it "returns the original path unchanged if stamping fails" do
+    it "raises instead of silently returning an unstamped PDF if stamping fails" do
       pdf_path = build_pdf
       document = create(:document)
 
       allow(Prawn::Document).to receive(:new).and_raise(StandardError, "boom")
 
-      expect(described_class.stamp(pdf_path, document)).to eq(pdf_path)
+      expect {
+        described_class.stamp(pdf_path, document)
+      }.to raise_error(StandardError, "boom")
+    end
+
+    it "raises instead of silently skipping the header stamp when the reference number is missing" do
+      pdf_path = build_pdf
+      document = create(:document, reference_number: nil, temporary_number: "PROV-1")
+
+      expect {
+        described_class.stamp(pdf_path, document)
+      }.to raise_error(NoMethodError)
     end
 
     context "with an approved SIGN step" do

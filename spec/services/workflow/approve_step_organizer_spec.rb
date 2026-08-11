@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rails_helper"
+require "pdf/reader"
 
 RSpec.describe Workflow::ApproveStepOrganizer do
   let(:document) { create(:document, :with_workflow, :in_progress) }
@@ -147,6 +148,34 @@ RSpec.describe Workflow::ApproveStepOrganizer do
         expect(PdfConversionJob).to receive(:perform_later).with(document.id, sign_step.id)
 
         described_class.call(step: sign_step, current_user: sign_step.actor, **step_up_params_for(sign_step))
+      end
+
+      it "stamps the reference number and signature once the enqueued PdfConversionJob actually runs" do
+        # Regression test for a bug where the reference number/logo header
+        # and the signature were both silently missing from the PDF after a
+        # real SIGN approval: PdfConversionJob.perform_later is called from
+        # inside this organizer's transaction, but Solid Queue's job table
+        # lives in a separate physical database (see config/database.yml),
+        # so the job could run - and read the document - before that
+        # transaction committed. Unlike the other examples in this file,
+        # this one deliberately does NOT mock PdfConversionJob.perform_later
+        # or PdfStamper.stamp, so it exercises the real stamping pipeline
+        # against the document exactly as committed by the organizer.
+        pdf_path = Rails.root.join("tmp", "approve_step_organizer_spec_#{SecureRandom.hex(4)}.pdf")
+        Prawn::Document.generate(pdf_path.to_s) { |pdf| pdf.text "Body content" }
+        document.main_file.attach(io: File.open(pdf_path), filename: "main.pdf", content_type: "application/pdf")
+        File.delete(pdf_path)
+
+        result = described_class.call(step: sign_step, current_user: sign_step.actor, **step_up_params_for(sign_step))
+        expect(result).to be_success
+
+        PdfConversionJob.new.perform(document.id, sign_step.id)
+
+        document.reload.main_file.open do |stamped_file|
+          reader = PDF::Reader.new(stamped_file.path)
+          expect(reader.pages.first.text).to include(document.reference_number)
+          expect(reader.pages.last.xobjects.values.any? { |x| x.hash[:Subtype] == :Image }).to be(true)
+        end
       end
 
       it "records the approving actor's IP and user agent when a request is provided" do

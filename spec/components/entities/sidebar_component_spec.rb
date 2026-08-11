@@ -417,11 +417,26 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       expect(rendered).to have_link("Overview", href: entity_contacts_path(entity))
     end
 
+    it "links to distribution lists, below Overview" do
+      expect(rendered).to have_link("Distribution lists", href: distribution_lists_path)
+
+      links = rendered.css("nav a").map { |a| a.text.squish }
+      expect(links.rindex("Overview")).to be < links.index("Distribution lists")
+    end
+
     context "when on the contacts overview page" do
       let(:current_path) { entity_contacts_path(entity) }
 
       it "highlights the contacts Overview link" do
         expect(rendered).to have_css("a.bg-primary-100", text: "Overview")
+      end
+    end
+
+    context "when on the distribution lists page" do
+      let(:current_path) { distribution_lists_path }
+
+      it "highlights the Distribution lists link" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "Distribution lists")
       end
     end
   end

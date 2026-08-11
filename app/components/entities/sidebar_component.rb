@@ -46,7 +46,7 @@ module Entities
     end
 
     def contacts_section_active?
-      request.path.start_with?(entity_contacts_path(current_entity))
+      request.path.start_with?(entity_contacts_path(current_entity)) || request.path.start_with?(distribution_lists_path)
     end
 
     def settings_section_active?

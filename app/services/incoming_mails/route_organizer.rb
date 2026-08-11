@@ -3,6 +3,7 @@
 module IncomingMails
   class RouteOrganizer < ApplicationService
     workflow_steps Actions::ValidateActionAssigneeDepartmentMembership,
+                   Actions::ValidateReplyLink,
                    Actions::RouteIncomingMail,
                    Actions::CreateInfoRecipients,
                    Actions::NotifyActionAssignee,

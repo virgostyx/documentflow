@@ -38,6 +38,7 @@ class IncomingMailsController < ApplicationController
 
   def route_form
     authorize @document, :route?
+    @repliable_documents = base_scope.repliable_by(@document.sender).sorted("document_date", "desc")
   end
 
   def route
@@ -52,6 +53,7 @@ class IncomingMailsController < ApplicationController
     else
       @document.assign_attributes(routing_params)
       flash.now[:alert] = result.message
+      @repliable_documents = base_scope.repliable_by(@document.sender).sorted("document_date", "desc")
       render :route_form, status: :unprocessable_content
     end
   end

@@ -1,6 +1,6 @@
 <%= turbo_frame_tag "modal" do %>
   <div class="p-6">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Route this mail</h2>
-    <%= render "route_form", document: @document %>
+    <%= render "route_form", document: @document, repliable_documents: @repliable_documents %>
   </div>
 <% end %>

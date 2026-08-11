@@ -10,7 +10,6 @@
         { selected: document.action_user_id, include_blank: "Select an assignee for action..." },
         { label: "Assign for action", required: true } %>
 
-  <% repliable_documents = current_entity.documents.repliable_by(document.sender) %>
   <% if repliable_documents.any? %>
     <%= f.floating_select :in_reply_to_id, repliable_documents.map { |d| [ "#{d.display_number} — #{d.subject}", d.id ] },
           { selected: document.in_reply_to_id, include_blank: "Not a reply to an existing document" },

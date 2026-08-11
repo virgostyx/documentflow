@@ -200,6 +200,24 @@ RSpec.describe "Incoming mails", type: :request do
           expect(response.body).to include(original.display_number)
         end
       end
+
+      context "when a repliable original document exists in a department the lead is not a member of" do
+        let(:other_department) { create(:department, entity: entity) }
+        let!(:in_scope_original) do
+          create(:document, :finalized, :expecting_response, entity: entity, department: department, addressee: document.sender)
+        end
+        let!(:out_of_scope_original) do
+          create(:document, :finalized, :expecting_response, entity: entity, department: other_department, addressee: document.sender)
+        end
+
+        it "excludes the out-of-department candidate but still shows the in-department one" do
+          get route_form_entity_incoming_mail_path(entity, document)
+
+          expect(response.body).to include("Replies to")
+          expect(response.body).to include(in_scope_original.display_number)
+          expect(response.body).not_to include(out_of_scope_original.display_number)
+        end
+      end
     end
 
     context "as another department member who is not the lead" do
@@ -247,7 +265,9 @@ RSpec.describe "Incoming mails", type: :request do
       end
 
       context "when linking to an original document" do
-        let(:original) { create(:document, :finalized, :expecting_response, entity: entity, department: department) }
+        let(:original) do
+          create(:document, :finalized, :expecting_response, entity: entity, department: department, addressee: document.sender)
+        end
         let(:params) do
           { document: { action_user_id: user.id, expects_response: "0", in_reply_to_id: original.id } }
         end

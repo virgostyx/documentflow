@@ -94,7 +94,9 @@ RSpec.describe IncomingMails::RouteOrganizer do
       end
 
       context "when routing_params includes in_reply_to_id" do
-        let(:original) { create(:document, :finalized, :expecting_response, entity: entity, department: department) }
+        let(:original) do
+          create(:document, :finalized, :expecting_response, entity: entity, department: department, addressee: document.sender)
+        end
         let(:routing_params) do
           { action_user_id: action_user.id, expects_response: false, in_reply_to_id: original.id, info_user_ids: [ "" ] }
         end
@@ -110,6 +112,63 @@ RSpec.describe IncomingMails::RouteOrganizer do
           described_class.call(document: document, current_user: lead, routing_params: routing_params)
 
           expect(Document.waiting_for(creator)).not_to include(original)
+        end
+      end
+    end
+
+    context "when in_reply_to_id points to a document that fails repliable_by" do
+      context "because it does not expect a response" do
+        let(:original) do
+          create(:document, :finalized, entity: entity, department: department, addressee: document.sender, expects_response: false)
+        end
+        let(:routing_params) do
+          { action_user_id: action_user.id, expects_response: false, in_reply_to_id: original.id, info_user_ids: [ "" ] }
+        end
+
+        it "does not route the document and returns an explicit message" do
+          result = described_class.call(document: document, current_user: lead, routing_params: routing_params)
+
+          expect(result).not_to be_success
+          expect(result.message).to include("not a valid reply target")
+          expect(document.reload.in_reply_to).to be_nil
+          expect(document.reload.routed_at).to be_nil
+        end
+      end
+
+      context "because it is still a draft" do
+        let(:original) do
+          create(:document, :expecting_response, entity: entity, department: department, addressee: document.sender)
+        end
+        let(:routing_params) do
+          { action_user_id: action_user.id, expects_response: false, in_reply_to_id: original.id, info_user_ids: [ "" ] }
+        end
+
+        it "does not route the document and returns an explicit message" do
+          result = described_class.call(document: document, current_user: lead, routing_params: routing_params)
+
+          expect(result).not_to be_success
+          expect(result.message).to include("not a valid reply target")
+          expect(document.reload.in_reply_to).to be_nil
+          expect(document.reload.routed_at).to be_nil
+        end
+      end
+
+      context "because it is in a department the routing current_user is not a member of (regression for the Fix 1 UI bypass)" do
+        let(:other_department) { create(:department, entity: entity) }
+        let(:original) do
+          create(:document, :finalized, :expecting_response, entity: entity, department: other_department, addressee: document.sender)
+        end
+        let(:routing_params) do
+          { action_user_id: action_user.id, expects_response: false, in_reply_to_id: original.id, info_user_ids: [ "" ] }
+        end
+
+        it "is rejected by ValidateReplyLink even when submitted directly, bypassing the UI dropdown" do
+          result = described_class.call(document: document, current_user: lead, routing_params: routing_params)
+
+          expect(result).not_to be_success
+          expect(result.message).to include("not a valid reply target")
+          expect(document.reload.in_reply_to).to be_nil
+          expect(document.reload.routed_at).to be_nil
         end
       end
     end

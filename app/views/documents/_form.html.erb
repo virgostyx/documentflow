@@ -9,6 +9,10 @@
     <%= f.hidden_field :in_reply_to_id %>
   <% end %>
 
+  <% if document.new_record? && document.distribution_list_id.present? %>
+    <%= f.hidden_field :distribution_list_id %>
+  <% end %>
+
   <%= f.floating_text_field :subject, label: "Subject", required: true, autofocus: true, placeholder: " " %>
   <%= f.floating_date_field :document_date, label: "Document date", required: true, placeholder: " " %>
 
@@ -46,6 +50,17 @@
     selected: document.addressee_token,
     additional_picker_ids: [ "document_sender_token" ]
   )) %>
+
+  <% if document.new_record? && @distribution_list.present? %>
+    <p class="mt-2 text-sm text-gray-500">
+      <% if @distribution_list_cc_preview_count.to_i.positive? %>
+        <%= pluralize(@distribution_list_cc_preview_count, "additional recipient") %> from &ldquo;<%= @distribution_list.name %>&rdquo; will also be added as CC once this document is created.
+      <% end %>
+      <% if @skipped_distribution_list_members.to_i.positive? %>
+        <%= pluralize(@skipped_distribution_list_members, "member") %> of &ldquo;<%= @distribution_list.name %>&rdquo; skipped: not part of this entity.
+      <% end %>
+    </p>
+  <% end %>
 
   <div class="mt-6 flex justify-end gap-3">
     <%= render(Ui::ButtonComponent.new(

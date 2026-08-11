@@ -1,0 +1,22 @@
+<div class="rounded-md border border-gray-200 p-3 flex items-center gap-3" data-distribution-list-builder-target="member">
+  <%= f.hidden_field :id %>
+  <%= f.hidden_field :position, data: { distribution_list_builder_target: "position" } %>
+  <%= f.hidden_field :party_token, data: { distribution_list_builder_target: "partyToken" } %>
+  <%= f.hidden_field :_destroy, data: { distribution_list_builder_target: "destroy" } %>
+
+  <span class="drag-handle cursor-grab text-gray-400" title="Drag to reorder">&#10495;</span>
+
+  <span class="flex-1 text-sm text-gray-900" data-distribution-list-builder-target="partyLabel">
+    <%= f.object.party&.display_name %>
+  </span>
+
+  <label class="flex items-center gap-1 text-xs text-gray-600 whitespace-nowrap">
+    <%= f.check_box :dispatch_as_attachment, class: "h-4 w-4 text-primary-600 border-gray-300 rounded" %>
+    Send as attachment
+  </label>
+
+  <button type="button" data-action="distribution-list-builder#removeMember"
+          class="text-sm text-danger-600 hover:text-danger-700 whitespace-nowrap">
+    Remove
+  </button>
+</div>

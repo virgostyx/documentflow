@@ -35,6 +35,10 @@ class DocumentPolicy < ApplicationPolicy
     entity_owner? || entity_admin?
   end
 
+  def apply_distribution_list?
+    record.draft? && update?
+  end
+
   def launch?
     record.draft? && (record.created_by == user || entity_admin? || entity_owner?)
   end

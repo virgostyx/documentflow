@@ -31,6 +31,8 @@ Rails.application.routes.draw do
 
   resource :signature, only: %i[show create destroy], controller: "users/signatures"
 
+  resources :distribution_lists, controller: "users/distribution_lists"
+
   mount ActionCable.server => "/cable"
   mount MissionControl::Jobs::Engine, at: "/jobs"
 
@@ -97,6 +99,7 @@ Rails.application.routes.draw do
       resources :cc_recipients, only: %i[create destroy] do
         collection do
           post :bulk_create
+          post :add_distribution_list
         end
       end
       resource :main_file, only: %i[create destroy] do
@@ -122,6 +125,7 @@ Rails.application.routes.draw do
         get :confirm_destroy
         get :classify_form
         patch :classify
+        post :apply_distribution_list
       end
       collection do
         get :search

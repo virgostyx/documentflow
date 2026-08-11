@@ -175,6 +175,26 @@ RSpec.describe DocumentPolicy, type: :policy do
     end
   end
 
+  describe "#apply_distribution_list?" do
+    context "when the document is a draft" do
+      let(:document) { create(:document, entity: entity, created_by: member) }
+
+      context "as its author"     do let(:user) { member };   it { is_expected.to permit_action(:apply_distribution_list) } end
+      context "as entity owner"   do let(:user) { owner };    it { is_expected.to permit_action(:apply_distribution_list) } end
+      context "as another member" do let(:user) { create(:user).tap { |u| create(:entity_user, user: u, entity: entity, role: "member", status: "active") } }; it { is_expected.not_to permit_action(:apply_distribution_list) } end
+    end
+
+    context "when the document is in_progress" do
+      let(:document) do
+        document = create(:document, :in_progress, entity: entity, created_by: member)
+        create(:workflow_step, document: document, role: "VISA", order: 1, status: "pending", actor: admin)
+        document
+      end
+
+      context "as the current step actor" do let(:user) { admin }; it { is_expected.not_to permit_action(:apply_distribution_list) } end
+    end
+  end
+
   describe "#check_out?" do
     context "when the document is a draft and not checked out" do
       let(:document) { create(:document, entity: entity, created_by: member) }

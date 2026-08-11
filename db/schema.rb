@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_10_190503) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_11_183750) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -140,6 +140,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_10_190503) do
     t.index ["entity_id", "name"], name: "index_departments_on_entity_id_and_name", unique: true
     t.index ["entity_id", "prefix"], name: "index_departments_on_entity_id_and_prefix", unique: true
     t.index ["entity_id"], name: "index_departments_on_entity_id"
+  end
+
+  create_table "distribution_list_members", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "dispatch_as_attachment", default: false, null: false
+    t.bigint "distribution_list_id", null: false
+    t.bigint "party_id", null: false
+    t.string "party_type", null: false
+    t.integer "position", null: false
+    t.datetime "updated_at", null: false
+    t.index ["distribution_list_id", "party_type", "party_id"], name: "index_distribution_list_members_unique", unique: true
+    t.index ["distribution_list_id", "position"], name: "idx_on_distribution_list_id_position_a33b49f4ad", unique: true
+    t.index ["distribution_list_id"], name: "index_distribution_list_members_on_distribution_list_id"
+    t.index ["party_type", "party_id"], name: "index_distribution_list_members_on_party_type_and_party_id"
+  end
+
+  create_table "distribution_lists", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "name"], name: "index_distribution_lists_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_distribution_lists_on_user_id"
   end
 
   create_table "document_file_versions", force: :cascade do |t|
@@ -408,6 +431,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_10_190503) do
   add_foreign_key "classification_nodes", "entities"
   add_foreign_key "contacts", "entities"
   add_foreign_key "departments", "entities"
+  add_foreign_key "distribution_list_members", "distribution_lists"
+  add_foreign_key "distribution_lists", "users"
   add_foreign_key "document_file_versions", "annexes"
   add_foreign_key "document_file_versions", "documents"
   add_foreign_key "document_file_versions", "users"

@@ -1,0 +1,72 @@
+<%= form_with model: distribution_list, builder: FloatingLabelsRails::FormBuilder, local: true do |f| %>
+  <% if distribution_list.errors.any? %>
+    <div class="mb-4 rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+      <%= distribution_list.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= f.floating_text_field :name, label: "Name", required: true, autofocus: true, placeholder: " " %>
+
+  <% entities = current_user.entities.order(:name) %>
+
+  <div class="mt-6 border-t border-gray-200 pt-6" data-controller="distribution-list-builder">
+    <h3 class="text-sm font-medium text-gray-900">Members</h3>
+    <p class="mt-1 text-sm text-gray-500">
+      The first member becomes the addressee when this list is applied to a document; the rest are added as CC. Drag to reorder.
+    </p>
+
+    <div data-distribution-list-builder-target="members" class="mt-4 space-y-3">
+      <%= f.fields_for :distribution_list_members do |member_form| %>
+        <%= render "member_fields", f: member_form %>
+      <% end %>
+    </div>
+
+    <template data-distribution-list-builder-target="template">
+      <%= f.fields_for :distribution_list_members, DistributionListMember.new, child_index: "NEW_RECORD" do |member_form| %>
+        <%= render "member_fields", f: member_form %>
+      <% end %>
+    </template>
+
+    <% if entities.any? %>
+      <div class="mt-4 rounded-md border border-gray-200 p-3">
+        <div class="flex flex-wrap items-end gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Entity</label>
+            <select data-distribution-list-builder-target="entitySelect"
+                    data-action="distribution-list-builder#switchEntity"
+                    class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <% entities.each do |entity| %>
+                <option value="<%= entity.id %>"><%= entity.name %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Person to add</label>
+            <% entities.each do |entity| %>
+              <select data-distribution-list-builder-target="partyPicker" data-entity-id="<%= entity.id %>"
+                      class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <option value="">Select a person...</option>
+                <%= party_grouped_options(entity) %>
+              </select>
+            <% end %>
+          </div>
+
+          <button type="button" data-action="distribution-list-builder#addMember"
+                  class="text-sm font-medium text-primary-600 hover:text-primary-700 whitespace-nowrap">
+            + Add member
+          </button>
+        </div>
+      </div>
+    <% else %>
+      <p class="mt-4 text-sm text-gray-500">
+        You must belong to at least one entity before you can add members to a distribution list.
+      </p>
+    <% end %>
+  </div>
+
+  <div class="mt-6 flex justify-end gap-3">
+    <%= render(Ui::ButtonComponent.new(href: distribution_lists_path, variant: :secondary)) { "Cancel" } %>
+    <%= render(Ui::ButtonComponent.new) { distribution_list.persisted? ? "Save changes" : "Create distribution list" } %>
+  </div>
+<% end %>

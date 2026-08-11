@@ -4,7 +4,7 @@ class DocumentsController < ApplicationController
   include EntityScoped
   include OrganizerResponse
 
-  before_action :set_document, only: %i[show edit update destroy launch cancel confirm_cancel confirm_destroy classify_form classify]
+  before_action :set_document, only: %i[show edit update destroy launch cancel confirm_cancel confirm_destroy classify_form classify apply_distribution_list]
   before_action :load_classification_tree, only: %i[index mine received todo waiting info to_validate search classify_form]
 
   def index
@@ -64,6 +64,7 @@ class DocumentsController < ApplicationController
   def new
     @document = current_entity.documents.new
     apply_reply_prefill if params[:reply_to].present?
+    apply_distribution_list_prefill if params[:distribution_list_id].present?
     authorize @document
   end
 
@@ -154,6 +155,19 @@ class DocumentsController < ApplicationController
                    alert: result.success? ? nil : result.message
   end
 
+  def apply_distribution_list
+    authorize @document, :apply_distribution_list?
+
+    distribution_list = current_user.distribution_lists.find_by(id: params[:distribution_list_id])
+    return redirect_to entity_document_path(current_entity, @document), alert: "That distribution list could not be found." if distribution_list.nil?
+
+    result = Documents::ApplyDistributionListOrganizer.call(document: @document, distribution_list: distribution_list, current_user: current_user)
+
+    redirect_on_result(result,
+                        success_path: entity_document_path(current_entity, @document),
+                        success_message: apply_distribution_list_success_message(result))
+  end
+
   private
 
   def set_document
@@ -180,6 +194,28 @@ class DocumentsController < ApplicationController
     @document.sender_token = "User-#{current_user.id}"
     @document.addressee_token = "#{original.sender_type}-#{original.sender_id}"
     @document.in_reply_to_id = original.id
+  end
+
+  def apply_distribution_list_prefill
+    list = current_user.distribution_lists.find_by(id: params[:distribution_list_id])
+    return if list.nil?
+
+    all_members = list.distribution_list_members.ordered.to_a
+    valid_members = all_members.select { |member| @document.party_in_entity?(member.party) }
+    return if valid_members.empty?
+
+    primary, *rest = valid_members
+    @document.addressee_token = primary.party_token
+    @document.distribution_list_id = list.id
+    @distribution_list = list
+    @distribution_list_cc_preview_count = rest.size
+    @skipped_distribution_list_members = all_members.size - valid_members.size
+  end
+
+  def apply_distribution_list_success_message(result)
+    return "Distribution list applied successfully." if result.skipped_count.to_i.zero?
+
+    "Distribution list applied successfully (#{result.skipped_count} member(s) skipped: not part of this entity)."
   end
 
   def scoped_base_for(list_scope)
@@ -224,6 +260,6 @@ class DocumentsController < ApplicationController
   end
 
   def document_params
-    params.require(:document).permit(:subject, :document_date, :department_id, :expects_response, :response_deadline, :sender_token, :addressee_token, :in_reply_to_id)
+    params.require(:document).permit(:subject, :document_date, :department_id, :expects_response, :response_deadline, :sender_token, :addressee_token, :in_reply_to_id, :distribution_list_id)
   end
 end

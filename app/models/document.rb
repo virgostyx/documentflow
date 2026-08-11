@@ -42,6 +42,10 @@ class Document < ApplicationRecord
   # Not persisted; only used to redisplay the incoming mail routing form after a validation failure.
   attr_accessor :action_user_id, :info_user_ids
 
+  # Not persisted; carries a chosen distribution list through the new -> create
+  # request so its remaining members can be added as CC recipients on save.
+  attr_accessor :distribution_list_id
+
   # Validations
   validates :subject, presence: true, length: { maximum: 255 }
   validates :document_date, presence: true

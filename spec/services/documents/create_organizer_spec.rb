@@ -129,5 +129,73 @@ RSpec.describe Documents::CreateOrganizer do
         }.to change(Document, :count).by(1)
       end
     end
+
+    context "with a distribution_list_id in the params" do
+      let(:distribution_list) { create(:distribution_list, user: user) }
+      let(:cc_party) { create(:contact, entity: entity) }
+
+      let(:document_params) do
+        {
+          subject: "Contrat de prestation",
+          document_date: Date.current,
+          department_id: department.id,
+          sender_token: "Contact-#{sender.id}",
+          addressee_token: "Contact-#{addressee.id}",
+          distribution_list_id: distribution_list.id
+        }
+      end
+
+      before do
+        create(:distribution_list_member, distribution_list: distribution_list, party: addressee, position: 1)
+        create(:distribution_list_member, distribution_list: distribution_list, party: cc_party, position: 2)
+      end
+
+      it "adds the non-addressee members as cc_recipients" do
+        described_class.call(entity: entity, current_user: user, document_params: document_params)
+
+        document = entity.documents.last
+        expect(document.cc_recipients.map(&:party)).to contain_exactly(cc_party)
+      end
+
+      it "does not add the addressee itself as a cc_recipient" do
+        described_class.call(entity: entity, current_user: user, document_params: document_params)
+
+        document = entity.documents.last
+        expect(document.cc_recipients.map(&:party)).not_to include(addressee)
+      end
+    end
+
+    context "without a distribution_list_id" do
+      it "does not add any cc_recipients" do
+        described_class.call(entity: entity, current_user: user, document_params: document_params)
+
+        document = entity.documents.last
+        expect(document.cc_recipients).to be_empty
+      end
+    end
+
+    context "with a distribution_list_id that does not belong to the current user" do
+      let(:other_user) { create(:user) }
+      let(:distribution_list) { create(:distribution_list, user: other_user) }
+      let(:document_params) do
+        {
+          subject: "Contrat de prestation",
+          document_date: Date.current,
+          department_id: department.id,
+          sender_token: "Contact-#{sender.id}",
+          addressee_token: "Contact-#{addressee.id}",
+          distribution_list_id: distribution_list.id
+        }
+      end
+
+      before { create(:distribution_list_member, distribution_list: distribution_list, party: addressee, position: 1) }
+
+      it "ignores the list and creates the document without extra cc_recipients" do
+        result = described_class.call(entity: entity, current_user: user, document_params: document_params)
+
+        expect(result).to be_success
+        expect(result.document.cc_recipients).to be_empty
+      end
+    end
   end
 end

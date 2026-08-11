@@ -30,6 +30,22 @@ class CcRecipientsController < ApplicationController
     end
   end
 
+  def add_distribution_list
+    authorize CcRecipient.new(document: @document), :create?
+
+    distribution_list = current_user.distribution_lists.find_by(id: params[:distribution_list_id])
+    return redirect_to entity_document_path(current_entity, @document), alert: "That distribution list could not be found." if distribution_list.nil?
+
+    result = Documents::AddCcRecipientsFromDistributionListOrganizer.call(document: @document, distribution_list: distribution_list, current_user: current_user)
+
+    if result.success?
+      message = result.skipped_count.to_i.zero? ? "Recipients added to copy successfully." : "Recipients added to copy successfully (#{result.skipped_count} member(s) skipped: not part of this entity)."
+      redirect_to entity_document_path(current_entity, @document), notice: message
+    else
+      redirect_to entity_document_path(current_entity, @document), alert: "Could not add the distribution list's recipients."
+    end
+  end
+
   def destroy
     @cc_recipient = @document.cc_recipients.find(params[:id])
     authorize @cc_recipient

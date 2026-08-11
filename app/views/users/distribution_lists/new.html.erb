@@ -1,0 +1,9 @@
+<%= render Auth::AuthLayoutComponent.new(title: "New distribution list") do %>
+  <div class="mb-6">
+    <%= link_to distribution_lists_path, class: "inline-flex items-center text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors" do %>
+      ← Back to distribution lists
+    <% end %>
+  </div>
+
+  <%= render "form", distribution_list: @distribution_list %>
+<% end %>

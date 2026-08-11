@@ -35,6 +35,30 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "associations" do
+    subject { build(:user) }
+
+    it { is_expected.to have_many(:distribution_lists).dependent(:destroy) }
+  end
+
+  describe "#entities" do
+    it "returns entities the user is an active member of" do
+      user = create(:user)
+      entity = create(:entity)
+      create(:entity_user, user: user, entity: entity, status: "active")
+
+      expect(user.entities).to contain_exactly(entity)
+    end
+
+    it "excludes entities where membership is inactive" do
+      user = create(:user)
+      entity = create(:entity)
+      create(:entity_user, user: user, entity: entity, status: "suspended")
+
+      expect(user.entities).to be_empty
+    end
+  end
+
   describe "factory" do
     it "generates a valid user" do
       expect(build(:user)).to be_valid

@@ -701,6 +701,53 @@ RSpec.describe "Documents", type: :request do
         expect(flash[:alert]).to be_present
       end
     end
+
+    context "when picking a distribution list" do
+      let!(:entity_user) { create(:entity_user, :admin, entity: entity, user: user) }
+      let(:distribution_list) { create(:distribution_list, user: user) }
+
+      before do
+        create(:distribution_list_member, distribution_list: distribution_list, party: addressee, position: 1)
+        sign_in user
+      end
+
+      it "pre-fills the addressee with the list's first member" do
+        get new_entity_document_path(entity, distribution_list_id: distribution_list.id)
+
+        expect(response.body).to include(%(selected="selected" value="Contact-#{addressee.id}"))
+      end
+
+      it "carries the distribution list id through as a hidden field" do
+        get new_entity_document_path(entity, distribution_list_id: distribution_list.id)
+
+        expect(response.body).to include(%(value="#{distribution_list.id}" name="document[distribution_list_id]" id="document_distribution_list_id"))
+      end
+
+      context "with additional members beyond the first" do
+        let(:cc_party) { create(:contact, entity: entity) }
+
+        before { create(:distribution_list_member, distribution_list: distribution_list, party: cc_party, position: 2) }
+
+        it "notes how many additional recipients will be added as CC" do
+          get new_entity_document_path(entity, distribution_list_id: distribution_list.id)
+
+          expect(response.body).to include("1 additional recipient")
+          expect(response.body).to include(distribution_list.name)
+        end
+      end
+
+      context "with a member from another entity" do
+        let(:outsider_party) { create(:contact, entity: create(:entity)) }
+
+        before { create(:distribution_list_member, distribution_list: distribution_list, party: outsider_party, position: 2) }
+
+        it "notes the skipped member" do
+          get new_entity_document_path(entity, distribution_list_id: distribution_list.id)
+
+          expect(response.body).to include("1 member").and include("skipped")
+        end
+      end
+    end
   end
 
   describe "POST /entities/:entity_id/documents" do
@@ -782,6 +829,35 @@ RSpec.describe "Documents", type: :request do
 
             document = entity.documents.find_by(subject: "Internal memo")
             expect(document.sender).to eq(user)
+          end
+        end
+
+        context "with a distribution_list_id" do
+          let(:distribution_list) { create(:distribution_list, user: user) }
+          let(:cc_party) { create(:contact, entity: entity) }
+          let(:document_params) do
+            {
+              document: {
+                subject: "New supplier agreement",
+                document_date: Date.current,
+                department_id: department.id,
+                sender_token: "Contact-#{sender.id}",
+                addressee_token: "Contact-#{addressee.id}",
+                distribution_list_id: distribution_list.id
+              }
+            }
+          end
+
+          before do
+            create(:distribution_list_member, distribution_list: distribution_list, party: addressee, position: 1)
+            create(:distribution_list_member, distribution_list: distribution_list, party: cc_party, position: 2)
+          end
+
+          it "adds the list's non-addressee members as cc_recipients" do
+            post entity_documents_path(entity), params: document_params
+
+            document = entity.documents.find_by(subject: "New supplier agreement")
+            expect(document.cc_recipients.map(&:party)).to contain_exactly(cc_party)
           end
         end
 

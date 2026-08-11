@@ -1,7 +1,6 @@
 # Linking an Incoming Mail Reply to its Original Document — Design
 
-Status: DESIGNED, not yet implemented. Next step: `writing-plans` skill produces
-the step-by-step implementation plan from this spec.
+Status: IMPLEMENTED (2026-08-11).
 
 ## 1. Concept
 

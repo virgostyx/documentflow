@@ -164,7 +164,7 @@ class DocumentsController < ApplicationController
     policy_scope(Document).where(entity: current_entity).outgoing
   end
 
-  # Only for todo/waiting/info, which now include routed incoming mail.
+  # Only for todo/waiting/info/show, which now include routed incoming mail.
   # received/mine/to_validate/index must stay outgoing-only — do not reuse this there.
   def merged_base_scope
     policy_scope(Document).where(entity: current_entity)

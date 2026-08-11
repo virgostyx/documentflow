@@ -183,3 +183,9 @@ other.
 - One incoming mail can link to at most one original (single
   `in_reply_to_id`), matching the existing `Reply`-button semantics. A mail
   that answers multiple outstanding documents at once isn't supported.
+- There is no way to un-link or re-link through the UI once a mail is
+  routed. `DocumentPolicy#route?` returns false once `routed_at` is set, and
+  the "Replies to" field only exists on the routing form, so a wrong
+  selection is permanent, and a lead who forgets to link a reply has no
+  recovery path — the original stays in Waiting forever, which is the exact
+  problem this feature exists to solve.

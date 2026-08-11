@@ -15,7 +15,7 @@ module IncomingMails
           routing_message: ctx.routing_params[:routing_message],
           expects_response: ctx.routing_params[:expects_response],
           response_deadline: ctx.routing_params[:response_deadline],
-          in_reply_to_id: ctx.routing_params[:in_reply_to_id],
+          in_reply_to_id: ctx.routing_params[:in_reply_to_id].presence,
           routed_at: Time.current
         )
           ctx.document = document

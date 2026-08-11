@@ -67,6 +67,7 @@ RSpec.describe "Linking an incoming mail reply to its original document", type: 
       # in again here would hit Devise's require_no_authentication guard on
       # the sign-in form and redirect before the form even renders.
       visit waiting_entity_documents_path(entity)
+      expect(page).to have_content("Waiting")
       expect(page).not_to have_content("Request for tax documents")
 
       visit entity_document_path(entity, original)

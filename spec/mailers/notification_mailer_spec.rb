@@ -147,6 +147,18 @@ RSpec.describe NotificationMailer do
         expect(mail.text_part.body.encoded).not_to include("{{recipient_name}}")
       end
 
+      it "greets the recipient by name when the message was not built from an email template" do
+        expect(mail.text_part.body.encoded).to include("Hello #{user.display_name}")
+        expect(mail.html_part.body.encoded).to include("Hello #{CGI.escapeHTML(user.display_name)}")
+      end
+
+      it "omits the automatic greeting when the message was built from an email template" do
+        document.update!(dispatch_message: "Dear #{user.display_name}, please review.", dispatch_message_from_template: true)
+
+        expect(mail.text_part.body.encoded).not_to include("Hello")
+        expect(mail.html_part.body.encoded).not_to include("Hello")
+      end
+
       it "uses the document's default subject when no dispatch_subject override is set" do
         expect(mail.subject).to eq("Document addressed to you: #{document.reference_number}")
       end
@@ -283,6 +295,18 @@ RSpec.describe NotificationMailer do
       it "does not mention any link expiration" do
         expect(mail.text_part.body.encoded).not_to include("expire")
         expect(mail.html_part.body.encoded).not_to include("expire")
+      end
+
+      it "greets the recipient by name when the message was not built from an email template" do
+        expect(mail.text_part.body.encoded).to include("Hello #{user.display_name}")
+        expect(mail.html_part.body.encoded).to include("Hello #{CGI.escapeHTML(user.display_name)}")
+      end
+
+      it "omits the automatic greeting when the message was built from an email template" do
+        document.update!(dispatch_message: "Dear #{user.display_name}, please review.", dispatch_message_from_template: true)
+
+        expect(mail.text_part.body.encoded).not_to include("Hello")
+        expect(mail.html_part.body.encoded).not_to include("Hello")
       end
 
       it "uses the document's default subject when no dispatch_subject override is set" do

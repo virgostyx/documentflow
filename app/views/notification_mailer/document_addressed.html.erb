@@ -1,4 +1,6 @@
-<p>Hello <%= @recipient_name %>,</p>
+<% if @show_greeting %>
+  <p>Hello <%= @recipient_name %>,</p>
+<% end %>
 
 <%= simple_format(@dispatch_message) %>
 

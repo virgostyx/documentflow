@@ -62,6 +62,7 @@ class NotificationMailer < ApplicationMailer
     @recipient_name = party.display_name
     @document = document
     @dispatch_message = document.dispatch_message.to_s.gsub("{{recipient_name}}", @recipient_name)
+    @show_greeting = !document.dispatch_message_from_template?
 
     if party.external? && document.addressee_dispatch_as_attachment?
       attach_document_files(document)
@@ -79,6 +80,7 @@ class NotificationMailer < ApplicationMailer
     @recipient_name = party.display_name
     @document = document
     @dispatch_message = document.dispatch_message.to_s.gsub("{{recipient_name}}", @recipient_name)
+    @show_greeting = !document.dispatch_message_from_template?
     cc_recipient = document.cc_recipients.find_by(party_type: party.class.name, party_id: party.id)
 
     if party.external? && cc_recipient&.dispatch_as_attachment?

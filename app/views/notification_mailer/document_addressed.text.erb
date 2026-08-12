@@ -1,4 +1,5 @@
-Hello <%= @recipient_name %>,
+<% if @show_greeting %>Hello <%= @recipient_name %>,
+<% end %>
 
 <%= @dispatch_message %>
 

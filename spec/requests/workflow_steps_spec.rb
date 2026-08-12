@@ -244,6 +244,20 @@ RSpec.describe "WorkflowSteps", type: :request do
         expect(response.body).to include("Dear {{recipient_name}}, reference TND-2026-01")
       end
 
+      it "flags the message as template-sourced once a template is selected" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step), params: { email_template_id: email_template.id }
+
+        field = Nokogiri::HTML(response.body).at_css('input[name="dispatch_message_from_template"]')
+        expect(field["value"]).to eq("1")
+      end
+
+      it "does not flag the message as template-sourced when no template is selected" do
+        get confirm_exp_entity_document_workflow_step_path(entity, document, exp_step)
+
+        field = Nokogiri::HTML(response.body).at_css('input[name="dispatch_message_from_template"]')
+        expect(field["value"]).to eq("0")
+      end
+
       context "when the template has a subject_template" do
         let!(:email_template) do
           create(:email_template, entity: entity, subject_template: "Tender {{reference}}",
@@ -315,6 +329,20 @@ RSpec.describe "WorkflowSteps", type: :request do
         params: { dispatch_message: "Test message" }
 
       expect(document.reload.include_attachment_note).to be false
+    end
+
+    it "persists that the dispatch message was built from an email template when the flag is submitted" do
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { dispatch_message: "Test message", dispatch_message_from_template: "1" }
+
+      expect(document.reload.dispatch_message_from_template).to be true
+    end
+
+    it "defaults dispatch_message_from_template to false when the flag is not submitted" do
+      post approve_entity_document_workflow_step_path(entity, document, exp_step),
+        params: { dispatch_message: "Test message" }
+
+      expect(document.reload.dispatch_message_from_template).to be false
     end
 
     it "persists the submitted dispatch subject" do

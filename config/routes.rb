@@ -31,8 +31,6 @@ Rails.application.routes.draw do
 
   resource :signature, only: %i[show create destroy], controller: "users/signatures"
 
-  resources :distribution_lists, controller: "users/distribution_lists"
-
   mount ActionCable.server => "/cable"
   mount MissionControl::Jobs::Engine, at: "/jobs"
 
@@ -64,6 +62,7 @@ Rails.application.routes.draw do
       end
     end
     resources :contacts
+    resources :distribution_lists, controller: "users/distribution_lists"
     resources :circuit_templates, controller: "entities/circuit_templates"
     resources :document_templates, controller: "entities/document_templates" do
       resource :generation, only: %i[new create], controller: "entities/document_templates/generations"

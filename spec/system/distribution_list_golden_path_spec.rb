@@ -14,8 +14,8 @@ RSpec.describe "Distribution list golden path", type: :system, js: true do
   before { sign_in_via_form(owner) }
 
   it "builds a distribution list through the UI and applies it to a document" do
-    visit distribution_lists_path
-    click_link "New distribution list"
+    visit entity_distribution_lists_path(entity)
+    click_link "New distribution list", match: :first
 
     fill_in "Name", with: "Quarterly partners"
 

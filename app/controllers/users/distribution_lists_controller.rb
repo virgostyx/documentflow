@@ -4,10 +4,12 @@ module Users
   # Self-service management of a user's personal, reusable distribution
   # lists (see DistributionList). Not entity-scoped: ownership through
   # current_user.distribution_lists is the only access control needed here.
+  # Routes are nested under an entity, and EntityScoped's current_entity is
+  # used only to render the entity app-shell (sidebar/header) the user
+  # arrived from -- it does not filter which lists are visible.
   class DistributionListsController < ApplicationController
     include SavesAndResponds
-
-    layout "pages"
+    include EntityScoped
 
     before_action :set_distribution_list, only: %i[edit update destroy]
 
@@ -23,7 +25,7 @@ module Users
       @distribution_list = current_user.distribution_lists.new(distribution_list_params)
 
       save_and_respond(@distribution_list,
-                        success_path: distribution_lists_path,
+                        success_path: entity_distribution_lists_path(current_entity),
                         success_message: "Distribution list created successfully.",
                         failure_template: :new) { @distribution_list.save }
     end
@@ -33,14 +35,14 @@ module Users
 
     def update
       save_and_respond(@distribution_list,
-                        success_path: distribution_lists_path,
+                        success_path: entity_distribution_lists_path(current_entity),
                         success_message: "Distribution list updated successfully.",
                         failure_template: :edit) { @distribution_list.update(distribution_list_params) }
     end
 
     def destroy
       @distribution_list.destroy
-      redirect_to distribution_lists_path, notice: "Distribution list deleted successfully."
+      redirect_to entity_distribution_lists_path(current_entity), notice: "Distribution list deleted successfully."
     end
 
     private

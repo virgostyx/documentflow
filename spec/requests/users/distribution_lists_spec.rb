@@ -8,13 +8,16 @@ RSpec.describe "Users::DistributionLists", type: :request do
   let(:entity) { create(:entity) }
   let(:contact) { create(:contact, entity: entity) }
 
-  before { sign_in user }
+  before do
+    create(:entity_user, entity: entity, user: user)
+    sign_in user
+  end
 
-  describe "GET /distribution_lists" do
+  describe "GET /entities/:entity_id/distribution_lists" do
     it "lists the current user's distribution lists" do
       list = create(:distribution_list, user: user, name: "My partners")
 
-      get distribution_lists_path
+      get entity_distribution_lists_path(entity)
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(list.name)
@@ -23,21 +26,21 @@ RSpec.describe "Users::DistributionLists", type: :request do
     it "does not include another user's distribution lists" do
       other_list = create(:distribution_list, user: other_user, name: "Other's private list")
 
-      get distribution_lists_path
+      get entity_distribution_lists_path(entity)
 
       expect(response.body).not_to include(other_list.name)
     end
   end
 
-  describe "GET /distribution_lists/new" do
+  describe "GET /entities/:entity_id/distribution_lists/new" do
     it "renders the new form" do
-      get new_distribution_list_path
+      get new_entity_distribution_list_path(entity)
 
       expect(response).to have_http_status(:ok)
     end
   end
 
-  describe "POST /distribution_lists" do
+  describe "POST /entities/:entity_id/distribution_lists" do
     let(:params) do
       {
         distribution_list: {
@@ -50,9 +53,9 @@ RSpec.describe "Users::DistributionLists", type: :request do
     end
 
     it "creates a distribution list owned by the current user" do
-      expect { post distribution_lists_path, params: params }.to change(user.distribution_lists, :count).by(1)
+      expect { post entity_distribution_lists_path(entity), params: params }.to change(user.distribution_lists, :count).by(1)
 
-      expect(response).to redirect_to(distribution_lists_path)
+      expect(response).to redirect_to(entity_distribution_lists_path(entity))
       list = user.distribution_lists.last
       expect(list.name).to eq("Quarterly partners")
       expect(list.distribution_list_members.first.party).to eq(contact)
@@ -60,25 +63,25 @@ RSpec.describe "Users::DistributionLists", type: :request do
 
     it "creates an empty list when no members are submitted" do
       expect {
-        post distribution_lists_path, params: { distribution_list: { name: "Empty for now" } }
+        post entity_distribution_lists_path(entity), params: { distribution_list: { name: "Empty for now" } }
       }.to change(user.distribution_lists, :count).by(1)
 
-      expect(response).to redirect_to(distribution_lists_path)
+      expect(response).to redirect_to(entity_distribution_lists_path(entity))
       expect(user.distribution_lists.last.distribution_list_members).to be_empty
     end
 
     it "re-renders the form with errors when invalid" do
-      post distribution_lists_path, params: { distribution_list: { name: "" } }
+      post entity_distribution_lists_path(entity), params: { distribution_list: { name: "" } }
 
       expect(response).to have_http_status(:unprocessable_content)
     end
   end
 
-  describe "GET /distribution_lists/:id/edit" do
+  describe "GET /entities/:entity_id/distribution_lists/:id/edit" do
     it "renders the edit form for the owner" do
       list = create(:distribution_list, user: user)
 
-      get edit_distribution_list_path(list)
+      get edit_entity_distribution_list_path(entity, list)
 
       expect(response).to have_http_status(:ok)
     end
@@ -86,43 +89,43 @@ RSpec.describe "Users::DistributionLists", type: :request do
     it "404s for another user's list" do
       other_list = create(:distribution_list, user: other_user)
 
-      get edit_distribution_list_path(other_list)
+      get edit_entity_distribution_list_path(entity, other_list)
 
       expect(response).to have_http_status(:not_found)
     end
   end
 
-  describe "PATCH /distribution_lists/:id" do
+  describe "PATCH /entities/:entity_id/distribution_lists/:id" do
     it "updates the owner's list" do
       list = create(:distribution_list, user: user, name: "Old name")
 
-      patch distribution_list_path(list), params: { distribution_list: { name: "New name" } }
+      patch entity_distribution_list_path(entity, list), params: { distribution_list: { name: "New name" } }
 
-      expect(response).to redirect_to(distribution_lists_path)
+      expect(response).to redirect_to(entity_distribution_lists_path(entity))
       expect(list.reload.name).to eq("New name")
     end
 
     it "404s for another user's list" do
       other_list = create(:distribution_list, user: other_user)
 
-      patch distribution_list_path(other_list), params: { distribution_list: { name: "Hijacked" } }
+      patch entity_distribution_list_path(entity, other_list), params: { distribution_list: { name: "Hijacked" } }
 
       expect(response).to have_http_status(:not_found)
     end
   end
 
-  describe "DELETE /distribution_lists/:id" do
+  describe "DELETE /entities/:entity_id/distribution_lists/:id" do
     it "destroys the owner's list" do
       list = create(:distribution_list, user: user)
 
-      expect { delete distribution_list_path(list) }.to change(DistributionList, :count).by(-1)
-      expect(response).to redirect_to(distribution_lists_path)
+      expect { delete entity_distribution_list_path(entity, list) }.to change(DistributionList, :count).by(-1)
+      expect(response).to redirect_to(entity_distribution_lists_path(entity))
     end
 
     it "404s for another user's list" do
       other_list = create(:distribution_list, user: other_user)
 
-      delete distribution_list_path(other_list)
+      delete entity_distribution_list_path(entity, other_list)
 
       expect(response).to have_http_status(:not_found)
     end

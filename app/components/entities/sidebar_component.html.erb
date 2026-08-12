@@ -182,7 +182,7 @@
       </svg>
       Overview
     <% end %>
-    <%= link_to distribution_lists_path, class: helpers.nav_class(distribution_lists_path) do %>
+    <%= link_to entity_distribution_lists_path(current_entity), class: helpers.nav_class(entity_distribution_lists_path(current_entity)) do %>
       <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
       </svg>

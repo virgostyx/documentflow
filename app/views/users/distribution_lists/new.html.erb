@@ -1,9 +1,12 @@
-<%= render Auth::AuthLayoutComponent.new(title: "New distribution list") do %>
-  <div class="mb-6">
-    <%= link_to distribution_lists_path, class: "inline-flex items-center text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors" do %>
-      ← Back to distribution lists
-    <% end %>
-  </div>
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render Ui::PageHeaderComponent.new(
+    title: "New distribution list",
+    description: current_entity.name,
+    back_path: entity_distribution_lists_path(current_entity),
+    back_text: "Distribution lists"
+  ) %>
 
-  <%= render "form", distribution_list: @distribution_list %>
-<% end %>
+  <%= render Ui::CardComponent.new do %>
+    <%= render "form", distribution_list: @distribution_list %>
+  <% end %>
+</div>

@@ -30,11 +30,11 @@
     <% if entities.any? %>
       <div class="mt-4 rounded-md border border-gray-200 p-3">
         <div class="flex flex-wrap items-end gap-3">
-          <div>
+          <div class="flex-1 min-w-0">
             <label class="block text-xs font-medium text-gray-700 mb-1">Entity</label>
             <select data-distribution-list-builder-target="entitySelect"
                     data-action="distribution-list-builder#switchEntity"
-                    class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
               <% entities.each do |entity| %>
                 <option value="<%= entity.id %>"><%= entity.name %></option>
               <% end %>

@@ -38,6 +38,10 @@ RSpec.describe Documents::AnnexListComponent, type: :component do
       expect(subject).to have_css("a[href='#{Rails.application.routes.url_helpers.preview_entity_document_annex_path(document.entity, document, annex)}']")
     end
 
+    it "scopes the keep-original-format checkbox under annex[] so the controller's params.require(:annex) succeeds" do
+      expect(subject).to have_css("input[name='annex[skip_pdf_conversion]']")
+    end
+
     it "displays a remove link for each annex" do
       expect(subject).to have_link("Remove")
     end

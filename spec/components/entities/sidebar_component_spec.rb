@@ -441,6 +441,84 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
   end
 
+  describe "Templates section" do
+    context "as an owner" do
+      let!(:entity_user) { create(:entity_user, :owner, entity: entity, user: user) }
+
+      subject(:rendered) do
+        with_request_url(current_path) do
+          render_inline(described_class.new(current_entity: entity, current_user: user, current_entity_user: entity_user))
+        end
+      end
+
+      it "links to Circuit templates, Document templates and Email templates, in that order" do
+        expect(rendered).to have_link("Circuit templates", href: entity_circuit_templates_path(entity))
+        expect(rendered).to have_link("Document templates", href: entity_document_templates_path(entity))
+        expect(rendered).to have_link("Email templates", href: entity_email_templates_path(entity))
+
+        links = rendered.css("nav a").map { |a| a.text.squish }
+        expect(links.index("Circuit templates")).to be < links.index("Document templates")
+        expect(links.index("Document templates")).to be < links.index("Email templates")
+      end
+
+      context "when on the circuit templates page" do
+        let(:current_path) { entity_circuit_templates_path(entity) }
+
+        it "highlights the Circuit templates link" do
+          expect(rendered).to have_css("a.bg-primary-100", text: "Circuit templates")
+        end
+      end
+
+      context "when on the document templates page" do
+        let(:current_path) { entity_document_templates_path(entity) }
+
+        it "highlights the Document templates link" do
+          expect(rendered).to have_css("a.bg-primary-100", text: "Document templates")
+        end
+      end
+
+      context "when on the email templates page" do
+        let(:current_path) { entity_email_templates_path(entity) }
+
+        it "highlights the Email templates link" do
+          expect(rendered).to have_css("a.bg-primary-100", text: "Email templates")
+        end
+      end
+    end
+
+    context "as a member" do
+      let!(:entity_user) { create(:entity_user, entity: entity, user: user, role: "member") }
+
+      subject(:rendered) do
+        with_request_url(current_path) do
+          render_inline(described_class.new(current_entity: entity, current_user: user, current_entity_user: entity_user))
+        end
+      end
+
+      it "shows Document templates and Email templates but not Circuit templates" do
+        expect(rendered).to have_link("Document templates", href: entity_document_templates_path(entity))
+        expect(rendered).to have_link("Email templates", href: entity_email_templates_path(entity))
+        expect(rendered).not_to have_link("Circuit templates")
+      end
+    end
+
+    context "as a guest" do
+      let!(:entity_user) { create(:entity_user, :guest, entity: entity, user: user) }
+
+      subject(:rendered) do
+        with_request_url(current_path) do
+          render_inline(described_class.new(current_entity: entity, current_user: user, current_entity_user: entity_user))
+        end
+      end
+
+      it "shows Document templates and Email templates but not Circuit templates" do
+        expect(rendered).to have_link("Document templates", href: entity_document_templates_path(entity))
+        expect(rendered).to have_link("Email templates", href: entity_email_templates_path(entity))
+        expect(rendered).not_to have_link("Circuit templates")
+      end
+    end
+  end
+
   describe "Settings section" do
     it "links to settings" do
       expect(rendered).to have_link("Settings", href: entity_settings_path(entity))

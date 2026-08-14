@@ -26,17 +26,7 @@
     <%= f.hidden_field :department_id, value: default_department_id %>
   <% end %>
 
-  <div class="mt-4" data-controller="checkbox-toggle">
-    <div class="flex items-center gap-2">
-      <%= f.check_box :expects_response, class: "h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded",
-            data: { action: "checkbox-toggle#sync", checkbox_toggle_target: "checkbox" } %>
-      <%= f.label :expects_response, "This document expects a response from the recipient", class: "text-sm text-gray-700" %>
-    </div>
-
-    <div class="mt-3 <%= "hidden" unless document.expects_response? %>" data-checkbox-toggle-target="panel">
-      <%= f.floating_date_field :response_deadline, label: "Response deadline", placeholder: " " %>
-    </div>
-  </div>
+  <%= render "shared/expects_response_fields", form: f, document: document %>
 
   <%= render(Documents::PartyPickerComponent.new(
     form: f, attribute: :sender_token, entity: current_entity,

@@ -37,6 +37,8 @@
         additional_picker_ids: [ "document_sender_token" ]
       )) %>
 
+      <%= render "shared/expects_response_fields", form: f, document: @document %>
+
       <div class="mt-4">
         <label class="block text-sm font-medium text-gray-700 mb-1">CC recipients (optional)</label>
         <%= select_tag "document[cc_party_tokens][]", party_grouped_options(current_entity, @cc_party_tokens),

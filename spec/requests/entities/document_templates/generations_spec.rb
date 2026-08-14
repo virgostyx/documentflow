@@ -51,6 +51,13 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
 
       expect(response.body).to include('name="document[annexes][]"')
     end
+
+    it "renders an expects_response checkbox and response_deadline field" do
+      get new_entity_document_template_generation_path(entity, document_template)
+
+      expect(response.body).to include('name="document[expects_response]"')
+      expect(response.body).to include('name="document[response_deadline]"')
+    end
   end
 
   describe "POST /entities/:entity_id/document_templates/:document_template_id/generation" do
@@ -115,6 +122,30 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
 
         document = entity.documents.last
         expect(document.cc_recipients.map(&:party)).to contain_exactly(cc_user, cc_contact)
+      end
+    end
+
+    context "when expects_response and response_deadline are provided" do
+      let(:generation_params) do
+        {
+          document: {
+            department_id: department.id,
+            document_date: Date.current,
+            sender_token: "Contact-#{sender.id}",
+            addressee_token: "Contact-#{addressee.id}",
+            expects_response: "1",
+            response_deadline: 5.days.from_now.to_date
+          },
+          field_values: { "supplier" => "Acme Corp", "amount" => "1200 EUR" }
+        }
+      end
+
+      it "sets expects_response and response_deadline on the generated document" do
+        post entity_document_template_generation_path(entity, document_template), params: generation_params
+
+        document = entity.documents.last
+        expect(document.expects_response).to be(true)
+        expect(document.response_deadline).to eq(5.days.from_now.to_date)
       end
     end
 

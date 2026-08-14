@@ -77,6 +77,10 @@ class DocumentPolicy < ApplicationPolicy
     record.checked_out_by?(user) || entity_admin? || entity_owner?
   end
 
+  def resend_dispatch?
+    record.finalized? && (record.created_by == user || entity_admin? || entity_owner?)
+  end
+
   def route?
     return false if record.outgoing? || record.routed?
 

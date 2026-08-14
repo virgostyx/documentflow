@@ -345,6 +345,23 @@ RSpec.describe DocumentPolicy, type: :policy do
     end
   end
 
+  describe "#resend_dispatch?" do
+    context "when the document is finalized" do
+      let(:document) { create(:document, :finalized, entity: entity, created_by: member) }
+
+      context "as its creator"   do let(:user) { member }; it { is_expected.to permit_action(:resend_dispatch) } end
+      context "as entity owner"  do let(:user) { owner };  it { is_expected.to permit_action(:resend_dispatch) } end
+      context "as entity admin"  do let(:user) { admin };  it { is_expected.to permit_action(:resend_dispatch) } end
+      context "as another member" do let(:user) { create(:user).tap { |u| create(:entity_user, user: u, entity: entity, role: "member", status: "active") } }; it { is_expected.not_to permit_action(:resend_dispatch) } end
+    end
+
+    context "when the document is not finalized" do
+      let(:document) { create(:document, :in_progress, entity: entity, created_by: owner) }
+
+      context "as entity owner" do let(:user) { owner }; it { is_expected.not_to permit_action(:resend_dispatch) } end
+    end
+  end
+
   describe "#route?" do
     let(:department) { create(:department, entity: entity) }
     let(:lead) do

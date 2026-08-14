@@ -125,6 +125,7 @@ Rails.application.routes.draw do
         get :classify_form
         patch :classify
         post :apply_distribution_list
+        post :resend_dispatch
       end
       collection do
         get :search

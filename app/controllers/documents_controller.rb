@@ -4,7 +4,7 @@ class DocumentsController < ApplicationController
   include EntityScoped
   include OrganizerResponse
 
-  before_action :set_document, only: %i[show edit update destroy launch cancel confirm_cancel confirm_destroy classify_form classify apply_distribution_list]
+  before_action :set_document, only: %i[show edit update destroy launch cancel confirm_cancel confirm_destroy classify_form classify apply_distribution_list resend_dispatch]
   before_action :load_classification_tree, only: %i[index mine received todo waiting info to_validate search classify_form]
 
   def index
@@ -166,6 +166,17 @@ class DocumentsController < ApplicationController
     redirect_on_result(result,
                         success_path: entity_document_path(current_entity, @document),
                         success_message: apply_distribution_list_success_message(result))
+  end
+
+  def resend_dispatch
+    authorize @document, :resend_dispatch?
+
+    result = Documents::ResendDispatchOrganizer.call(
+      document: @document, current_user: current_user,
+      recipient_type: params[:recipient_type], recipient_id: params[:recipient_id]
+    )
+
+    redirect_on_result(result, success_path: entity_document_path(current_entity, @document), success_message: "Document resent.")
   end
 
   private

@@ -7,6 +7,11 @@
           <span class="flex items-center gap-2">
             <%= render(Ui::BadgeComponent.new(color: row.status_color)) { row.status_label } %>
             <span class="text-gray-500 text-xs"><%= l(row.created_at, format: :short) %></span>
+            <% if resendable?(row) %>
+              <%= button_to "Resend", resend_dispatch_entity_document_path(document.entity, document, recipient_type: row.recipient_type, recipient_id: row.recipient_id),
+                    method: :post, class: "text-xs text-primary-600 hover:text-primary-700 underline",
+                    data: { turbo_confirm: "Resend the dispatch email to #{row.label}?" } %>
+            <% end %>
           </span>
         </li>
       <% end %>

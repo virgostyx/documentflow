@@ -10,10 +10,11 @@ module Documents
       "dispatch_failed" => { label: "Failed", color: :danger }
     }.freeze
 
-    Row = Struct.new(:label, :status_label, :status_color, :created_at, keyword_init: true)
+    Row = Struct.new(:label, :status_label, :status_color, :created_at, :recipient_type, :recipient_id, :external, keyword_init: true)
 
-    def initialize(document:)
+    def initialize(document:, current_user: nil)
       @document = document
+      @policy = current_user && Pundit.policy!(current_user, document)
     end
 
     def dom_id
@@ -24,9 +25,22 @@ module Documents
       logs_by_recipient.map do |_key, logs|
         latest = logs.max_by(&:created_at)
         status = STATUSES.fetch(latest.action)
+        type = latest.change_data["recipient_type"]
+        id = latest.change_data["recipient_id"]
+        party = type.present? && id.present? ? type.constantize.find_by(id: id) : nil
 
-        Row.new(label: recipient_label(latest), status_label: status[:label], status_color: status[:color], created_at: latest.created_at)
+        Row.new(
+          label: party&.display_name || latest.change_data["recipient_email"],
+          status_label: status[:label], status_color: status[:color], created_at: latest.created_at,
+          recipient_type: type, recipient_id: id, external: party&.external? || false
+        )
       end.sort_by(&:label)
+    end
+
+    def resendable?(row)
+      return false unless @policy
+
+      row.external && @policy.resend_dispatch?
     end
 
     private
@@ -36,14 +50,6 @@ module Documents
     def logs_by_recipient
       document.audit_logs.where(action: ACTIONS)
               .group_by { |log| [ log.change_data["recipient_type"], log.change_data["recipient_id"] ] }
-    end
-
-    def recipient_label(log)
-      type = log.change_data["recipient_type"]
-      id = log.change_data["recipient_id"]
-      party = type.present? && id.present? ? type.constantize.find_by(id: id) : nil
-
-      party&.display_name || log.change_data["recipient_email"]
     end
   end
 end

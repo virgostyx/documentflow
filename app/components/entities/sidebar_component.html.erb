@@ -200,14 +200,6 @@
     </button>
 
     <div data-sidebar-section-target="panel" class="space-y-0.5">
-    <% if can_view_circuit_templates? %>
-      <%= link_to entity_circuit_templates_path(current_entity), class: helpers.nav_class(entity_circuit_templates_path(current_entity)) do %>
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.007H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.007H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.007H3.75v-.007Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
-        </svg>
-        Circuit templates
-      <% end %>
-    <% end %>
     <% if can_view_document_templates? %>
       <%= link_to entity_document_templates_path(current_entity), class: helpers.nav_class(entity_document_templates_path(current_entity)) do %>
         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">

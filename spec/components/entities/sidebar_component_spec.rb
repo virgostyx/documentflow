@@ -451,22 +451,16 @@ RSpec.describe Entities::SidebarComponent, type: :component do
         end
       end
 
-      it "links to Circuit templates, Document templates and Email templates, in that order" do
-        expect(rendered).to have_link("Circuit templates", href: entity_circuit_templates_path(entity))
+      it "links to Document templates and Email templates, in that order" do
         expect(rendered).to have_link("Document templates", href: entity_document_templates_path(entity))
         expect(rendered).to have_link("Email templates", href: entity_email_templates_path(entity))
 
         links = rendered.css("nav a").map { |a| a.text.squish }
-        expect(links.index("Circuit templates")).to be < links.index("Document templates")
         expect(links.index("Document templates")).to be < links.index("Email templates")
       end
 
-      context "when on the circuit templates page" do
-        let(:current_path) { entity_circuit_templates_path(entity) }
-
-        it "highlights the Circuit templates link" do
-          expect(rendered).to have_css("a.bg-primary-100", text: "Circuit templates")
-        end
+      it "does not link to Circuit templates, which stays on the Settings page" do
+        expect(rendered).not_to have_link("Circuit templates")
       end
 
       context "when on the document templates page" do

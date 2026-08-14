@@ -54,13 +54,8 @@ module Entities
     end
 
     def templates_section_active?
-      request.path.start_with?(entity_circuit_templates_path(current_entity)) ||
-        request.path.start_with?(entity_document_templates_path(current_entity)) ||
+      request.path.start_with?(entity_document_templates_path(current_entity)) ||
         request.path.start_with?(entity_email_templates_path(current_entity))
-    end
-
-    def can_view_circuit_templates?
-      Pundit.policy!(current_user, current_entity.circuit_templates.new).index?
     end
 
     def can_view_document_templates?

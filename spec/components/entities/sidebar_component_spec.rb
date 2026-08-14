@@ -201,12 +201,12 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       expect(link_text(mine_entity_documents_path(entity))).to eq("My Outbox 0")
     end
 
-    it "only counts finalized documents in the Unclassified badge" do
+    it "only counts finalized documents in the Not filed badge" do
       create(:document, :finalized, entity: entity)
       create(:document, entity: entity)
 
       unclassified_href = entity_documents_path(entity, classification_node_id: "unclassified")
-      expect(link_text(unclassified_href)).to eq("Unclassified 1")
+      expect(link_text(unclassified_href)).to eq("Not filed 1")
     end
 
     it "only counts finalized documents as Overview" do
@@ -339,20 +339,20 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
   end
 
-  describe "Classification section" do
+  describe "Filing section" do
     it "links to manage classification nodes" do
       expect(rendered).to have_link("Manage", href: entity_classification_nodes_path(entity))
     end
 
     it "links to the unclassified documents view" do
-      expect(rendered).to have_link("Unclassified", href: entity_documents_path(entity, classification_node_id: "unclassified"))
+      expect(rendered).to have_link("Not filed", href: entity_documents_path(entity, classification_node_id: "unclassified"))
     end
 
     context "when on the unclassified documents page" do
       let(:current_path) { entity_documents_path(entity, classification_node_id: "unclassified") }
 
-      it "highlights the Unclassified link" do
-        expect(rendered).to have_css("a.bg-primary-100", text: "Unclassified")
+      it "highlights the Not filed link" do
+        expect(rendered).to have_css("a.bg-primary-100", text: "Not filed")
       end
     end
 

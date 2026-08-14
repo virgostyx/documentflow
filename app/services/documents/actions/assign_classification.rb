@@ -16,7 +16,7 @@ module Documents
           ctx[:action] = "classify"
           ctx[:audit_changes] = { classification_node_id: document.classification_node_id }
 
-          succeed_with!(ctx, node ? "Document classified under #{node.code} — #{node.name}." : "Document unclassified.")
+          succeed_with!(ctx, node ? "Document filed under #{node.code} — #{node.name}." : "Document unfiled.")
         else
           fail_with!(ctx, document.errors.full_messages.to_sentence)
         end

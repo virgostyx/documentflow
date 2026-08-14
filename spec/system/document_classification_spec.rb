@@ -16,7 +16,7 @@ RSpec.describe "Document classification", type: :system, js: true do
     expect(page).to have_current_path(entity_documents_path(entity))
   end
 
-  it "creates a root node and a child node through the modal, classifies a document into the child via right-click, then unclassifies it" do
+  it "creates a root node and a child node through the modal, files a document into the child via right-click, then unfiles it" do
     document.update!(status: "finalized")
 
     visit entity_classification_nodes_path(entity)
@@ -28,7 +28,7 @@ RSpec.describe "Document classification", type: :system, js: true do
       click_button "Create node"
     end
 
-    expect(page).to have_content("Classification node created successfully")
+    expect(page).to have_content("Filing node created successfully")
     expect(page).to have_content("Contracts")
 
     click_link "Add child"
@@ -38,36 +38,36 @@ RSpec.describe "Document classification", type: :system, js: true do
       click_button "Create node"
     end
 
-    expect(page).to have_content("Classification node created successfully")
+    expect(page).to have_content("Filing node created successfully")
     expect(page).to have_content("Drafts")
 
     visit entity_documents_path(entity)
     row = find("tr", text: "Supplier contract")
     row.right_click
-    within(row) { click_link "Classify..." }
+    within(row) { click_link "File..." }
 
     within("dialog") do
-      within("[data-classification-picker-target='row']", text: "Drafts") { click_button "Classify here" }
+      within("[data-classification-picker-target='row']", text: "Drafts") { click_button "File here" }
     end
 
-    expect(page).to have_content("Document classified under 1.1")
+    expect(page).to have_content("Document filed under 1.1")
 
     within("aside") { click_link "Drafts" }
     expect(page).to have_content("Supplier contract")
 
-    within("aside") { click_link "Unclassified" }
+    within("aside") { click_link "Not filed" }
     expect(page).not_to have_content("Supplier contract")
 
     visit entity_documents_path(entity)
     row = find("tr", text: "Supplier contract")
     row.right_click
-    within(row) { click_link "Classify..." }
+    within(row) { click_link "File..." }
 
-    within("dialog") { click_button "Remove classification" }
+    within("dialog") { click_button "Remove filing" }
 
-    expect(page).to have_content("Document unclassified")
+    expect(page).to have_content("Document unfiled")
 
-    within("aside") { click_link "Unclassified" }
+    within("aside") { click_link "Not filed" }
     expect(page).to have_content("Supplier contract")
   end
 
@@ -80,7 +80,7 @@ RSpec.describe "Document classification", type: :system, js: true do
     visit entity_documents_path(entity)
     row = find("tr", text: "Supplier contract")
     row.right_click
-    within(row) { click_link "Classify..." }
+    within(row) { click_link "File..." }
 
     within("dialog") do
       fill_in "Search by code or name...", with: "drafts"
@@ -102,10 +102,10 @@ RSpec.describe "Document classification", type: :system, js: true do
     click_link "Change filing"
 
     within("dialog") do
-      within("[data-classification-picker-target='row']", text: "Drafts") { click_button "Classify here" }
+      within("[data-classification-picker-target='row']", text: "Drafts") { click_button "File here" }
     end
 
-    expect(page).to have_content("Document classified under 1.1")
+    expect(page).to have_content("Document filed under 1.1")
     expect(page).to have_content("1 › 1.1 — Drafts")
   end
 

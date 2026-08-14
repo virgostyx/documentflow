@@ -1718,7 +1718,7 @@ RSpec.describe "Documents", type: :request do
       sign_in user
     end
 
-    it "offers a Classify... trigger that opens the picker modal for the document" do
+    it "offers a File... trigger that opens the picker modal for the document" do
       get entity_documents_path(entity)
 
       expect(response.body).to include(classify_form_entity_document_path(entity, document))

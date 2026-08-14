@@ -82,7 +82,7 @@ RSpec.describe Documents::AuditLogListComponent, type: :component do
     before { create(:audit_log, auditable: document, user: actor, action: "classify", change_data: { "classification_node_id" => node.id }) }
 
     it "names the classification node" do
-      expect(subject).to have_text("changed the classification to 3 Contracts")
+      expect(subject).to have_text("changed the filing to 3 Contracts")
     end
   end
 
@@ -90,7 +90,7 @@ RSpec.describe Documents::AuditLogListComponent, type: :component do
     before { create(:audit_log, auditable: document, user: actor, action: "classify", change_data: { "classification_node_id" => nil }) }
 
     it "indicates the document was unclassified" do
-      expect(subject).to have_text("changed the classification (unclassified)")
+      expect(subject).to have_text("changed the filing (not filed)")
     end
   end
 

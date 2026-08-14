@@ -20,7 +20,7 @@ module Entities
       authorize @classification_node
 
       if @classification_node.save
-        redirect_to entity_classification_nodes_path(current_entity), notice: "Classification node created successfully."
+        redirect_to entity_classification_nodes_path(current_entity), notice: "Filing node created successfully."
       else
         flash.now[:alert] = @classification_node.errors.full_messages.to_sentence
         render_modal_errors :new
@@ -35,7 +35,7 @@ module Entities
       authorize @classification_node
 
       if @classification_node.update(classification_node_params)
-        redirect_to entity_classification_nodes_path(current_entity), notice: "Classification node updated successfully."
+        redirect_to entity_classification_nodes_path(current_entity), notice: "Filing node updated successfully."
       else
         flash.now[:alert] = @classification_node.errors.full_messages.to_sentence
         render_modal_errors :edit
@@ -50,7 +50,7 @@ module Entities
       authorize @classification_node
 
       if @classification_node.destroy
-        redirect_to entity_classification_nodes_path(current_entity), notice: "Classification node deleted successfully."
+        redirect_to entity_classification_nodes_path(current_entity), notice: "Filing node deleted successfully."
       else
         redirect_to entity_classification_nodes_path(current_entity), alert: @classification_node.errors.full_messages.to_sentence
       end

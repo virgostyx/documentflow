@@ -1,6 +1,6 @@
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <%= render Ui::PageHeaderComponent.new(
-    title: "Classification plan",
+    title: "Filing plan",
     description: current_entity.name,
     back_path: entity_documents_path(current_entity),
     back_text: "Documents"
@@ -27,7 +27,7 @@
         <% end %>
       </div>
     <% else %>
-      <p class="text-gray-600">No classification nodes yet.</p>
+      <p class="text-gray-600">No filing nodes yet.</p>
     <% end %>
   <% end %>
 </div>

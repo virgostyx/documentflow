@@ -28,9 +28,9 @@
          class="flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50">
       <span class="text-sm text-gray-900"><span class="font-mono text-gray-500"><%= node.code %></span> — <%= node.name %></span>
       <% if classified_here? %>
-        <span class="text-xs font-medium text-gray-400">Classified here</span>
+        <span class="text-xs font-medium text-gray-400">Filed here</span>
       <% else %>
-        <%= button_to "Classify here", classify_entity_document_path(current_entity, document, classification_node_id: node.id), method: :patch,
+        <%= button_to "File here", classify_entity_document_path(current_entity, document, classification_node_id: node.id), method: :patch,
               data: { turbo_frame: "_top" }, class: "text-xs font-medium text-primary-600 hover:text-primary-700" %>
       <% end %>
     </div>

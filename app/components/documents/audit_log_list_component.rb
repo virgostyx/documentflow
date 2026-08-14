@@ -11,7 +11,7 @@ module Documents
       "check_out" => ->(_log) { "checked out the document" },
       "check_in" => ->(_log) { "checked in a new version" },
       "cancel_check_out" => ->(_log) { "released the checkout" },
-      "classify" => ->(log) { "changed the classification#{classification_detail(log)}" },
+      "classify" => ->(log) { "changed the filing#{classification_detail(log)}" },
       "finalize" => ->(_log) { "finalized the document" },
       "route" => ->(_log) { "routed the incoming mail" },
       "dispatch_queued" => ->(log) { "queued the dispatch email to #{recipient_label(log)}" },
@@ -52,7 +52,7 @@ module Documents
 
     def classification_detail(log)
       node_id = log.change_data["classification_node_id"]
-      return " (unclassified)" if node_id.blank?
+      return " (not filed)" if node_id.blank?
 
       node = ClassificationNode.find_by(id: node_id)
       node ? " to #{node.code} #{node.name}" : ""

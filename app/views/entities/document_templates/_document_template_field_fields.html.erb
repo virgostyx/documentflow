@@ -1,4 +1,4 @@
-<div class="rounded-md border border-gray-200 p-3">
+<div id="<%= dom_id(f.object) %>" class="rounded-md border border-gray-200 p-3" data-controller="select-value-toggle" data-select-value-toggle-match-value="select" data-action="change->select-value-toggle#sync">
   <%= f.hidden_field :id %>
   <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{<%= f.object.tag_name %>}}</p>
 
@@ -8,8 +8,10 @@
           { selected: f.object.field_type }, { label: "Type" } %>
   </div>
 
-  <%= f.floating_text_field :options_text, label: "Options (comma-separated, for the Select type only)",
-        value: f.object.options_text, placeholder: " " %>
+  <div data-select-value-toggle-target="panel">
+    <%= f.floating_text_field :options_text, label: "Options (comma-separated)",
+          value: f.object.options_text, placeholder: " " %>
+  </div>
 
   <div class="flex items-center gap-2">
     <%= f.check_box :required, class: "h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded" %>

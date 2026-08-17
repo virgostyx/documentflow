@@ -30,7 +30,8 @@ module Entities
           field_values: field_values_params,
           document_params: document_params,
           cc_party_tokens: cc_party_tokens_params,
-          annex_files: annex_files_params
+          annex_files: annex_files_params,
+          skip_pdf_conversion: annexes_skip_pdf_conversion_params
         )
 
         if result.success?
@@ -68,6 +69,10 @@ module Entities
 
       def annex_files_params
         params.require(:document).permit(annexes: []).fetch(:annexes, [])
+      end
+
+      def annexes_skip_pdf_conversion_params
+        params.dig(:document, :annexes_skip_pdf_conversion) == "1"
       end
     end
   end

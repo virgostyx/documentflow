@@ -60,5 +60,24 @@ RSpec.describe Templates::Actions::CreateAnnexes do
         expect { described_class.execute(ctx) }.to change(document.annexes, :count).by(1)
       end
     end
+
+    context "when skip_pdf_conversion is not provided" do
+      let(:annex_files) { [ fixture_upload ] }
+
+      it "creates annexes with skip_pdf_conversion false" do
+        described_class.execute(ctx)
+        expect(document.annexes.reload.first.skip_pdf_conversion?).to be(false)
+      end
+    end
+
+    context "when skip_pdf_conversion is true" do
+      let(:ctx) { LightService::Context.make(document: document, annex_files: annex_files, skip_pdf_conversion: true) }
+      let(:annex_files) { [ fixture_upload, fixture_upload ] }
+
+      it "creates every annex with skip_pdf_conversion true" do
+        described_class.execute(ctx)
+        expect(document.annexes.reload.pluck(:skip_pdf_conversion)).to all(be true)
+      end
+    end
   end
 end

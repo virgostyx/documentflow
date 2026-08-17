@@ -52,6 +52,13 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
       expect(response.body).to include('name="document[annexes][]"')
     end
 
+    it "renders a 'Keep original format' checkbox for annexes" do
+      get new_entity_document_template_generation_path(entity, document_template)
+
+      expect(response.body).to include('name="document[annexes_skip_pdf_conversion]"')
+      expect(response.body).to include("Keep original format")
+    end
+
     it "renders an expects_response checkbox and response_deadline field" do
       get new_entity_document_template_generation_path(entity, document_template)
 
@@ -168,6 +175,36 @@ RSpec.describe "Entities::DocumentTemplates::Generations", type: :request do
 
         document = entity.documents.last
         expect(document.annexes.count).to eq(2)
+      end
+
+      it "does not mark annexes to keep their original format by default" do
+        post entity_document_template_generation_path(entity, document_template), params: generation_params
+
+        document = entity.documents.last
+        expect(document.annexes).to all(have_attributes(skip_pdf_conversion?: false))
+      end
+    end
+
+    context "with annex files attached and 'keep original format' checked" do
+      let(:generation_params) do
+        {
+          document: {
+            department_id: department.id,
+            document_date: Date.current,
+            sender_token: "Contact-#{sender.id}",
+            addressee_token: "Contact-#{addressee.id}",
+            annexes: [ fixture_file_upload("sample.pdf", "application/pdf"), fixture_file_upload("sample.pdf", "application/pdf") ],
+            annexes_skip_pdf_conversion: "1"
+          },
+          field_values: { "supplier" => "Acme Corp", "amount" => "1200 EUR" }
+        }
+      end
+
+      it "marks every created annex to keep its original format" do
+        post entity_document_template_generation_path(entity, document_template), params: generation_params
+
+        document = entity.documents.last
+        expect(document.annexes).to all(have_attributes(skip_pdf_conversion?: true))
       end
     end
 

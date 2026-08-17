@@ -51,6 +51,10 @@
         <label class="block text-sm font-medium text-gray-700 mb-1">Annexes (optional)</label>
         <%= file_field_tag "document[annexes][]", multiple: true,
               class: "block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-primary-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100" %>
+        <label class="mt-2 flex items-center gap-1 text-xs text-gray-500" title="Attach these annexes in their original format instead of converting them to PDF">
+          <%= check_box_tag "document[annexes_skip_pdf_conversion]", "1", false %>
+          Keep original format
+        </label>
       </div>
 
       <% if @document_template.document_template_fields.any? %>

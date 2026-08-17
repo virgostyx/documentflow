@@ -31,6 +31,7 @@
 
             <div class="flex items-center gap-3">
               <%= render(Ui::ButtonComponent.new(href: new_entity_document_template_generation_path(current_entity, document_template))) { "Generate document" } %>
+              <%= render(Ui::ButtonComponent.new(href: rails_blob_path(document_template.source_file, disposition: "attachment"), variant: :secondary)) { "Download" } %>
               <% if policy(document_template).update? %>
                 <%= render(Ui::ButtonComponent.new(href: edit_entity_document_template_path(current_entity, document_template), variant: :secondary)) { "Edit" } %>
               <% end %>

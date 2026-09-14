@@ -149,5 +149,19 @@ RSpec.describe "Document validation circuit edge cases", type: :system do
       expect(page).to have_content(matching_document.subject)
       expect(page).not_to have_content("Annual budget forecast")
     end
+
+    it "clears the search query and filters" do
+      sign_in_via_form(owner)
+      visit search_entity_documents_path(entity, q: "budget", status: "finalized")
+
+      expect(page).to have_content(matching_document.subject)
+      expect(page).not_to have_content(other_document.subject)
+
+      click_on "Clear"
+
+      expect(page).to have_content(matching_document.subject)
+      expect(page).to have_content(other_document.subject)
+      expect(find_field(nil, placeholder: "Search documents...").value).to be_blank
+    end
   end
 end

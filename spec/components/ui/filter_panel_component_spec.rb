@@ -46,4 +46,30 @@ RSpec.describe Ui::FilterPanelComponent, type: :component do
 
     expect(page).to have_css('[data-controller="filter-panel"]')
   end
+
+  describe "the Clear link" do
+    it "is absent without a clear_href" do
+      render_inline(described_class.new(active_count: 2)) { "fields" }
+
+      expect(page).not_to have_link("Clear")
+    end
+
+    it "is absent when nothing is active, even with a clear_href" do
+      render_inline(described_class.new(clear_href: "/documents")) { "fields" }
+
+      expect(page).not_to have_link("Clear")
+    end
+
+    it "shows next to the Filters button when a filter is active" do
+      render_inline(described_class.new(active_count: 1, clear_href: "/documents")) { "fields" }
+
+      expect(page).to have_link("Clear", href: "/documents")
+    end
+
+    it "shows when open (e.g. a search query is active) even with active_count 0" do
+      render_inline(described_class.new(open: true, clear_href: "/documents")) { "fields" }
+
+      expect(page).to have_link("Clear", href: "/documents")
+    end
+  end
 end

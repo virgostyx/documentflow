@@ -14,7 +14,7 @@
 <% end %>
 
 <% active_filter_count = [ params[:status], params[:department_id], params[:date_from], params[:date_to], params[:doc_direction] ].count(&:present?) %>
-<%= render Ui::FilterPanelComponent.new(active_count: active_filter_count) do |panel| %>
+<%= render Ui::FilterPanelComponent.new(active_count: active_filter_count, open: params[:q].present?) do |panel| %>
     <% panel.with_search do %>
       <%= form_with url: search_entity_documents_path(current_entity), method: :get, local: true,
                     data: { turbo_frame: "documents_list", controller: "auto-submit" }, class: "flex-1 max-w-md" do %>

@@ -29,6 +29,12 @@ RSpec.describe Ui::FilterPanelComponent, type: :component do
     expect(page).not_to have_css('[data-filter-panel-target="panel"].hidden')
   end
 
+  it "is open by default when open: true, even with no active filters" do
+    render_inline(described_class.new(open: true)) { "fields" }
+
+    expect(page).not_to have_css('[data-filter-panel-target="panel"].hidden')
+  end
+
   it "shows the active filter count badge" do
     render_inline(described_class.new(active_count: 3)) { "fields" }
 

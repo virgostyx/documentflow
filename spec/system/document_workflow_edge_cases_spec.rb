@@ -150,6 +150,13 @@ RSpec.describe "Document validation circuit edge cases", type: :system do
       expect(page).not_to have_content("Annual budget forecast")
     end
 
+    it "shows the Clear button when only a search query is active (no filters)" do
+      sign_in_via_form(owner)
+      visit search_entity_documents_path(entity, q: "budget")
+
+      expect(page).to have_link("Clear")
+    end
+
     it "clears the search query and filters" do
       sign_in_via_form(owner)
       visit search_entity_documents_path(entity, q: "budget", status: "finalized")

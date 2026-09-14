@@ -13,7 +13,14 @@ class CcRecipient < ApplicationRecord
   validates :party_id, uniqueness: { scope: %i[document_id party_type] }
   validate :party_belongs_to_entity
 
+  after_save :update_document_search_text
+  after_destroy :update_document_search_text
+
   private
+
+  def update_document_search_text
+    document.update_column(:search_text, Document.compute_search_text(document))
+  end
 
   def party_belongs_to_entity
     return if document.nil? || party.nil? || party_in_entity?(party)

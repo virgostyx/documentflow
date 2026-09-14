@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_12_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_14_061509) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "pg_trgm"
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
@@ -243,6 +244,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_12_120000) do
     t.date "response_deadline"
     t.datetime "routed_at"
     t.text "routing_message"
+    t.text "search_text"
     t.bigint "sender_id", null: false
     t.string "sender_type", null: false
     t.datetime "shared_link_renewed_at"
@@ -256,10 +258,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_12_120000) do
     t.index ["classification_node_id"], name: "index_documents_on_classification_node_id"
     t.index ["created_by_id"], name: "index_documents_on_created_by_id"
     t.index ["department_id"], name: "index_documents_on_department_id"
+    t.index ["document_date"], name: "index_documents_on_document_date"
     t.index ["entity_id", "reference_number"], name: "index_documents_on_entity_id_and_reference_number", unique: true
     t.index ["entity_id"], name: "index_documents_on_entity_id"
     t.index ["in_reply_to_id"], name: "index_documents_on_in_reply_to_id"
     t.index ["lead_user_id"], name: "index_documents_on_lead_user_id"
+    t.index ["search_text"], name: "index_documents_on_search_text_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["sender_type", "sender_id"], name: "index_documents_on_sender_type_and_sender_id"
     t.index ["status"], name: "index_documents_on_status"
     t.index ["temporary_number"], name: "index_documents_on_temporary_number", unique: true

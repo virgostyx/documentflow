@@ -115,5 +115,39 @@ RSpec.describe "Document validation circuit edge cases", type: :system do
       expect(page).to have_content(matching_document.subject)
       expect(page).not_to have_content(other_document.subject)
     end
+
+    it "matches on the dispatch subject" do
+      dispatch_match = create(:document, :finalized, entity: entity, created_by: owner,
+                                                       subject: "Misc", dispatch_subject: "Budget follow-up")
+
+      sign_in_via_form(owner)
+      visit search_entity_documents_path(entity, q: "budget")
+
+      expect(page).to have_content(matching_document.subject)
+      expect(page).to have_content(dispatch_match.subject)
+      expect(page).not_to have_content(other_document.subject)
+    end
+
+    it "matches on the sender's display name" do
+      sender = create(:contact, entity: entity, first_name: "Amara", last_name: "Okafor")
+      sender_match = create(:document, :finalized, entity: entity, created_by: owner, sender: sender, subject: "Misc")
+
+      sign_in_via_form(owner)
+      visit search_entity_documents_path(entity, q: "okafor")
+
+      expect(page).to have_content(sender_match.subject)
+      expect(page).not_to have_content(matching_document.subject)
+    end
+
+    it "combines the search query with the department filter" do
+      other_department = create(:department, entity: entity)
+      create(:document, :finalized, entity: entity, created_by: owner, department: other_department, subject: "Annual budget forecast")
+
+      sign_in_via_form(owner)
+      visit search_entity_documents_path(entity, q: "budget", department_id: matching_document.department_id)
+
+      expect(page).to have_content(matching_document.subject)
+      expect(page).not_to have_content("Annual budget forecast")
+    end
   end
 end

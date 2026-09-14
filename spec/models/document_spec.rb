@@ -1185,4 +1185,47 @@ RSpec.describe Document, type: :model do
       expect(build(:document, entity: entity, direction: "outgoing")).not_to be_incoming
     end
   end
+
+  describe ".search" do
+    it "returns everything when the query is blank" do
+      create(:document, entity: entity)
+
+      expect(Document.search(nil).count).to eq(1)
+      expect(Document.search("").count).to eq(1)
+    end
+
+    it "matches on subject and dispatch_subject" do
+      matching = create(:document, entity: entity, subject: "Annual budget review")
+      create(:document, entity: entity, subject: "Office lease renewal", dispatch_subject: "Lease renewal notice")
+      dispatch_match = create(:document, entity: entity, subject: "Misc", dispatch_subject: "Budget follow-up")
+
+      expect(Document.search("budget")).to contain_exactly(matching, dispatch_match)
+    end
+
+    it "matches on the sender's and addressee's display name" do
+      sender = create(:contact, entity: entity, first_name: "Amara", last_name: "Okafor")
+      matching = create(:document, entity: entity, sender: sender)
+      create(:document, entity: entity)
+
+      expect(Document.search("okafor")).to contain_exactly(matching)
+    end
+
+    it "matches on a CC recipient's display name" do
+      document = create(:document, entity: entity)
+      other = create(:document, entity: entity)
+      cc_party = create(:contact, entity: entity, first_name: "Kenji", last_name: "Sato")
+      create(:cc_recipient, document: document, party: cc_party)
+
+      expect(Document.search("kenji")).to contain_exactly(document)
+      expect(Document.search("kenji")).not_to include(other)
+    end
+
+    it "does not treat literal % or _ in the query as wildcards" do
+      create(:document, entity: entity, subject: "50% discount")
+      create(:document, entity: entity, subject: "no match here")
+
+      expect(Document.search("50%").count).to eq(1)
+      expect(Document.search("50_").count).to eq(0)
+    end
+  end
 end

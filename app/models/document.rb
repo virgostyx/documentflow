@@ -130,6 +130,9 @@ class Document < ApplicationRecord
     dir = %w[asc desc].include?(direction.to_s) ? direction.to_s : DEFAULT_SORT_DIRECTION
     order(Arel.sql("#{col} #{dir}, documents.created_at #{dir}"))
   }
+  scope :search, ->(query) {
+    query.present? ? where("search_text ILIKE :q", q: "%#{sanitize_sql_like(query)}%") : all
+  }
 
   # Callbacks
   #
@@ -143,6 +146,7 @@ class Document < ApplicationRecord
   before_validation :generate_reference_number, on: :create, if: -> { incoming? || archived_from_email? }
   after_create :assign_temporary_number, unless: -> { incoming? || archived_from_email? }
   before_validation :clear_response_deadline_unless_expecting_response
+  before_save :update_search_text
 
   # State machine
   aasm column: :status do
@@ -246,7 +250,26 @@ class Document < ApplicationRecord
     [ self ] + replies.flat_map(&:self_and_descendants)
   end
 
+  # Fields fed into `search_text`. Sender/addressee/CC display names are
+  # snapshotted at save time; renaming a Contact/User afterward won't
+  # retroactively update documents that already reference it.
+  def self.compute_search_text(document)
+    [
+      document.subject,
+      document.dispatch_subject,
+      document.reference_number,
+      document.temporary_number,
+      document.sender&.display_name,
+      document.addressee&.display_name,
+      document.cc_recipients.reload.map { |cc| cc.party&.display_name }
+    ].flatten.compact.join(" ")
+  end
+
   private
+
+  def update_search_text
+    self.search_text = self.class.compute_search_text(self)
+  end
 
   def generate_reference_number
     return if reference_number.present?

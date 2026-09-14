@@ -244,13 +244,11 @@ class DocumentsController < ApplicationController
   def load_documents(scope)
     documents = scope.includes(:sender, :addressee, :created_by)
     documents = documents.with_status(params[:status])
-    if params[:q].present?
-      documents = documents.where(
-        "subject ILIKE :q OR reference_number ILIKE :q OR temporary_number ILIKE :q",
-        q: "%#{params[:q]}%"
-      )
-    end
+    documents = documents.search(params[:q])
     documents = apply_classification_filter(documents)
+    documents = apply_department_filter(documents)
+    documents = apply_date_range_filter(documents)
+    documents = apply_doc_direction_filter(documents)
     documents.sorted(params[:sort], params[:direction]).page(params[:page])
   end
 
@@ -262,6 +260,20 @@ class DocumentsController < ApplicationController
     else
       documents
     end
+  end
+
+  def apply_department_filter(documents)
+    params[:department_id].present? ? documents.where(department_id: params[:department_id]) : documents
+  end
+
+  def apply_date_range_filter(documents)
+    documents = documents.where("document_date >= ?", params[:date_from]) if params[:date_from].present?
+    documents = documents.where("document_date <= ?", params[:date_to]) if params[:date_to].present?
+    documents
+  end
+
+  def apply_doc_direction_filter(documents)
+    params[:doc_direction].present? ? documents.where(direction: params[:doc_direction]) : documents
   end
 
   def load_classification_tree

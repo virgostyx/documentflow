@@ -14,6 +14,7 @@
 <% end %>
 
 <% active_filter_count = [ params[:status], params[:department_id], params[:date_from], params[:date_to], params[:doc_direction] ].count(&:present?) %>
+<%= turbo_frame_tag "documents_list" do %>
 <%= render Ui::FilterPanelComponent.new(
   active_count: active_filter_count,
   open: params[:q].present?,
@@ -85,7 +86,6 @@
     <% end %>
   <% end %>
 
-<%= turbo_frame_tag "documents_list" do %>
   <% if @documents.any? %>
     <%= render "documents/table", documents: @documents, list_scope: @list_scope %>
 

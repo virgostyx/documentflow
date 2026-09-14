@@ -565,6 +565,14 @@ RSpec.describe "Documents", type: :request do
       expect(response.body).to include('<turbo-frame id="documents_list"')
     end
 
+    it "wraps the Filters toolbar (badge, Clear link) inside the same turbo frame as the results" do
+      get search_entity_documents_path(entity), params: { status: "finalized" }
+
+      frame = Nokogiri::HTML.fragment(response.body).at_css("turbo-frame#documents_list")
+      expect(frame.to_html).to include(">Clear<")
+      expect(frame.to_html).to include("Filters")
+    end
+
     it "re-applies the 'mine' scope when searching" do
       mine = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Mine supplier deal", created_by: user)
       other = create(:document, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")

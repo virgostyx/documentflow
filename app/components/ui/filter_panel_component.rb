@@ -2,6 +2,7 @@
 
 module Ui
   class FilterPanelComponent < ViewComponent::Base
+    renders_one :search
     renders_one :fields
 
     def initialize(active_count: 0)

@@ -6,6 +6,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   submit(event) {
     if (event.target.files && event.target.files.length === 0) return
+    event.preventDefault()
 
     this._showOverlay()
     this.element.addEventListener("turbo:submit-end", () => this._hideOverlay(), { once: true })

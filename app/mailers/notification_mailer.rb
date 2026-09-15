@@ -73,7 +73,7 @@ class NotificationMailer < ApplicationMailer
       @document_url = entity_document_url(document.entity, document)
     end
 
-    mail(to: party.email, from: sender_from(document), reply_to: document.created_by.email,
+    mail(to: party.email, from: sender_from(document), reply_to: document.sender.email,
          subject: dispatch_subject_for(document, "Document addressed to you: #{document.reference_number}"))
   end
 
@@ -93,7 +93,7 @@ class NotificationMailer < ApplicationMailer
       @document_url = entity_document_url(document.entity, document)
     end
 
-    mail(to: party.email, from: sender_from(document), reply_to: document.created_by.email,
+    mail(to: party.email, from: sender_from(document), reply_to: document.sender.email,
          subject: dispatch_subject_for(document, "Document finalized: #{document.reference_number}"))
   end
 

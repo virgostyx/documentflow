@@ -73,7 +73,8 @@ class NotificationMailer < ApplicationMailer
       @document_url = entity_document_url(document.entity, document)
     end
 
-    mail(to: party.email, subject: dispatch_subject_for(document, "Document addressed to you: #{document.reference_number}"))
+    mail(to: party.email, from: sender_from(document), reply_to: document.created_by.email,
+         subject: dispatch_subject_for(document, "Document addressed to you: #{document.reference_number}"))
   end
 
   def cc_notification(party, document)
@@ -92,10 +93,15 @@ class NotificationMailer < ApplicationMailer
       @document_url = entity_document_url(document.entity, document)
     end
 
-    mail(to: party.email, subject: dispatch_subject_for(document, "Document finalized: #{document.reference_number}"))
+    mail(to: party.email, from: sender_from(document), reply_to: document.created_by.email,
+         subject: dispatch_subject_for(document, "Document finalized: #{document.reference_number}"))
   end
 
   private
+
+  def sender_from(document)
+    %("#{document.entity.name}" <#{ENV.fetch("DEFAULT_FROM_EMAIL", "from@example.com")}>)
+  end
 
   def dispatch_subject_for(document, default_subject)
     document.dispatch_subject.presence&.gsub("{{recipient_name}}", @recipient_name) || default_subject

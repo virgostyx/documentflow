@@ -15,7 +15,7 @@ module EmailArchive
 
     class << self
       def call(mail)
-        forwarded = mail.attachments.find { |attachment| attachment.mime_type == "message/rfc822" }
+        forwarded = mail.attachments.find { |attachment| forwarded_message_attachment?(attachment) }
 
         if forwarded
           Result.new(message: Mail.new(forwarded.body.decoded), relaying_address: Array(mail.from).first)
@@ -25,6 +25,13 @@ module EmailArchive
       end
 
       private
+
+      # Some mail clients (e.g. Outlook's "Forward as Attachment") label the
+      # nested .eml as application/octet-stream instead of message/rfc822,
+      # so fall back to the filename when the mime type doesn't say so.
+      def forwarded_message_attachment?(attachment)
+        attachment.mime_type == "message/rfc822" || attachment.filename.to_s.downcase.end_with?(".eml")
+      end
 
       def resent_from(mail)
         Array(mail.resent_from).first || Array(mail.resent_sender).first

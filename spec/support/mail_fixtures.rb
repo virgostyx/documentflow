@@ -20,7 +20,7 @@ module MailFixtures
 
   # Outlook "Forward as attachment": the original message is nested as a
   # message/rfc822 attachment inside an outer message from the forwarder.
-  def build_forwarded_mail(forwarded_by:, original:, delivered_to: nil)
+  def build_forwarded_mail(forwarded_by:, original:, delivered_to: nil, attachment_content_type: "message/rfc822")
     Mail.new do
       from     forwarded_by
       to       original.to
@@ -29,7 +29,7 @@ module MailFixtures
       text_part { body "See attached." }
       add_file filename: "original.eml", content: original.to_s
     end.tap do |mail|
-      mail.attachments.last.content_type = "message/rfc822"
+      mail.attachments.last.content_type = attachment_content_type
       mail["Delivered-To"] = delivered_to if delivered_to
     end
   end

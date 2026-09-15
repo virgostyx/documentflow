@@ -37,5 +37,17 @@ RSpec.describe EmailArchive::ExtractOriginalMessage do
         expect(result.relaying_address).to eq("forwarder@example.com")
       end
     end
+
+    context "with a Forward-as-attachment-style message where the .eml is labeled application/octet-stream" do
+      it "still unwraps the attached original message by its .eml filename" do
+        original = build_archive_mail(from: "external@example.com", to: "lead@example.com", subject: "Original subject")
+        forwarded = build_forwarded_mail(forwarded_by: "forwarder@example.com", original: original, attachment_content_type: "application/octet-stream")
+
+        result = described_class.call(forwarded)
+
+        expect(result.message.subject).to eq("Original subject")
+        expect(result.relaying_address).to eq("forwarder@example.com")
+      end
+    end
   end
 end

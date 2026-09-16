@@ -129,8 +129,8 @@ RSpec.describe NotificationMailer do
       end
 
       it "renders a text and an html part with the dispatch message and a link to the authenticated document page" do
-        expect(mail.text_part.body.encoded).to include(user.display_name, document.dispatch_message, document_url)
-        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(user.display_name), document.dispatch_message, document_url)
+        expect(mail.text_part.body.encoded).to include(document.dispatch_message, document_url)
+        expect(mail.html_part.body.encoded).to include(document.dispatch_message, document_url)
       end
 
       it "does not mention any link expiration" do
@@ -152,14 +152,7 @@ RSpec.describe NotificationMailer do
         expect(mail.text_part.body.encoded).not_to include("{{recipient_name}}")
       end
 
-      it "greets the recipient by name when the message was not built from an email template" do
-        expect(mail.text_part.body.encoded).to include("Hello #{user.display_name}")
-        expect(mail.html_part.body.encoded).to include("Hello #{CGI.escapeHTML(user.display_name)}")
-      end
-
-      it "omits the automatic greeting when the message was built from an email template" do
-        document.update!(dispatch_message: "Dear #{user.display_name}, please review.", dispatch_message_from_template: true)
-
+      it "does not add an automatic greeting on top of the actor's message" do
         expect(mail.text_part.body.encoded).not_to include("Hello")
         expect(mail.html_part.body.encoded).not_to include("Hello")
       end
@@ -192,8 +185,8 @@ RSpec.describe NotificationMailer do
           shared_link.token, **Rails.application.config.action_mailer.default_url_options
         )
 
-        expect(mail.text_part.body.encoded).to include(contact.display_name, document.dispatch_message, shared_url)
-        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(contact.display_name), document.dispatch_message, shared_url)
+        expect(mail.text_part.body.encoded).to include(document.dispatch_message, shared_url)
+        expect(mail.html_part.body.encoded).to include(document.dispatch_message, shared_url)
       end
 
       it "reuses an existing active shared link instead of creating a new one" do
@@ -298,8 +291,8 @@ RSpec.describe NotificationMailer do
       end
 
       it "renders a text and an html part with the dispatch message and a link to the authenticated document page" do
-        expect(mail.text_part.body.encoded).to include(user.display_name, document.dispatch_message, document_url)
-        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(user.display_name), document.dispatch_message, document_url)
+        expect(mail.text_part.body.encoded).to include(document.dispatch_message, document_url)
+        expect(mail.html_part.body.encoded).to include(document.dispatch_message, document_url)
       end
 
       it "does not mention any link expiration" do
@@ -307,14 +300,7 @@ RSpec.describe NotificationMailer do
         expect(mail.html_part.body.encoded).not_to include("expire")
       end
 
-      it "greets the recipient by name when the message was not built from an email template" do
-        expect(mail.text_part.body.encoded).to include("Hello #{user.display_name}")
-        expect(mail.html_part.body.encoded).to include("Hello #{CGI.escapeHTML(user.display_name)}")
-      end
-
-      it "omits the automatic greeting when the message was built from an email template" do
-        document.update!(dispatch_message: "Dear #{user.display_name}, please review.", dispatch_message_from_template: true)
-
+      it "does not add an automatic greeting on top of the actor's message" do
         expect(mail.text_part.body.encoded).not_to include("Hello")
         expect(mail.html_part.body.encoded).not_to include("Hello")
       end
@@ -347,8 +333,8 @@ RSpec.describe NotificationMailer do
           shared_link.token, **Rails.application.config.action_mailer.default_url_options
         )
 
-        expect(mail.text_part.body.encoded).to include(contact.display_name, document.dispatch_message, shared_url)
-        expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(contact.display_name), document.dispatch_message, shared_url)
+        expect(mail.text_part.body.encoded).to include(document.dispatch_message, shared_url)
+        expect(mail.html_part.body.encoded).to include(document.dispatch_message, shared_url)
       end
 
       it "substitutes the reserved {{recipient_name}} tag with this recipient's own display name" do

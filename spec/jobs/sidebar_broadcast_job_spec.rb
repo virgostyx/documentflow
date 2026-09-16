@@ -19,11 +19,11 @@ RSpec.describe SidebarBroadcastJob do
       }
     end
 
-    it "broadcasts updates for all eight sidebar badges in a single message" do
+    it "broadcasts updates for all seven sidebar badges in a single message" do
       expect {
         described_class.new.perform(user.id, entity.id)
       }.to have_broadcasted_to(stream_name).exactly(1).times.with { |content|
-        %w[overview to_validate received mine todo waiting info incoming_mail].each do |key|
+        %w[overview to_validate mine todo waiting info incoming_mail].each do |key|
           expect(content).to include(%(target="sidebar-badge-#{key}"))
         end
       }

@@ -35,20 +35,6 @@ RSpec.describe Entities::SidebarCounts do
     end
   end
 
-  describe "#received_count" do
-    it "counts finalized documents addressed to the user" do
-      create(:document, :finalized, entity: entity, addressee: user)
-
-      expect(counts.received_count).to eq(1)
-    end
-
-    it "excludes a matching document that is not yet finalized" do
-      create(:document, entity: entity, addressee: user)
-
-      expect(counts.received_count).to eq(0)
-    end
-  end
-
   describe "#mine_count" do
     it "counts non-finalized documents authored by the user" do
       create(:document, entity: entity, created_by: user)

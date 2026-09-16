@@ -272,46 +272,6 @@ RSpec.describe "Documents", type: :request do
     end
   end
 
-  describe "GET /entities/:entity_id/documents/received" do
-    let!(:entity_user) do
-      eu = create(:entity_user, entity: entity, user: user)
-      create(:entity_user_department, entity_user: eu, department: department)
-      eu
-    end
-    let!(:addressed_to_me) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: user, subject: "Addressed to me") }
-    let!(:cc_to_me) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Copied to me") }
-    let!(:not_received) { create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Not received") }
-    let!(:not_finalized_addressed_to_me) { create(:document, entity: entity, department: department, sender: sender, addressee: user, subject: "Not yet finalized") }
-
-    before do
-      create(:cc_recipient, document: cc_to_me, party: user)
-      sign_in user
-    end
-
-    it "lists finalized documents where the current user is the addressee or a cc recipient" do
-      get received_entity_documents_path(entity)
-
-      expect(response).to have_http_status(:ok)
-      expect(response.body).to include(addressed_to_me.subject)
-      expect(response.body).to include(cc_to_me.subject)
-      expect(response.body).not_to include(not_received.subject)
-    end
-
-    it "excludes documents that are not yet finalized" do
-      get received_entity_documents_path(entity)
-
-      expect(response.body).not_to include(not_finalized_addressed_to_me.subject)
-    end
-
-    it "never lists incoming mail, even when routed to the current user" do
-      routed = create(:document, :incoming, :routed, entity: entity, department: department, addressee: user, subject: "Routed incoming mail")
-
-      get received_entity_documents_path(entity)
-
-      expect(response.body).not_to include(routed.subject)
-    end
-  end
-
   describe "GET /entities/:entity_id/documents/todo" do
     let!(:entity_user) do
       eu = create(:entity_user, entity: entity, user: user)
@@ -580,16 +540,6 @@ RSpec.describe "Documents", type: :request do
       get search_entity_documents_path(entity), params: { q: "supplier", scope: "mine" }
 
       expect(response.body).to include(mine.subject)
-      expect(response.body).not_to include(other.subject)
-    end
-
-    it "re-applies the 'received' scope when searching" do
-      received = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: user, subject: "Received supplier deal")
-      other = create(:document, :finalized, entity: entity, department: department, sender: sender, addressee: addressee, subject: "Other supplier deal")
-
-      get search_entity_documents_path(entity), params: { q: "supplier", scope: "received" }
-
-      expect(response.body).to include(received.subject)
       expect(response.body).not_to include(other.subject)
     end
 

@@ -59,13 +59,6 @@ class Document < ApplicationRecord
 
   # Scopes
   scope :authored_by, ->(user) { where(created_by: user) }
-  scope :received_by, ->(user) {
-    left_joins(:cc_recipients).where(
-      "(documents.addressee_type = 'User' AND documents.addressee_id = :user_id) " \
-      "OR (cc_recipients.party_type = 'User' AND cc_recipients.party_id = :user_id)",
-      user_id: user.id
-    ).distinct
-  }
   scope :todo_for, ->(user) {
     replied_document_ids = Document.settled
                                     .where(created_by_id: user.id)

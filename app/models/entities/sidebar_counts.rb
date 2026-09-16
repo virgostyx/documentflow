@@ -15,10 +15,6 @@ module Entities
       current_entity.documents.outgoing.pending_for(current_user).count
     end
 
-    def received_count
-      documents_base_scope.received_by(current_user).finalized.count
-    end
-
     def mine_count
       documents_base_scope.authored_by(current_user).not_finalized.count
     end

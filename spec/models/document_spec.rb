@@ -647,41 +647,6 @@ RSpec.describe Document, type: :model do
     end
   end
 
-  describe ".received_by" do
-    it "returns documents where the user is the addressee" do
-      user = create(:user)
-      create(:entity_user, entity: entity, user: user)
-      received = create(:document, entity: entity, addressee: user)
-      not_received = create(:document, entity: entity)
-
-      expect(Document.received_by(user)).to contain_exactly(received)
-    end
-
-    it "returns documents where the user is a cc recipient" do
-      user = create(:user)
-      create(:entity_user, entity: entity, user: user)
-      other_user = create(:user)
-      create(:entity_user, entity: entity, user: other_user)
-
-      received = create(:document, entity: entity)
-      create(:cc_recipient, document: received, party: user)
-
-      not_received = create(:document, entity: entity)
-      create(:cc_recipient, document: not_received, party: other_user)
-
-      expect(Document.received_by(user)).to contain_exactly(received)
-    end
-
-    it "does not return duplicate rows for a document where the user is both addressee and cc recipient" do
-      user = create(:user)
-      create(:entity_user, entity: entity, user: user)
-      document = create(:document, entity: entity, addressee: user)
-      create(:cc_recipient, document: document, party: user)
-
-      expect(Document.received_by(user)).to contain_exactly(document)
-    end
-  end
-
   describe ".todo_for" do
     it "returns documents where the user is the addressee and expects a response" do
       user = create(:user)

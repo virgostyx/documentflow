@@ -8,7 +8,7 @@ module Entities
       @current_entity_user = current_entity_user
     end
 
-    delegate :overview_count, :to_validate_count, :received_count, :mine_count,
+    delegate :overview_count, :to_validate_count, :mine_count,
              :todo_count, :waiting_count, :info_count, :incoming_mail_count,
              to: :sidebar_counts
 

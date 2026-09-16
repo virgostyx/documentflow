@@ -52,10 +52,9 @@ RSpec.describe Entities::SidebarComponent, type: :component do
   end
 
   describe "Documents section" do
-    it "links to Overview, To Validate, My Inbox, My Outbox, ToDo, Waiting and Info, in that order" do
+    it "links to Overview, To Validate, My Outbox, ToDo, Waiting and Info, in that order" do
       expect(rendered).to have_link("Overview", href: entity_documents_path(entity))
       expect(rendered).to have_link("To Validate", href: to_validate_entity_documents_path(entity))
-      expect(rendered).to have_link("My Inbox", href: received_entity_documents_path(entity))
       expect(rendered).to have_link("My Outbox", href: mine_entity_documents_path(entity))
       expect(rendered).to have_link("ToDo", href: todo_entity_documents_path(entity))
       expect(rendered).to have_link("Waiting", href: waiting_entity_documents_path(entity))
@@ -64,15 +63,13 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       links = rendered.css("nav a").map { |a| a.text.squish }
       overview_index = links.index { |text| text.start_with?("Overview") }
       to_validate_index = links.index { |text| text.start_with?("To Validate") }
-      inbox_index = links.index { |text| text.start_with?("My Inbox") }
       outbox_index = links.index { |text| text.start_with?("My Outbox") }
       todo_index = links.index { |text| text.start_with?("ToDo") }
       waiting_index = links.index { |text| text.start_with?("Waiting") }
       info_index = links.index { |text| text.start_with?("Info") }
 
       expect(overview_index).to be < to_validate_index
-      expect(to_validate_index).to be < inbox_index
-      expect(inbox_index).to be < outbox_index
+      expect(to_validate_index).to be < outbox_index
       expect(outbox_index).to be < todo_index
       expect(todo_index).to be < waiting_index
       expect(waiting_index).to be < info_index
@@ -83,7 +80,6 @@ RSpec.describe Entities::SidebarComponent, type: :component do
 
       it "highlights only Overview" do
         expect(rendered).to have_css("a.bg-primary-100", text: "Overview")
-        expect(rendered).not_to have_css("a.bg-primary-100", text: "My Inbox")
         expect(rendered).not_to have_css("a.bg-primary-100", text: "My Outbox")
       end
     end
@@ -106,22 +102,12 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       end
     end
 
-    context "when on the my inbox page" do
-      let(:current_path) { received_entity_documents_path(entity) }
-
-      it "highlights only My Inbox" do
-        expect(rendered).to have_css("a.bg-primary-100", text: "My Inbox")
-        expect(rendered).not_to have_css("a.bg-primary-100", text: "Overview")
-      end
-    end
-
     context "when on the todo page" do
       let(:current_path) { todo_entity_documents_path(entity) }
 
       it "highlights only ToDo" do
         expect(rendered).to have_css("a.bg-primary-100", text: "ToDo")
         expect(rendered).not_to have_css("a.bg-primary-100", text: "Overview")
-        expect(rendered).not_to have_css("a.bg-primary-100", text: "My Inbox")
         expect(rendered).not_to have_css("a.bg-primary-100", text: "My Outbox")
         expect(rendered).not_to have_css("a.bg-primary-100", text: "Waiting")
         expect(rendered).not_to have_css("a.bg-primary-100", text: "Info")
@@ -159,7 +145,7 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     end
 
     it "gives each count badge a stable dom id for live updates" do
-      %w[overview to_validate received mine todo waiting info].each do |key|
+      %w[overview to_validate mine todo waiting info].each do |key|
         expect(rendered).to have_css("span#sidebar-badge-#{key}")
       end
     end
@@ -167,7 +153,6 @@ RSpec.describe Entities::SidebarComponent, type: :component do
     it "shows zero counts when the boxes are empty" do
       expect(link_text(entity_documents_path(entity))).to eq("Overview 0")
       expect(link_text(to_validate_entity_documents_path(entity))).to eq("To Validate 0")
-      expect(link_text(received_entity_documents_path(entity))).to eq("My Inbox 0")
       expect(link_text(mine_entity_documents_path(entity))).to eq("My Outbox 0")
       expect(link_text(todo_entity_documents_path(entity))).to eq("ToDo 0")
       expect(link_text(waiting_entity_documents_path(entity))).to eq("Waiting 0")
@@ -214,18 +199,6 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       create(:document, entity: entity, created_by: user)
 
       expect(link_text(entity_documents_path(entity))).to eq("Overview 1")
-    end
-
-    it "counts documents addressed to the user as My Inbox" do
-      create(:document, :finalized, entity: entity, addressee: user)
-
-      expect(link_text(received_entity_documents_path(entity))).to eq("My Inbox 1")
-    end
-
-    it "excludes a matching My Inbox document that is not yet finalized" do
-      create(:document, entity: entity, addressee: user)
-
-      expect(link_text(received_entity_documents_path(entity))).to eq("My Inbox 0")
     end
 
     it "counts documents addressed to the user expecting a response as ToDo" do

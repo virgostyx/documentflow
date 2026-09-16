@@ -130,7 +130,6 @@ Rails.application.routes.draw do
       collection do
         get :search
         get :mine
-        get :received
         get :todo
         get :waiting
         get :info

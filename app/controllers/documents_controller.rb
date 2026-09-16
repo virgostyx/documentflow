@@ -5,7 +5,7 @@ class DocumentsController < ApplicationController
   include OrganizerResponse
 
   before_action :set_document, only: %i[show edit update destroy launch cancel confirm_cancel confirm_destroy classify_form classify apply_distribution_list resend_dispatch]
-  before_action :load_classification_tree, only: %i[index mine received todo waiting info to_validate search classify_form]
+  before_action :load_classification_tree, only: %i[index mine todo waiting info to_validate search classify_form]
 
   def index
     @list_scope = "all"
@@ -15,12 +15,6 @@ class DocumentsController < ApplicationController
   def mine
     @list_scope = "mine"
     @documents = load_documents(base_scope.authored_by(current_user).not_finalized)
-    render :index
-  end
-
-  def received
-    @list_scope = "received"
-    @documents = load_documents(base_scope.received_by(current_user).finalized)
     render :index
   end
 
@@ -232,7 +226,6 @@ class DocumentsController < ApplicationController
   def scoped_base_for(list_scope)
     case list_scope
     when "mine" then base_scope.authored_by(current_user).not_finalized
-    when "received" then base_scope.received_by(current_user).finalized
     when "todo" then merged_base_scope.todo_for(current_user).settled
     when "waiting" then merged_base_scope.waiting_for(current_user).settled
     when "info" then merged_base_scope.info_for(current_user).settled

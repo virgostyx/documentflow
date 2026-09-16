@@ -20,18 +20,13 @@ RSpec.describe "Entity sidebar navigation", type: :system do
     visit entity_documents_path(entity)
   end
 
-  it "navigates between Documents, My Inbox, My Outbox, ToDo, Waiting, Info, Contacts and Settings" do
+  it "navigates between Documents, My Outbox, ToDo, Waiting, Info, Contacts and Settings" do
     expect(page).to have_content("Finalized overview document")
 
     click_link "My Outbox"
     expect(page).to have_current_path(mine_entity_documents_path(entity))
     expect(page).to have_content("My contract")
     expect(page).not_to have_content("Received contract")
-
-    click_link "My Inbox"
-    expect(page).to have_current_path(received_entity_documents_path(entity))
-    expect(page).to have_content("Received contract")
-    expect(page).not_to have_content("My contract")
 
     click_link "ToDo"
     expect(page).to have_current_path(todo_entity_documents_path(entity))

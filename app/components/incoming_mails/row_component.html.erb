@@ -1,0 +1,11 @@
+<tr id="<%= dom_id(document) %>" class="hover:bg-gray-50 transition-colors cursor-pointer"
+    data-controller="row-link" data-row-link-url-value="<%= row_path %>"
+    data-action="click->row-link#navigate">
+  <td class="px-4 py-3">
+    <%= link_to document.reference_number, row_path, class: "font-mono text-primary-700 hover:text-primary-800", data: { turbo_frame: "_top" } %>
+  </td>
+  <td class="px-4 py-3 text-gray-900"><%= document.subject %></td>
+  <td class="px-4 py-3 text-gray-500"><%= document.sender&.display_name %></td>
+  <td class="px-4 py-3 text-gray-500"><%= document.lead_user&.display_name %></td>
+  <td class="px-4 py-3 text-gray-500"><%= l(document.document_date) %></td>
+</tr>

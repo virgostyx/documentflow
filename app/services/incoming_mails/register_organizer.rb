@@ -5,6 +5,7 @@ module IncomingMails
     workflow_steps Documents::Actions::ValidateDepartmentMembership,
                    Actions::ValidateLeadDepartmentMembership,
                    Actions::RegisterIncomingMail,
-                   Actions::NotifyLeadAssigned
+                   Actions::NotifyLeadAssigned,
+                   Actions::BroadcastIncomingMailRow
   end
 end

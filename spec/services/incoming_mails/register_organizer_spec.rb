@@ -65,6 +65,12 @@ RSpec.describe IncomingMails::RegisterOrganizer do
 
         described_class.call(entity: entity, current_user: user, document_params: document_params)
       end
+
+      it "broadcasts a live row update to the lead's Incoming Mail table" do
+        expect(IncomingMailRowBroadcastJob).to receive(:perform_later).with(anything)
+
+        described_class.call(entity: entity, current_user: user, document_params: document_params)
+      end
     end
 
     context "with invalid params" do

@@ -100,7 +100,7 @@ class NotificationMailer < ApplicationMailer
   private
 
   def sender_from(document)
-    %("#{document.entity.name}" <#{ENV.fetch("DEFAULT_FROM_EMAIL", "from@example.com")}>)
+    %("#{document.sender.display_name}" <#{ENV.fetch("DEFAULT_FROM_EMAIL", "from@example.com")}>)
   end
 
   def dispatch_subject_for(document, default_subject)

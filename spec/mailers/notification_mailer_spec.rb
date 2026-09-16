@@ -123,6 +123,11 @@ RSpec.describe NotificationMailer do
         expect(mail.subject).to include(document.reference_number)
       end
 
+      it "shows the document's sender as the From display name, not the entity name" do
+        expect(mail[:from].display_names).to eq([ document.sender.display_name ])
+        expect(mail[:from].display_names).not_to include(document.entity.name)
+      end
+
       it "renders a text and an html part with the dispatch message and a link to the authenticated document page" do
         expect(mail.text_part.body.encoded).to include(user.display_name, document.dispatch_message, document_url)
         expect(mail.html_part.body.encoded).to include(CGI.escapeHTML(user.display_name), document.dispatch_message, document_url)
@@ -285,6 +290,11 @@ RSpec.describe NotificationMailer do
       it "is addressed to the user with a subject mentioning the reference number" do
         expect(mail.to).to eq([ user.email ])
         expect(mail.subject).to include(document.reference_number)
+      end
+
+      it "shows the document's sender as the From display name, not the entity name" do
+        expect(mail[:from].display_names).to eq([ document.sender.display_name ])
+        expect(mail[:from].display_names).not_to include(document.entity.name)
       end
 
       it "renders a text and an html part with the dispatch message and a link to the authenticated document page" do

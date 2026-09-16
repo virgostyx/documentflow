@@ -19,6 +19,17 @@ RSpec.describe IncomingMailRowBroadcastJob do
       }
     end
 
+    it "also removes the empty-state placeholder row" do
+      stream_name = Turbo::StreamsChannel.send(:stream_name_from, [ entity, document.lead_user, :documents ])
+
+      expect {
+        described_class.new.perform(document.id)
+      }.to have_broadcasted_to(stream_name).with { |content|
+        expect(content).to include(%(action="remove"))
+        expect(content).to include(%(target="#{described_class::EMPTY_ROW_DOM_ID}"))
+      }
+    end
+
     it "does not raise when the document has no lead_user" do
       document.update_column(:lead_user_id, nil)
 

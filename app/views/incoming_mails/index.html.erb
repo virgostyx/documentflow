@@ -10,15 +10,10 @@
   <% end %>
 <% end %>
 
-<% if @documents.any? %>
-  <%= render "table", documents: @documents %>
+<%= render "table", documents: @documents %>
 
+<% if @documents.any? %>
   <div class="mt-4">
     <%= paginate @documents %>
   </div>
-<% else %>
-  <%= render Ui::EmptyStateComponent.new(
-    title: "No mail awaiting triage",
-    description: "Incoming mail assigned to you as Lead will appear here until you route it."
-  ) %>
 <% end %>

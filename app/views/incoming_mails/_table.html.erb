@@ -10,6 +10,16 @@
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100" id="incoming-mails-table-body">
+      <% if documents.none? %>
+        <tr id="incoming-mails-empty-row">
+          <td colspan="5">
+            <%= render Ui::EmptyStateComponent.new(
+              title: "No mail awaiting triage",
+              description: "Incoming mail assigned to you as Lead will appear here until you route it."
+            ) %>
+          </td>
+        </tr>
+      <% end %>
       <% documents.each do |document| %>
         <%= render IncomingMails::RowComponent.new(document: document) %>
       <% end %>

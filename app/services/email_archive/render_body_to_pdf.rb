@@ -20,8 +20,13 @@ module EmailArchive
 
       def html_content_for(message)
         return message.html_part.decoded if message.html_part
+        # A single-part message with its own Content-Type: text/html (no
+        # nested html_part) — message.decoded charset-transcodes safely,
+        # unlike message.body.decoded which returns the raw, untranscoded
+        # bytes and can crash File.write on non-ASCII content.
+        return message.decoded if !message.multipart? && message.mime_type == "text/html"
 
-        text = message.text_part&.decoded || message.body&.decoded || ""
+        text = message.text_part&.decoded || (message.decoded if !message.multipart? && message.text?) || ""
         "<html><body><pre>#{ERB::Util.html_escape(text)}</pre></body></html>"
       end
     end

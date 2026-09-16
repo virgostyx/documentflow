@@ -33,6 +33,40 @@ module MailFixtures
       mail["Delivered-To"] = delivered_to if delivered_to
     end
   end
+
+  # A single-part (non-multipart) text/html message: Outlook sends these for
+  # HTML-only emails with no alternative text part, unlike the
+  # multipart/alternative shape build_archive_mail's DSL always produces —
+  # so message.html_part is nil and the raw body must be read via
+  # message.decoded (charset-safe) instead of message.body.decoded (raw).
+  def build_single_part_html_mail(from:, to:, subject: "Test subject", html_body: "<p>Hello</p>", resent_from: nil)
+    raw = +"From: #{from}\r\n"
+    raw << "To: #{to}\r\n"
+    raw << "Resent-From: #{resent_from}\r\n" if resent_from
+    raw << "Subject: #{subject}\r\n"
+    raw << "Date: #{Time.current.rfc2822}\r\n"
+    raw << "Content-Type: text/html; charset=UTF-8\r\n"
+    raw << "Content-Transfer-Encoding: 8bit\r\n"
+    raw << "\r\n"
+    raw << html_body
+
+    Mail.new(raw.dup.force_encoding("ASCII-8BIT"))
+  end
+
+  # A single-part (non-multipart) text/plain message with the same raw,
+  # untranscoded-body hazard as build_single_part_html_mail.
+  def build_single_part_text_mail(from:, to:, subject: "Test subject", text_body: "Hello")
+    raw = +"From: #{from}\r\n"
+    raw << "To: #{to}\r\n"
+    raw << "Subject: #{subject}\r\n"
+    raw << "Date: #{Time.current.rfc2822}\r\n"
+    raw << "Content-Type: text/plain; charset=UTF-8\r\n"
+    raw << "Content-Transfer-Encoding: 8bit\r\n"
+    raw << "\r\n"
+    raw << text_body
+
+    Mail.new(raw.dup.force_encoding("ASCII-8BIT"))
+  end
 end
 
 RSpec.configure do |config|

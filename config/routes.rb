@@ -126,6 +126,9 @@ Rails.application.routes.draw do
         patch :classify
         post :apply_distribution_list
         post :resend_dispatch
+        get  :confirm_dismiss_waiting
+        post :dismiss_waiting
+        post :dismiss_info
       end
       collection do
         get :search

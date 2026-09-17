@@ -476,4 +476,18 @@ RSpec.describe DocumentPolicy, type: :policy do
       end
     end
   end
+
+  describe "#dismiss_waiting?" do
+    let(:document) { create(:document, :expecting_response, :finalized, entity: entity, created_by: member) }
+
+    context "as the document's author" do let(:user) { member }; it { is_expected.to permit_action(:dismiss_waiting) } end
+    context "as someone else" do let(:user) { owner }; it { is_expected.not_to permit_action(:dismiss_waiting) } end
+  end
+
+  describe "#dismiss_info?" do
+    let(:document) { create(:document, :finalized, entity: entity, created_by: member) }
+
+    context "as the document's author" do let(:user) { member }; it { is_expected.to permit_action(:dismiss_info) } end
+    context "as someone else" do let(:user) { owner }; it { is_expected.not_to permit_action(:dismiss_info) } end
+  end
 end

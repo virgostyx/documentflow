@@ -87,6 +87,14 @@ class DocumentPolicy < ApplicationPolicy
     record.lead_user == user || entity_admin? || entity_owner?
   end
 
+  def dismiss_waiting?
+    Document.waiting_for(user).settled.exists?(id: record.id)
+  end
+
+  def dismiss_info?
+    Document.info_for(user).settled.exists?(id: record.id)
+  end
+
   class Scope < ApplicationPolicy::Scope
     include DepartmentScoped
   end

@@ -34,6 +34,7 @@ class Document < ApplicationRecord
   has_many :cc_recipients, dependent: :destroy
   has_many :audit_logs, as: :auditable, dependent: :nullify
   has_many :document_file_versions, dependent: :destroy
+  has_many :document_dismissals, dependent: :destroy
   has_one_attached :main_file
   has_many :annexes, -> { order(:id) }, dependent: :destroy
 
@@ -79,14 +80,17 @@ class Document < ApplicationRecord
   }
   scope :waiting_for, ->(user) {
     replied_document_ids = Document.settled.where.not(in_reply_to_id: nil).select(:in_reply_to_id)
+    dismissed_ids = DocumentDismissal.where(user: user, tab: "waiting").select(:document_id)
 
     where(
       "(documents.direction = 'outgoing' AND documents.created_by_id = :user_id) " \
       "OR (documents.direction = 'incoming' AND documents.lead_user_id = :user_id)",
       user_id: user.id
-    ).where(expects_response: true).where.not(id: replied_document_ids)
+    ).where(expects_response: true).where.not(id: replied_document_ids).where.not(id: dismissed_ids)
   }
   scope :info_for, ->(user) {
+    dismissed_ids = DocumentDismissal.where(user: user, tab: "info").select(:document_id)
+
     left_joins(:cc_recipients).where(
       "(" \
         "(documents.addressee_type = 'User' AND documents.addressee_id = :user_id AND documents.expects_response = false) " \
@@ -95,7 +99,7 @@ class Document < ApplicationRecord
         "OR (cc_recipients.party_type = 'User' AND cc_recipients.party_id = :user_id)" \
       ")",
       user_id: user.id
-    ).distinct
+    ).where.not(id: dismissed_ids).distinct
   }
   scope :incoming, -> { where(direction: "incoming") }
   scope :outgoing, -> { where(direction: "outgoing") }

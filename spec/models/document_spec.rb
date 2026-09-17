@@ -861,6 +861,31 @@ RSpec.describe Document, type: :model do
 
       expect(Document.waiting_for(lead)).to be_empty
     end
+
+    it "excludes a document the user has dismissed from waiting" do
+      user = create(:user)
+      waiting = create(:document, :expecting_response, entity: entity, created_by: user)
+      create(:document_dismissal, document: waiting, user: user, tab: "waiting")
+
+      expect(Document.waiting_for(user)).to be_empty
+    end
+
+    it "does not exclude a document dismissed by a different user" do
+      user = create(:user)
+      other_user = create(:user)
+      waiting = create(:document, :expecting_response, entity: entity, created_by: user)
+      create(:document_dismissal, document: waiting, user: other_user, tab: "waiting")
+
+      expect(Document.waiting_for(user)).to contain_exactly(waiting)
+    end
+
+    it "does not exclude a document dismissed from a different tab" do
+      user = create(:user)
+      waiting = create(:document, :expecting_response, entity: entity, created_by: user)
+      create(:document_dismissal, document: waiting, user: user, tab: "info")
+
+      expect(Document.waiting_for(user)).to contain_exactly(waiting)
+    end
   end
 
   describe ".info_for" do
@@ -942,6 +967,31 @@ RSpec.describe Document, type: :model do
       create(:document, :incoming, :routed, :expecting_response, entity: entity, lead_user: lead)
 
       expect(Document.info_for(lead)).to be_empty
+    end
+
+    it "excludes a document the user has dismissed from info" do
+      user = create(:user)
+      document = create(:document, entity: entity, created_by: user)
+      create(:document_dismissal, document: document, user: user, tab: "info")
+
+      expect(Document.info_for(user)).to be_empty
+    end
+
+    it "does not exclude a document dismissed by a different user" do
+      user = create(:user)
+      other_user = create(:user)
+      document = create(:document, entity: entity, created_by: user)
+      create(:document_dismissal, document: document, user: other_user, tab: "info")
+
+      expect(Document.info_for(user)).to contain_exactly(document)
+    end
+
+    it "does not exclude a document dismissed from a different tab" do
+      user = create(:user)
+      document = create(:document, entity: entity, created_by: user)
+      create(:document_dismissal, document: document, user: user, tab: "waiting")
+
+      expect(Document.info_for(user)).to contain_exactly(document)
     end
   end
 

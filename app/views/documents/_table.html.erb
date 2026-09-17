@@ -13,7 +13,7 @@
     </thead>
     <%= tag.tbody class: "divide-y divide-gray-100", id: ("documents-overview-table-body" if list_scope == "all") do %>
       <% documents.each do |document| %>
-        <%= render Documents::RowComponent.new(document: document, current_user: current_user) %>
+        <%= render Documents::RowComponent.new(document: document, current_user: current_user, list_scope: list_scope) %>
       <% end %>
     <% end %>
   </table>

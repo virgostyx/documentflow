@@ -56,4 +56,28 @@ RSpec.describe Documents::RowComponent, type: :component do
 
     expect(rendered).not_to have_link("Reply")
   end
+
+  it "shows a Remove from Waiting link when rendered in the waiting list" do
+    document = create(:document, :finalized, entity: entity, department: department)
+    rendered = render_inline(described_class.new(document: document, current_user: user, list_scope: "waiting"))
+
+    expect(rendered).to have_link("Remove from Waiting")
+    expect(rendered).not_to have_link("Remove from Info")
+  end
+
+  it "shows a Remove from Info link when rendered in the info list" do
+    document = create(:document, :finalized, entity: entity, department: department)
+    rendered = render_inline(described_class.new(document: document, current_user: user, list_scope: "info"))
+
+    expect(rendered).to have_link("Remove from Info")
+    expect(rendered).not_to have_link("Remove from Waiting")
+  end
+
+  it "shows neither dismiss link outside the waiting/info lists" do
+    document = create(:document, :finalized, entity: entity, department: department)
+    rendered = render_inline(described_class.new(document: document, current_user: user, list_scope: "all"))
+
+    expect(rendered).not_to have_link("Remove from Waiting")
+    expect(rendered).not_to have_link("Remove from Info")
+  end
 end

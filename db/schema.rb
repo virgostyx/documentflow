@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_061509) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_17_043500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -164,6 +164,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_061509) do
     t.bigint "user_id", null: false
     t.index ["user_id", "name"], name: "index_distribution_lists_on_user_id_and_name", unique: true
     t.index ["user_id"], name: "index_distribution_lists_on_user_id"
+  end
+
+  create_table "document_dismissals", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "document_id", null: false
+    t.text "message"
+    t.string "tab", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["document_id", "user_id", "tab"], name: "index_document_dismissals_unique", unique: true
+    t.index ["document_id"], name: "index_document_dismissals_on_document_id"
+    t.index ["user_id"], name: "index_document_dismissals_on_user_id"
   end
 
   create_table "document_file_versions", force: :cascade do |t|
@@ -438,6 +450,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_061509) do
   add_foreign_key "departments", "entities"
   add_foreign_key "distribution_list_members", "distribution_lists"
   add_foreign_key "distribution_lists", "users"
+  add_foreign_key "document_dismissals", "documents"
+  add_foreign_key "document_dismissals", "users"
   add_foreign_key "document_file_versions", "annexes"
   add_foreign_key "document_file_versions", "documents"
   add_foreign_key "document_file_versions", "users"

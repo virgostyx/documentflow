@@ -4,7 +4,7 @@ class DocumentsController < ApplicationController
   include EntityScoped
   include OrganizerResponse
 
-  before_action :set_document, only: %i[show edit update destroy launch cancel confirm_cancel confirm_destroy classify_form classify apply_distribution_list resend_dispatch]
+  before_action :set_document, only: %i[show edit update destroy launch cancel confirm_cancel confirm_destroy classify_form classify apply_distribution_list resend_dispatch confirm_dismiss_waiting dismiss_waiting dismiss_info]
   before_action :load_classification_tree, only: %i[index mine todo waiting info to_validate search classify_form]
 
   def index
@@ -160,6 +160,28 @@ class DocumentsController < ApplicationController
     redirect_on_result(result,
                         success_path: entity_document_path(current_entity, @document),
                         success_message: apply_distribution_list_success_message(result))
+  end
+
+  def confirm_dismiss_waiting
+    authorize @document, :dismiss_waiting?
+  end
+
+  def dismiss_waiting
+    authorize @document, :dismiss_waiting?
+
+    @document.document_dismissals.find_or_create_by!(user: current_user, tab: "waiting") do |dismissal|
+      dismissal.message = params[:message].presence
+    end
+
+    redirect_to waiting_entity_documents_path(current_entity), notice: "Document removed from Waiting."
+  end
+
+  def dismiss_info
+    authorize @document, :dismiss_info?
+
+    @document.document_dismissals.find_or_create_by!(user: current_user, tab: "info")
+
+    redirect_to info_entity_documents_path(current_entity), notice: "Document removed from Info."
   end
 
   def resend_dispatch

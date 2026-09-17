@@ -28,6 +28,25 @@ RSpec.describe "Documents#dismiss", type: :request do
 
       expect(response).to redirect_to(root_path)
     end
+
+    it "offers incoming documents of the entity as a reply-link picker" do
+      incoming = create(:document, :incoming, entity: entity, subject: "Original request")
+      sign_in creator
+
+      get confirm_dismiss_waiting_entity_document_path(entity, document)
+
+      expect(response.body).to include(incoming.display_number)
+    end
+
+    it "does not offer the picker when the document already has a reply link" do
+      incoming = create(:document, :incoming, entity: entity, subject: "Original request")
+      document.update!(in_reply_to: incoming)
+      sign_in creator
+
+      get confirm_dismiss_waiting_entity_document_path(entity, document)
+
+      expect(response.body).not_to include("in_reply_to_id")
+    end
   end
 
   describe "POST /entities/:entity_id/documents/:id/dismiss_waiting" do
@@ -56,6 +75,41 @@ RSpec.describe "Documents#dismiss", type: :request do
 
       expect { post dismiss_waiting_entity_document_path(entity, document) }
         .not_to change { document.document_dismissals.count }
+    end
+
+    it "links the document to the chosen incoming mail" do
+      incoming = create(:document, :incoming, entity: entity)
+
+      post dismiss_waiting_entity_document_path(entity, document), params: { in_reply_to_id: incoming.id }
+
+      expect(document.reload.in_reply_to_id).to eq(incoming.id)
+    end
+
+    it "ignores the reply link when the document is already linked" do
+      original = create(:document, :incoming, entity: entity)
+      document.update!(in_reply_to: original)
+      other_incoming = create(:document, :incoming, entity: entity)
+
+      post dismiss_waiting_entity_document_path(entity, document), params: { in_reply_to_id: other_incoming.id }
+
+      expect(document.reload.in_reply_to_id).to eq(original.id)
+    end
+
+    it "ignores a reply link targeting a document outside the entity" do
+      other_entity = create(:entity)
+      outsider_incoming = create(:document, :incoming, entity: other_entity)
+
+      post dismiss_waiting_entity_document_path(entity, document), params: { in_reply_to_id: outsider_incoming.id }
+
+      expect(document.reload.in_reply_to_id).to be_nil
+    end
+
+    it "ignores a reply link targeting a non-incoming document" do
+      outgoing = create(:document, :finalized, entity: entity)
+
+      post dismiss_waiting_entity_document_path(entity, document), params: { in_reply_to_id: outgoing.id }
+
+      expect(document.reload.in_reply_to_id).to be_nil
     end
   end
 

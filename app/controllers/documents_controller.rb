@@ -164,6 +164,8 @@ class DocumentsController < ApplicationController
 
   def confirm_dismiss_waiting
     authorize @document, :dismiss_waiting?
+
+    @incoming_documents = current_entity.documents.incoming.sorted("document_date", "desc") if @document.in_reply_to_id.blank?
   end
 
   def dismiss_waiting
@@ -171,6 +173,11 @@ class DocumentsController < ApplicationController
 
     @document.document_dismissals.find_or_create_by!(user: current_user, tab: "waiting") do |dismissal|
       dismissal.message = params[:message].presence
+    end
+
+    if @document.in_reply_to_id.blank? && params[:in_reply_to_id].present?
+      incoming_document = current_entity.documents.incoming.find_by(id: params[:in_reply_to_id])
+      @document.update!(in_reply_to: incoming_document) if incoming_document
     end
 
     redirect_to waiting_entity_documents_path(current_entity), notice: "Document removed from Waiting."

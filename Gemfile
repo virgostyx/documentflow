@@ -70,7 +70,6 @@ gem "nokogiri"
 gem "rubyzip", require: "zip"
 
 # Recherche full-text
-gem "pg_search"
 
 # Email archive ingestion (IMAP polling + message parsing)
 gem "mail"

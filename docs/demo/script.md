@@ -2,7 +2,7 @@
 
 Registration → Validation → Signing → Sending, for a document that needs no reply,
 on documentflowmanagement.com. See the seed script at `db/demo_seed.rb` and the
-sample file at `docs/dev/demo/office_relocation_notice.pdf`.
+sample file at `docs/demo/office_relocation_notice.pdf`.
 
 Verified against a local dry run on 2026-07-26 (see notes below) — this script
 reflects actual app behavior, not assumptions from reading the code.
@@ -26,7 +26,7 @@ the "external" client — actually lands somewhere you can show.
 ## Before you go live
 
 - Run `bin/rails runner db/demo_seed.rb` against production once, in advance.
-- Have `docs/dev/demo/office_relocation_notice.pdf` ready to upload.
+- Have `docs/demo/office_relocation_notice.pdf` ready to upload.
 - Create three separate **Chrome/Edge profiles** (avatar icon → Add), one per
   persona — **not** private/incognito windows. All incognito windows in a
   browser share one session, so a second incognito window shows the same

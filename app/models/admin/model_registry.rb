@@ -3,7 +3,7 @@
 module Admin
   # Allowlist of models browsable (read-only) via Admin::RecordsController.
   # Deliberately excludes User, AuditLog, SignatureImage, and ActiveStorage's
-  # internal tables — see docs/dev plan for the "hand-rolled admin" feature.
+  # internal tables — see docs/ARCHITECTURE.md.
   module ModelRegistry
     ENTRIES = {
       "Department" => { klass: Department },

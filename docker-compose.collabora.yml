@@ -1,5 +1,5 @@
 # Local Collabora Online instance for manually verifying the WOPI/in-browser
-# editing flow (see docs/wopi_local_dev.md). Not used by the test suite,
+# editing flow (see docs/wopi_collabora.md). Not used by the test suite,
 # CI, or production — production infra for Collabora is a separate,
 # not-yet-made decision (box upsize vs. dedicated VPS; see the project plan).
 #

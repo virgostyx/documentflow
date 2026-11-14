@@ -6,7 +6,7 @@ module Documents
       expects :document, :current_user
 
       executed do |ctx|
-        ctx.document.cc_recipients.each do |cc_recipient|
+        ctx.document.cc_recipients.reload.each do |cc_recipient|
           AuditLog.log_event(
             user: ctx.current_user, auditable: ctx.document, action: "dispatch_queued",
             changes: { recipient_type: cc_recipient.party_type, recipient_id: cc_recipient.party_id, recipient_email: cc_recipient.party.email }

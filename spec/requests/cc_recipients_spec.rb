@@ -26,7 +26,7 @@ RSpec.describe "CcRecipients", type: :request do
 
           expect(response).to redirect_to(entity_document_path(entity, document))
           expect(flash[:notice]).to be_present
-          expect(document.cc_recipients.last.party).to eq(contact)
+          expect(document.cc_recipients.reload.last.party).to eq(contact)
         end
       end
 
@@ -41,7 +41,7 @@ RSpec.describe "CcRecipients", type: :request do
                  params: { cc_recipient: { party_token: "User-#{colleague.id}" } }
           }.to change(document.cc_recipients, :count).by(1)
 
-          expect(document.cc_recipients.last.party).to eq(colleague)
+          expect(document.cc_recipients.reload.last.party).to eq(colleague)
         end
       end
 

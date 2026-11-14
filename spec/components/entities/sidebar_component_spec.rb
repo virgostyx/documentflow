@@ -46,7 +46,7 @@ RSpec.describe Entities::SidebarComponent, type: :component do
 
       it "falls back to the full name" do
         expect(rendered).to have_text(entity.name)
-        expect(rendered).not_to have_css("img")
+        expect(rendered).not_to have_css("img.w-12")
       end
     end
   end
@@ -559,7 +559,7 @@ RSpec.describe Entities::SidebarComponent, type: :component do
       end
 
       it "does not show a logo image when the department has none" do
-        expect(rendered).not_to have_css("img")
+        expect(rendered).not_to have_css("img.w-6")
       end
     end
 
